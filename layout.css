@@ -1,0 +1,99 @@
+/* 
+    Document   : layout.css
+    Created on : Sep 25, 2012, 4:08:01 PM
+    Author     : benpreece
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+root { 
+    display: block;
+}
+
+body,
+html {
+    margin:0;
+    padding:0;
+}
+
+#page {
+    margin-left: 25px;
+    margin-right: 25px;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    background-color: #fff8f0;
+}
+
+#header {
+    
+}
+
+#logo {
+    float: left;
+}
+
+#content {
+    clear: both;
+}
+
+#main {
+    padding: 10px;
+    margin-left: 210px;
+}
+
+#sidebar {
+    float: left;
+    width: 200px;
+    margin-right: -210px;
+    padding: 10px;
+}
+
+.sidebar-block {
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#footer {
+    clear: both;
+}
+
+#login-page #login-form {
+    margin-left: 240px;
+    margin-right: 240px;
+}
+
+#login-page #login-controls {
+    float:right;
+    width: 240px;
+    margin-left: -240px;
+}
+
+#login-page #login-form {
+    margin-right: 240px;
+}
+
+#todo-projects-list .project-id,
+#todo-projects-list .task-id
+{
+    display: inline;
+    width: 25px;
+    padding-left: 5px;
+}
+
+#todo-projects-list .project-name, 
+#todo-projects-list .task-summary,
+#todo-projects-list .task-timebox-end-date
+{
+    display: inline;
+}
+
+#todo-projects-list .project-tasks-list {
+    padding-left: 2.5em;
+}
+
+#todo-projects-list .task-timebox-id,
+#todo-projects-list .task-timebox-name
+{
+    display: none;
+}

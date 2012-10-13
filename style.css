@@ -1,0 +1,120 @@
+/* 
+    Document   : style.css
+    Created on : Sep 25, 2012, 4:07:53 PM
+    Author     : benpreece
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+root { 
+    display: block;
+}
+
+
+body,
+html {
+    color: slateblue;
+    background: cornsilk;
+    font-family: Verdana, sans-serif;
+    font-size: 11pt;
+}
+
+form label {
+    font-variant: small-caps;
+    font-size: 85%;
+}
+
+.main-form label {
+    display: inline-block;
+    width: 7.5em;
+}
+
+.main-form #form-controls {
+    margin: 1em 2em;
+}
+
+#header,
+#footer {
+    background: darksalmon;
+}
+
+#title {
+    font-size: 300%;
+}
+
+.user-message {
+    padding: 15px;
+    background-color: #558;
+    color: #ccf;
+    border: 1px solid #335;
+}
+
+.user-message.failure {
+    background-color: #ff8080;
+    color: #600000;
+    border: 1px solid #600000;
+}
+
+.user-message.warning {
+    background-color: #ffa080;
+    color: #444400;
+    border: 1px solid #444400;
+}
+
+.user-message.success {
+    background-color: #80ff80;
+    color: #006000;
+    border: 1px solid #006000;
+}
+
+.user-message.info {
+    background-color: #8080ff;
+    color: #000060;
+    border: 1px solid #000060;
+}
+
+.user-message.debug {
+    background-color: #cff;
+    color: #ccc;
+    border: 1px solid #ccc;
+    font-family: "Andale Mono", monospace;
+    white-space: pre-wrap;
+}
+
+.sidebar-block {
+    background: khaki;
+}
+
+#login-page #content {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#login-page #login-controls form {
+    padding: 25px;
+    border: 1px solid #a0a0a0;
+}
+
+#login-page #login-form label {
+    margin-top: 15px;
+}
+
+#login-page #login-form input[type=text],
+#login-page #login-form input[type=password] {
+        font-size: 135%;
+        border: none;
+        border-bottom: 1px solid #a0a0a0;
+        background-color: #f0f0f0;
+        color: #555;
+        padding: 10px 15px;
+        margin-bottom: 10px;
+}
+
+#login-page #login-form input[type=text]:focus,
+#login-page #login-form input[type=password]:focus {
+        background-color: lightblue;
+}
+
+#login-form label {
+    display:block;
+}

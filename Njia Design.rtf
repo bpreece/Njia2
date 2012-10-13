@@ -1,0 +1,335 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1138\cocoasubrtf510
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww16800\viewh16940\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\qc
+
+\f0\fs48 \cf0 Njia 2\
+\
+Site Design\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+
+\fs36 \ul Data Model\
+
+\fs24 \ulnone \
+
+\fs28 Task
+\fs24 \
+\pard\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li2140\fi-1440\pardirnatural
+\cf0 \
+\pard\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+
+\b \cf0 task id
+\b0 	A unique identifier for this task.  The task identifier is permanent and cannot be changed.\
+\
+
+\b project id
+\b0 	The unique identifier for the project to which this task belongs.  Every task must belong to a project.  If a task is created as a subtask of another task, it automatically inherits the project of its parent task.  The project identifier cannot change - a task cannot be moved from one task to another.\
+\
+
+\b parent task ID
+\b0 	The identifier of the parent task of this task, if it has one.  The parent task is assigned when thte task is created, and cannot be changed.  A task which is created without a parent cannot be given one later.\
+\
+
+\b task summary
+\b0 	A brief summary of this task.  This summary cannot be more thatn 255 bytes, but otherwise it is not constrained - for example, it can potentially be duplicated in another task.  However, its intent is to uniquely identify the task to the user.  The task summary can be edited later.\
+\
+
+\b task discussion
+\b0 	A detailed description and discussion of the task.  There is no significant limit to the length of the discussion.\
+\
+
+\b task status
+\b0 	Either 'open' or 'closed'.  Other task status is defined by other fields:  a task is scheduled if it has a timebox ID;  a task is assigned if it has a user ID.\
+\
+
+\b timebox id
+\b0 	The identifier for the timebox to which this task is assigned, if any.  The timebox can be assigned or unassigned or modified at any later time, but the task is never assigned to more than one timebox at once.\
+\
+
+\b user id
+\b0 	The identifier for the user to which this task is assigned, if any.  The user can be assigned or unassigned or modified at any later time, but the task is never assigned to more than one user at once.\
+\
+
+\b task creation date
+\b0 	A timestamp for the date/time when this task was created.\
+\
+
+\b task modified date
+\b0 	A timestamp for the date/time when the task was last modified.\
+\
+\pard\tx3600\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+\cf0 ___\
+\
+\pard\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+
+\b \cf0 new
+\b0 	A task can only be created as new task for a specific project, or as a subtask of another task - at the time of creation, exactly one of these must be provided.  The task must also have a summary at the time of creation.  The task ID and task creation date are automatically provided.  All other fields are optional.  The default value for the task status is 'open'.\
+\
+
+\b edit
+\b0 	The task ID, project ID, parent task ID, and task creation date are not modifiable.  Once the object is created, these are constant.  The task modified date is automatically updated on every edit to the instance.  All other fields can be edited by the user.\
+\
+
+\b delete
+\b0 	A "deleted" task is not actually removed from the database table.  Instead, the task status is set to 'closed'.\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\fi340\pardirnatural
+\cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\fs28 \cf0 Project\
+\pard\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li2140\fi-1440\pardirnatural
+
+\fs24 \cf0 \
+\pard\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+
+\b \cf0 project id
+\b0 	A unique identifier for this project.  The project identifier is permanent and cannot be changed.\
+\
+
+\b project name
+\b0 	A short string identifying this project.  This does not need to be unique.\
+\
+
+\b project discussion
+\b0 	A detailed description and discussion of the project.  There is no significant limit on the length of the discussion.\
+\
+
+\b project status
+\b0 	Either 'open' or 'closed'.\
+\
+
+\b project creation date
+\b0 	A timestamp for the date/time when this project was created.\
+\
+\pard\tx3600\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+\cf0 ___\
+\
+\pard\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+
+\b \cf0 new
+\b0 	A project must have a name assigned at the time of creation.  The project ID and project creation date are automatically provided.  Other fields are optional.  The default value for the project status is 'open'.\
+\
+
+\b edit
+\b0 	The project ID and project creation date are not modifiable.  Once the object is created, these are constant.  All other fields can be edited by the user.\
+\
+
+\b delete
+\b0 	A "deleted" project is not actually removed from the database table.  Instead, the project status is set to 'closed'.\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\fi340\pardirnatural
+\cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\fs28 \cf0 Timebox\
+\pard\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li2140\fi-1440\pardirnatural
+
+\fs24 \cf0 \
+\pard\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+
+\b \cf0 timebox id
+\b0 	A unique identifier for this timebox.  The timebox identifier is permanent and cannot be changed.\
+\
+
+\b timebox name
+\b0 	A short string identifying this timebox.  This does not need to be unique.\
+\
+
+\b timebox discussion
+\b0 	A detailed description and discussion of the timebox.  There is no significant limit on the length of the discussion.\
+\
+
+\b timebox end date
+\b0 	A timestamp for the date/time when this timebox is scheduled to end.\
+\
+\pard\tx3600\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+\cf0 ___\
+\
+\pard\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+
+\b \cf0 new
+\b0 	A timebox must have a name assigned at the time of creation.  The timebox ID is automatically provided.  Other fields are optional.\
+\
+
+\b edit
+\b0 	The project ID is not modifiable.  Once the object is created, this are constant.  All other fields can be edited by the user.\
+\
+
+\b delete
+\b0 	A "deleted" timebox is not actually removed from the database table.  Instead, the timebox end date can be set to 
+\i NULL
+\i0 .
+\fs28 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\fi340\pardirnatural
+
+\fs24 \cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\fs28 \cf0 User\
+\pard\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li2140\fi-1440\pardirnatural
+
+\fs24 \cf0 \
+\pard\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+
+\b \cf0 user id
+\b0 	A unique identifier for this user.  The user identifier is permanent and cannot be changed.\
+\
+
+\b user login name
+\b0 	A short string identifying this user.  This must be unique.\
+\
+
+\b user password
+\b0 	The password which the user must provide to log in.\
+\
+
+\b user password salt
+\b0 	An arbitrary salt which is added to the user's login for password validation.  This must be provided at the time the account is created and cannot be changed.\
+\
+
+\b user creation date
+\b0 	A timestamp for the date/time when this user's account was created.\
+\
+
+\b user last login date
+\b0 	A timestamp for the last date/time when this user logged in.\
+\
+\pard\tx3600\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+\cf0 ___\
+\
+\pard\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+
+\b \cf0 new
+\b0 	A user must have a name, password, and password salt assigned at the time of creation.  The user ID, user creation date, and last login date are automatically provided.\
+\
+
+\b edit
+\b0 	The user ID, password salt, and user creation date are not modifiable.  Once the object is created, they are constant.  The last login date must be set to CURRENT_TIMESTAMP.   The login name and password may be changed by the user, but the login name must be unique in the database.\
+\
+
+\b delete
+\b0 	A "deleted" user is not actually removed from the database table.  Instead, the password is set to 
+\i NULL
+\i0 .
+\fs28 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\fi340\pardirnatural
+
+\fs24 \cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\fs28 \cf0 Session\
+\pard\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li2140\fi-1440\pardirnatural
+
+\fs24 \cf0 \
+\pard\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+
+\b \cf0 session id
+\b0 	A unique identifier for this session.  The session identifier is permanent and cannot be changed.\
+\
+
+\b user id
+\b0 	The identifier of the user who set up this session.\
+\
+
+\b session creation date
+\b0 	A timestamp for the date/time when this session was created.\
+\
+
+\b session expiration date
+\b0 	A timestamp for the date/time when this session will expire.\
+\
+\pard\tx3600\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+\cf0 ___\
+\
+\pard\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+
+\b \cf0 new
+\b0 	A session must have a user id assigned at the time of creation.  The session ID and session creation date are automatically provided.\
+\
+
+\b edit
+\b0 	There are no editable fields in the session table.\
+\
+
+\b delete
+\b0 	A "deleted" session is not actually removed from the database table.  Instead, the session expiration date can be set to '0000-00-00 00:00:00'.
+\fs28 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\fi340\pardirnatural
+
+\fs24 \cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\fs28 \cf0 Access
+\fs24 \
+\pard\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+\cf0 \
+
+\b user id
+\b0 	The identifier of the user who is granted access.
+\fs28 \
+\pard\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li2140\fi-1440\pardirnatural
+
+\fs24 \cf0 \
+\pard\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+
+\b \cf0 project id
+\b0 	The identifier of the project for which the user is granted access.\
+\
+
+\b access creation date
+\b0 	A timestamp for the date/time when this access was granted.\
+\
+\pard\tx3600\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+\cf0 ___\
+\
+\pard\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+
+\b \cf0 new
+\b0 	A session must have a user id and project id assigned at the time of creation.  The access creation date is automatically provided.\
+\
+
+\b edit
+\b0 	There are no editable fields in the access table.\
+\
+
+\b delete
+\b0 	A "deleted" session is not actually removed from the database table.  Instead, the session expiration date can be set to 0000-00-00 00:00:00.
+\fs28 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\fi340\pardirnatural
+
+\fs24 \cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\fs36 \cf0 \ul \ulc0 Use Cases\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\fs24 \cf0 \ulnone \
+TBD\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+
+\fs36 \cf0 \ul User Views\
+\pard\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li3580\fi-2880\pardirnatural
+
+\fs24 \cf0 \ulnone \
+
+\b to-do list
+\b0 	A list of the user's current assigned tasks.  \
+\
+	By default, this shows only the open tasks assigned to the user which have been slotted into a current timebox.\
+\
+
+\b project list
+\b0 	A list of the user's projects.  This is a hierarchical view of all projects, tasks, and subtasks.  \
+\
+	By default, this shows all open tasks in all open projects to which the user has been granted access, which have been slotted into a timebox with an end date in the future.\
+\
+
+\b timebox list
+\b0 	A list of timeboxes for the user's projects.  This is a hierarchical\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\fi340\pardirnatural
+\cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+}
