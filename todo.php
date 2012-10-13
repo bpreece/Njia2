@@ -13,13 +13,15 @@ function query_tasks() {
     }
 
     $session_id = get_session_id();
-    $query = "SELECT P.`project_id` , P.`project_name` , T.`task_id` , T.`task_summary` , T.`parent_task_id` , B.`timebox_id` , B.`timebox_name` , B.`timebox_end_date` 
+    $query = "SELECT P.`project_id` , P.`project_name` , 
+                T.`task_id` , T.`task_summary` , T.`parent_task_id` , 
+                X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` 
                 FROM  `session_table` AS S
                 INNER JOIN  `access_table` AS A ON S.`user_id` = A.`user_id` 
                 INNER JOIN  `project_table` AS P ON A.`project_id` = P.`project_id` 
                 INNER JOIN  `task_table` AS T ON P.`project_id` = T.`project_id` 
-                LEFT JOIN  `timebox_table` AS B ON T.`timebox_id` = B.`timebox_id` 
-                WHERE S.`session_id` = '$session_id'
+                INNER JOIN  `timebox_table` AS X ON T.`timebox_id` = X.`timebox_id` 
+                WHERE S.`session_id` = '$session_id' AND X.`timebox_end_date` >= CURRENT_DATE()
                 ORDER BY T.`task_id`";
 
     $results = mysqli_query($connection, $query);
@@ -102,28 +104,35 @@ function show_content()
         return;
     }
     
-    echo "<div id=todo-projects-list>";
-    foreach ($projects as $pid => &$pobj) {
-        echo "<div id='project-$pid' class='project-item'>";
-        echo "    <div class='project-info'>";
-        echo "        <div class='project-id'>$pid</div>";
-        echo "        <div class='project-name'>{$pobj['project-name']}</div>";
-        echo "    </div> <!-- /project-info -->";
-        $tasks = &$pobj['project-tasks'];
-        echo "    <div class='project-tasks-list'>";
-        foreach ($tasks as $tid => &$tobj) {
-            echo "        <div id='task-$tid' class='task-item'>";
-            echo "            <div class='task-info'>";
-            echo "                <div class='task-id'>$tid</div>";
-            echo "                <div class='task-summary'><a href='task.php?id=$tid'>{$tobj['task-summary']}</a></div>";
-            echo "                <div class='task-timebox-id'>{$tobj['timebox-id']}</div>";
-            echo "                <div class='task-timebox-name'>{$tobj['timebox-name']}</div>";
-            echo "                <div class='task-timebox-end-date'>{$tobj['timebox-end-date']}</div>";
-            echo "            </div> <!-- /task-info -->";
-            echo "        </div> <!-- /task-$tid -->";
+    echo "
+        <div id=todo-projects-list>";
+    foreach ($projects as $project_id => &$project) {
+        echo "
+            <div id='project-$project_id' class='project-item'>
+                <div class='project-info'>
+                <div class='project-id'>$project_id</div>
+                <div class='project-name'>
+                    <a href='project.php?id=$project_id'>{$project['project-name']}</a>
+                </div>
+                </div> <!-- /project-info -->";
+        $tasks = &$project['project-tasks'];
+        echo "    
+                <div class='project-tasks-list'>";
+        foreach ($tasks as $task_id => &$task) {
+            echo "        
+                    <div id='task-$task_id' class='task-item'>
+                        <div class='task-info'>
+                            <div class='task-id'>$task_id</div>
+                            <div class='task-summary'><a href='task.php?id=$task_id'>{$task['task-summary']}</a></div>
+                            <div class='task-timebox-id'>{$task['timebox-id']}</div>
+                            <div class='task-timebox-name'>{$task['timebox-name']}</div>
+                            <div class='task-timebox-end-date'>{$task['timebox-end-date']}</div>
+                        </div> <!-- /task-info -->
+                    </div> <!-- /task-$task_id -->";
         }
-        echo "    </div> <!-- /project-tasks-list -->";
-        echo "</div> <!-- /project-$pid -->";
+        echo "    
+                </div> <!-- /project-tasks-list -->
+            </div> <!-- /project-$$project_id -->";
     }
     echo "</div> <!-- /todo-projects-list -->";
 }

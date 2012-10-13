@@ -30,6 +30,8 @@ function process_form_data() {
         process_project_form();
     } else if (isset($_POST['add-task-button'])) {
         process_add_task_form();
+    } else if (isset($_POST['add-timebox-button'])) {
+        process_add_timebox_form();
     } else if (isset($_POST['new-project-button'])) {
         process_new_project_form();
     } else if (isset($_POST['close-project-button'])) {
@@ -88,6 +90,32 @@ function process_add_task_form() {
     $new_task_id = mysqli_insert_id($connection);
     
     header("Location:task.php?id=$new_task_id");
+}
+
+function process_add_timebox_form() {
+    $connection = connect_to_database_session();
+    if (!$connection) {
+        set_user_message("Failed accessing database", "failure");
+        return null;
+    }
+
+    $project_id = mysqli_real_escape_string($connection, $_POST['project-id']);
+    $timebox_name = mysqli_real_escape_string($connection, $_POST['timebox-name']);
+    $timebox_end_date = mysqli_real_escape_string($connection, $_POST['timebox-end-date']);
+    
+    $query = "INSERT INTO `timebox_table` (
+        `timebox_name` , `project_id` , `timebox_end_date` 
+        ) VALUES ( 
+        '$timebox_name' , '$project_id' , '$timebox_end_date')";
+
+    $results = mysqli_query($connection, $query);
+    if (! $results) {
+        set_user_message(mysqli_error($connection), "warning");
+        return null;
+    }    
+    $new_timebox_id = mysqli_insert_id($connection);
+    
+    header("Location:timebox.php?id=$new_timebox_id");
 }
 
 function process_new_project_form() {
@@ -204,6 +232,18 @@ function query_project($project_id) {
         $project['task_list'] = $task_list;
     }
     
+    $timebox_query = "SELECT X.* FROM `timebox_table` AS X
+                 WHERE X.`project_id` = '$project_id'
+                 ORDER BY X.`timebox_end_date`";
+    $timebox_result = mysqli_query($connection, $timebox_query);
+    if (mysqli_num_rows($timebox_result) > 0) {
+        $timebox_list = array();
+        while ($timebox = mysqli_fetch_array($timebox_result)) {
+            $timebox_list[$timebox['timebox_id']] = $timebox;
+        }
+        $project['timebox_list'] = $timebox_list;
+    }
+    
     return $project;
 }
 
@@ -232,6 +272,20 @@ function show_sidebar() {
                     <input style='width:100%' type='text' name='task-summary'></input>
                 </div>
                 <input type='submit' name='add-task-button' value='Add task'></input>
+            </form>
+        </div>
+        <div class='sidebar-block'>
+            <form id='add-timebox-form' method='post'>
+                <input type='hidden' name='project-id' value='${project['project_id']}'>
+                <div id='timebox-name'>
+                    <label for='timebox-name'>Timebox name:</label>
+                    <input style='width:100%' type='text' name='timebox-name'></input>
+                </div>
+                <div id='timebox-end-date'>
+                    <label for='timebox-end-date'>Timebox end date:</label>
+                    <input style='width:100%' type='text' name='timebox-end-date'></input>
+                </div>
+                <input type='submit' name='add-timebox-button' value='Add timebox'></input>
             </form>
         </div>
         <div class='sidebar-block'>
@@ -303,6 +357,21 @@ function show_content()
                 echo " <span class='subtask-closed'>&mdash; Closed</span>";
             }
             echo "
+                </li>";
+        }
+        echo "
+            </ul>";
+    }
+
+    if (array_key_exists('timebox_list', $project)) {
+        echo "
+            Timeboxes:
+            <ul>";
+        foreach ($project['timebox_list'] as $timebox) {
+            echo "
+                <li>
+                    <a href='timebox.php?id=${timebox['timebox_id']}'>${timebox['timebox_name']}</a>
+                    &mdash; ${timebox['timebox_end_date']}
                 </li>";
         }
         echo "
