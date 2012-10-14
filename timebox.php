@@ -84,6 +84,20 @@ function query_timebox($timebox_id) {
         return null;
     }
     $timebox = mysqli_fetch_array($timebox_result);
+    
+    $task_query = "SELECT T.`task_id` , T.`task_summary` , T.`task_status` 
+                FROM `task_table` AS T
+                WHERE T.`timebox_id` = '$timebox_id'";
+    $task_result = mysqli_query($connection, $task_query);
+    $num_rows = mysqli_num_rows($task_result);
+    if ($num_rows > 0) {
+        $tasks = array();
+        while ($task = mysqli_fetch_array($task_result)) {
+            $tasks[$task['task_id']] = $task;
+        }
+        $timebox['task_list'] = $tasks;
+    }
+    
     return $timebox;
 }
 
@@ -135,6 +149,24 @@ function show_content()
             </div> <!-- /form-controls -->
         </form>
             ";
+                
+    if (array_key_exists('task_list', $timebox)) {
+        echo "
+            Tasks:
+            <ul>";
+        foreach ($timebox['task_list'] as $task) {
+            echo "
+                <li>
+                    <a href='task.php?id=${task['task_id']}'>${task['task_summary']}</a>";
+            if ($task['task_status'] == 'closed') {
+                echo " <span class='subtask-closed'>&mdash; Closed</span>";
+            }
+            echo "
+                </li>";
+        }
+        echo "
+            </ul>";
+    }
 }
 
 include_once ('template.inc');
