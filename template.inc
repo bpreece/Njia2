@@ -95,6 +95,23 @@ if (function_exists('process_query_string')) {
                 
                 <?php if (function_exists('show_main_menu')): ?>
                 <div id="main-menu">
+                    <ul>
+                        <?php if ($page_id == 'todo-page') : ?>
+                            <li class='selected'>Todo</li>
+                        <?php else: ?>
+                            <li><a href='todo.php'>Todo</a></li>
+                        <?php endif; ?>
+                        <?php if ($page_id == 'projects-page') : ?>
+                            <li class='selected'>Projects</li>
+                        <?php else: ?>
+                            <li><a href='projects.php'>Projects</a></li>
+                        <?php endif; ?>
+                        <?php if ($page_id == 'timeboxes-page') : ?>
+                            <li class='selected'>Schedules</li>
+                        <?php else: ?>
+                            <li><a href='schedule.php'>Schedules</a></li>
+                        <?php endif; ?>
+                    </ul>
                 </div> <!-- /main-menu -->
                 <?php endif; ?>
             </div> <!-- /header -->

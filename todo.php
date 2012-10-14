@@ -2,6 +2,14 @@
 
 include_once('common.inc');
 
+function get_stylesheets() {
+    $stylesheets = array('todo-page.css');
+    return $stylesheets;
+}
+
+function get_page_id() {
+    return 'todo-page';
+}
 
 function query_tasks() {
     $project_array = array();

@@ -42,6 +42,12 @@ form label {
     font-size: 300%;
 }
 
+#main-menu li {
+    display: inline-block;
+    list-style-type: none;
+    width: 5em;
+}
+
 .user-message {
     padding: 15px;
     background-color: #558;
