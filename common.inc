@@ -79,6 +79,11 @@ function get_session_id() {
     return $session_id;
 }
 
+function get_session_user_id() {
+    global $session_user_id;
+    return $session_user_id;
+}
+
 function get_session_id_cookie() 
 {
     global $session_id, $session_user_id;
