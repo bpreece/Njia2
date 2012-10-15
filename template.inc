@@ -97,9 +97,9 @@ if (function_exists('process_query_string')) {
                 <div id="main-menu">
                     <ul>
                         <?php if ($page_id == 'todo-page') : ?>
-                            <li class='selected'>Todo</li>
+                            <li class='selected'>To-do</li>
                         <?php else: ?>
-                            <li><a href='todo.php'>Todo</a></li>
+                            <li><a href='todo.php'>To-do</a></li>
                         <?php endif; ?>
                         <?php if ($page_id == 'projects-page') : ?>
                             <li class='selected'>Projects</li>

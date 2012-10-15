@@ -11,24 +11,42 @@ function get_page_id() {
     return 'todo-page';
 }
 
+global $projects, $user, $user_list;
+
 function process_query_string() {
     global $projects;
-    $projects = query_tasks();
+    $user_id = NULL;
+    if (isset($_GET['id'])) {
+        $user_id = $_GET['id'];
+    }
+    $projects = query_tasks($user_id);
 }
 
-global $projects;
+function process_form_data() {
+    if (isset($_POST['user-id'])) {
+        header("Location: todo.php?id=${_POST['user-id']}");
+    }
+}
 
-function query_tasks() {
-    global $projects;
+function query_tasks($user_id) {
+    global $projects, $user, $user_list;
 
     $connection = connect_to_database_session();
     if (!$connection) {
         return;
     }
+    if ($user_id) {
+        $user = query_user($connection, $user_id);
+        if (! $user) {
+            header ('Location: todo.php');
+        }
+    } else {
+        $user_id = get_session_user_id();
+        $user = get_session_user();
+    }
 
     $session_id = get_session_id();
-    $user_id = get_session_user_id();
-    $query = "SELECT P.`project_id` , P.`project_name` , 
+    $task_query = "SELECT P.`project_id` , P.`project_name` , 
                 T.`task_id` , T.`task_summary` , T.`parent_task_id` , 
                 X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` 
                 FROM  `access_table` AS A 
@@ -36,94 +54,119 @@ function query_tasks() {
                 INNER JOIN `task_table` AS T ON P.`project_id` = T.`project_id` 
                 INNER JOIN `timebox_table` AS X ON T.`timebox_id` = X.`timebox_id` 
                 WHERE A.`user_id` = '$user_id' AND
-                    T.`user_id` = $user_id AND
+                    T.`user_id` = '$user_id' AND
                     T.`task_status` <> 'closed' AND X.`timebox_end_date` >= CURRENT_DATE()
                 ORDER BY T.`task_id`";
 
-    $results = mysqli_query($connection, $query);
-    if ($results == false) {
+    $task_results = mysqli_query($connection, $task_query);
+    if ($task_results == false) {
         set_user_message(mysqli_error($connection), 'failure');
         return;
     }
-    $num_rows = mysqli_num_rows($results);
-    if ($num_rows == 0) {
+    $num_tasks = mysqli_num_rows($task_results);
+    if ($num_tasks == 0) {
         set_user_message("There are no tasks in your current todo list.", 'info');
+    } else {
+        $projects = array();
+        for ($i = 0; $i < $num_tasks; $i++) {
+            $result = mysqli_fetch_array($task_results);
+
+            $project_id = $result['project_id'];
+            if (array_key_exists($project_id, $projects)) {
+                $project = &$projects[$project_id];
+            } else {
+                $project = array();
+                $project['project-id'] = $project_id;
+                $project['project-name'] = $result['project_name'];
+                $project['project-tasks'] = array();
+                $projects[$project_id] = $project;
+            }
+            $tasks = &$project['project-tasks'];
+
+            $task_id = $result['task_id'];
+            if (array_key_exists($task_id, $tasks)) {
+                $task = $tasks[$task_id];
+            } else {
+                $task = array();
+                $task['task-id'] = $task_id;
+                $task['parent-task-id'] = $result['parent_task_id'];
+                $task['task-summary'] = $result['task_summary'];
+                $task['timebox-id'] = $result['timebox_id'];
+                $task['timebox-name'] = $result['timebox_name'];
+                $task['timebox-end-date'] = $result['timebox_end_date'];
+                $tasks[$task_id] = $task;
+            }
+        }
+    }
+    
+    $users_query = "SELECT DISTINCT U.`user_id` , U.`login_name` 
+                FROM  `access_table` AS A1 
+                INNER JOIN `project_table` AS P ON A1.`project_id` = P.`project_id` 
+                INNER JOIN `access_table` AS A2 ON P.`project_id` = A2.`project_id`
+                INNER JOIN `user_table` as U ON A2.`user_id` = U.`user_id` 
+                WHERE A1.`user_id` = '$user_id'
+                ORDER BY U.`login_name`";
+    $users_result = mysqli_query($connection, $users_query);
+    if (! $users_result) {
+        set_user_message(mysqli_error($connection), 'failure');
         return;
     }
-
-    $projects = array();
-    for ($i = 0; $i < $num_rows; $i++) {
-        $result = mysqli_fetch_array($results);
-
-        $project_id = $result['project_id'];
-        if (array_key_exists($project_id, $projects)) {
-            $project = &$projects[$project_id];
-        } else {
-            $project = array();
-            $project['project-id'] = $project_id;
-            $project['project-name'] = $result['project_name'];
-            $project['project-tasks'] = array();
-            $projects[$project_id] = $project;
-        }
-        $tasks = &$project['project-tasks'];
-        
-        $task_id = $result['task_id'];
-        if (array_key_exists($task_id, $tasks)) {
-            $task = $tasks[$task_id];
-        } else {
-            $task = array();
-            $task['task-id'] = $task_id;
-            $task['parent-task-id'] = $result['parent_task_id'];
-            $task['task-summary'] = $result['task_summary'];
-            $task['timebox-id'] = $result['timebox_id'];
-            $task['timebox-name'] = $result['timebox_name'];
-            $task['timebox-end-date'] = $result['timebox_end_date'];
-            $tasks[$task_id] = $task;
-        }
+    $user_list = array();
+    while ($project_user = mysqli_fetch_array($users_result)) {
+        $user_list[$project_user['user_id']] = $project_user['login_name'];
     }
 
     return $projects;
 }
 
+function query_user($connection, $user_id) {
+    $user_query = "SELECT U.`user_id` , U.`login_name` 
+                FROM `user_table` AS U 
+                WHERE U.`user_id` = '$user_id'";
+    $user_result = mysqli_query($connection, $user_query);
+    if (! $user_result) {
+        set_user_message(mysqli_error($connection), 'failure');
+        return;
+    }
+    $num_users = mysqli_num_rows($user_result);
+    if ($num_users == 0) {
+        return;
+    } else {
+        return mysqli_fetch_array($user_result);
+    }
+}
 
 function show_sidebar() {
+    global $user, $user_list;
     echo "
-        <h3>Sidebar block</h3>
+        <h3>To-do options</h3>
         <div class='sidebar-block'>
-            <p>
-                Video adhuc duas esse sententias, unam D. Silani, qui 
-                censet eos, qui haec delere conati sunt, morte esse 
-                multandos, alteram C. Caesaris, qui mortis poenam removet, 
-                ceterorum suppliciorum omnes acerbitates amplectitur. 
-            </p>
-            <p>
-                Uterque et pro sua dignitate et pro rerum magnitudine in 
-                summa severitate versatur. Alter eos, qui nos omnes 
-                vita privare conati sunt, qui delere imperium, qui 
-                populi Romani nomen exstinguere, punctum temporis frui 
-                vita et hoc communi spiritu non putat oportere, atque 
-                hoc genus poenae saepe in improbos cives in hac re 
-                publica esse usurpatum recordatur. 
-            </p>
-        </div>
-        <div class='sidebar-block'>
-            <h3>Sidebar block</h3>
-            <p>
-                Alter intellegit mortem ab dis immortalibus non esse 
-                supplicii causa constitutam, sed aut necessitatem 
-                naturae aut laborum ac miseriarum quietem. 
-            </p>
+            <form id='add-subtask-form' method='post'>
+                <div id='subtask-summary'>
+                    <label for='subtask-summary'>Show to-do list for:</label>
+                    <select name='user-id'>";
+            foreach ($user_list as $todo_user_id => $login_name) {
+                $selected = ($user['user_id'] == $todo_user_id) ? "selected='selected'" : "";
+                echo "
+                        <option value='$todo_user_id' $selected>$login_name</option>";
+            }
+            echo "
+                    </select>
+                </div>
+                <input type='submit' name='show-button' value='Show to-do list'></input>
+            </form>
         </div>";
 }
 
 function show_content() 
 {
-    global $projects;
+    global $projects, $user;
     if (! $projects) {
         return;
     }
     
     echo "
+        <h3>To-do list for <span class='h3-user'>${user['login_name']}</span></h3>
         <div id=todo-projects-list>";
     foreach ($projects as $project_id => &$project) {
         echo "
