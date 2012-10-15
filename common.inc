@@ -56,13 +56,13 @@ function connect_to_database()
     $connection = mysqli_connect("localhost", "njia", "njia");
     if (! $connection) {
         show_user_message(mysqli_error($connection), 'failure');
-        return null;
+        return;
     }
     
     $database = mysqli_select_db($connection, 'njia');
     if (! $database) {
         show_user_message(mysqli_error($connection), 'failure');
-        return null;
+        return;
     }
     
     return $connection;
@@ -72,7 +72,7 @@ function connect_to_database()
  * Gets the value of the session-id cookie.
  * Returns an array of two values: the user id, and session id
  */
-global $session_id, $session_user_id;
+global $session_id, $session_user;
 
 function get_session_id() {
     global $session_id;
@@ -80,47 +80,88 @@ function get_session_id() {
 }
 
 function get_session_user_id() {
-    global $session_user_id;
-    return $session_user_id;
+    global $session_user;
+    return $session_user['user_id'];
 }
 
 function get_session_id_cookie() 
 {
     global $session_id, $session_user_id;
     if (isset($_COOKIE['njia-session-id'])) {
-        $cookie = $_COOKIE['njia-session-id'];
-        $session = $cookie ? explode('-', $cookie) : null;
-        $session_user_id = $session[0];
-        $session_id = $session[1];
-        return $session;
+        $session_id = $_COOKIE['njia-session-id'];
+        return $session_id;
     } else {
-        return NULL;
+        return;
     }
 }
 
+/**
+ * 
+ * @global type $session_id
+ * @global type $session_user_id
+ * @return type the user's record as an array
+ */
+function validate_user($connection)
+{
+    global $session_id, $session_user;
+    
+    $query = "SELECT U.*
+        FROM `session_table` AS S 
+        INNER JOIN `user_table` AS U on U.`user_id` = S.`user_id`
+        WHERE S.`session_id` = '$session_id'";
+    $results = mysqli_query($connection, $query);
+    if (! $results) {
+        set_user_message(mysqli_error($connection), "warning");
+        return;
+    }
+    $num_rows = mysqli_num_rows($results);
+    if ($num_rows == 0) {
+        return;
+    }
+
+    $session_user = mysqli_fetch_array($results);
+    return TRUE;
+}
+
+/**
+ * Creates an entry in the session table for the given user, and returns  the
+ * session ID of the new entry.
+ * @param type $user_id
+ * @param type $connection
+ * @return string the value of the session cookie
+ */
 function set_session_id($user_id, $connection) 
 {
     $session_id = md5(microtime());
     $query = "INSERT INTO `session_table` (`session_id`, `user_id`) VALUES ('$session_id', '$user_id')";
     if (! mysqli_query($connection, $query)) {
-        send_error(mysqli_error($connection));
+        set_user_message(mysqli_error($connection), 'failure');
         return;
     }
-    
-    $cookie= $user_id . '-' . $session_id;
-    setcookie('njia-session-id', $cookie);
-
-    return $cookie;
+    setcookie('njia-session-id', $session_id);
+    return $session_id;
 }
 
-function connect_to_database_session() {
+function connect_to_database_session() 
+{
     $session = get_session_id_cookie();
     if (!$session) {
         set_user_message("You must log in to access this page", "warning");
-        return null;
+        return;
     }
 
-    return connect_to_database();
+    $connection = connect_to_database();
+    if (! $connection) {
+        set_user_message("Failed connecting to database", 'failure');
+        return;
+    }
+    
+    if (! validate_user($connection)) {
+        set_user_message("You must be logged in to view this page", 'warning');
+        return;
+    }
+    
+    return $connection;
 }
 
 ?>

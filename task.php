@@ -40,7 +40,6 @@ function process_form_data() {
 function process_task_form() {
     $connection = connect_to_database_session();
     if (!$connection) {
-        set_user_message("Failed accessing database", "failure");
         return null;
     }
 
@@ -74,7 +73,6 @@ function process_task_form() {
 function process_add_subtask_form() {
     $connection = connect_to_database_session();
     if (!$connection) {
-        set_user_message("Failed accessing database", "failure");
         return null;
     }
 
@@ -114,7 +112,6 @@ function process_reopen_task_form() {
 function update_task_status($status) {
     $connection = connect_to_database_session();
     if (!$connection) {
-        set_user_message("Failed accessing database", "failure");
         return null;
     }
 
@@ -142,7 +139,6 @@ function process_query_string() {
 function query_task($task_id) {
     $connection = connect_to_database_session();
     if (!$connection) {
-        set_user_message("Failed accessing database", "failure");
         return null;
     }
 
@@ -227,6 +223,9 @@ function show_sidebar() {
     global $task;
     echo "
         <h3>Task Options</h3>";
+    if (! $task) {
+        return;
+    }
     if ($task['task_status'] == 'closed') {
         if ($task['parent_task_status'] != 'closed') {
             echo "

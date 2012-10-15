@@ -11,31 +11,43 @@ function get_page_id() {
     return 'todo-page';
 }
 
+function process_query_string() {
+    global $projects;
+    $projects = query_tasks();
+}
+
+global $projects;
+
 function query_tasks() {
-    $project_array = array();
+    global $projects;
 
     $connection = connect_to_database_session();
     if (!$connection) {
-        set_user_message("Failed accessing database", "failure");
         return;
     }
 
     $session_id = get_session_id();
+    $user_id = get_session_user_id();
     $query = "SELECT P.`project_id` , P.`project_name` , 
                 T.`task_id` , T.`task_summary` , T.`parent_task_id` , 
                 X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` 
-                FROM  `session_table` AS S
-                INNER JOIN  `access_table` AS A ON S.`user_id` = A.`user_id` 
-                INNER JOIN  `project_table` AS P ON A.`project_id` = P.`project_id` 
-                INNER JOIN  `task_table` AS T ON P.`project_id` = T.`project_id` 
-                INNER JOIN  `timebox_table` AS X ON T.`timebox_id` = X.`timebox_id` 
-                WHERE S.`session_id` = '$session_id' AND X.`timebox_end_date` >= CURRENT_DATE()
+                FROM  `access_table` AS A 
+                INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
+                INNER JOIN `task_table` AS T ON P.`project_id` = T.`project_id` 
+                INNER JOIN `timebox_table` AS X ON T.`timebox_id` = X.`timebox_id` 
+                WHERE A.`user_id` = '$user_id' AND
+                    T.`user_id` = $user_id AND
+                    T.`task_status` <> 'closed' AND X.`timebox_end_date` >= CURRENT_DATE()
                 ORDER BY T.`task_id`";
 
     $results = mysqli_query($connection, $query);
-    
+    if ($results == false) {
+        set_user_message(mysqli_error($connection), 'failure');
+        return;
+    }
     $num_rows = mysqli_num_rows($results);
     if ($num_rows == 0) {
+        set_user_message("There are no tasks in your current todo list.", 'info');
         return;
     }
 
@@ -106,9 +118,8 @@ function show_sidebar() {
 
 function show_content() 
 {
-    $projects = query_tasks();
+    global $projects;
     if (! $projects) {
-        show_user_message("You must sign on to view this page.", 'warning');
         return;
     }
     

@@ -45,7 +45,6 @@ function process_project_form() {
     global $project;
     $connection = connect_to_database_session();
     if (!$connection) {
-        set_user_message("Failed accessing database", "failure");
         return null;
     }
 
@@ -70,7 +69,6 @@ function process_project_form() {
 function process_add_task_form() {
     $connection = connect_to_database_session();
     if (!$connection) {
-        set_user_message("Failed accessing database", "failure");
         return null;
     }
 
@@ -95,7 +93,6 @@ function process_add_task_form() {
 function process_add_timebox_form() {
     $connection = connect_to_database_session();
     if (!$connection) {
-        set_user_message("Failed accessing database", "failure");
         return null;
     }
 
@@ -123,7 +120,6 @@ function process_new_project_form() {
     
     $connection = connect_to_database_session();
     if (!$connection) {
-        set_user_message("Failed accessing database", "failure");
         return null;
     }
 
@@ -161,7 +157,6 @@ function process_reopen_project_form() {
 function update_project_status($status) {
     $connection = connect_to_database_session();
     if (!$connection) {
-        set_user_message("Failed accessing database", "failure");
         return null;
     }
 
@@ -189,7 +184,6 @@ function process_query_string() {
 function query_project($project_id) {
     $connection = connect_to_database_session();
     if (!$connection) {
-        set_user_message("Failed accessing database", "failure");
         return null;
     }
 

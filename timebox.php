@@ -32,7 +32,6 @@ function process_timebox_form() {
     global $timebox;
     $connection = connect_to_database_session();
     if (!$connection) {
-        set_user_message("Failed accessing database", "failure");
         return null;
     }
 
@@ -65,7 +64,6 @@ function process_query_string() {
 function query_timebox($timebox_id) {
     $connection = connect_to_database_session();
     if (!$connection) {
-        set_user_message("Failed accessing database", "failure");
         return null;
     }
 
