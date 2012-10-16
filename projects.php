@@ -23,7 +23,7 @@ function get_page_class() {
     return $page_class;
 }
 
-global $projects;
+global $projects, $tasks;
 
 function process_form_data() {
     
@@ -62,25 +62,33 @@ function query_projects() {
         return null;
     }
 
-    global $projects;
+    global $projects, $tasks;
     $projects = array();
     $tasks = array();
     
     while ($result = mysqli_fetch_array($projects_result)) {
         $project_id = $result['project_id'];
         if (!array_key_exists($project_id, $projects)) {
-            $project = array();
-            $result['task-list'] = array();
-            $projects[$project_id] = $result;
+            $projects[$project_id] = array();
+            $projects[$project_id]['project-id'] = $result['project_id'];
+            $projects[$project_id]['project-name'] = $result['project_name'];
+            $projects[$project_id]['task-list'] = array();
         }
         $task_id = $result['task_id'];
         if (!array_key_exists($task_id, $tasks)) {
-            $result['subtask-list'] = array();
-            $tasks[$task_id] = $result;
+            $tasks[$task_id] = array();
+            $tasks[$task_id]['task-id'] = $task_id;
+            $tasks[$task_id]['task-summary'] = $result['task_summary'];
+            $tasks[$task_id]['timebox-id'] = $result['timebox_id'];
+            $tasks[$task_id]['timebox-name'] = $result['timebox_name'];
+            $tasks[$task_id]['timebox-end-date'] = $result['timebox_end_date'];
+            $tasks[$task_id]['user-id'] = $result['user_id'];
+            $tasks[$task_id]['user-name'] = $result['login_name'];
+            $tasks[$task_id]['subtask-list'] = array();
             if ($result['parent_task_id']) {
-                $tasks[$result['parent_task_id']]['subtask-list'][$task_id] = $result;
+                $tasks[$result['parent_task_id']]['subtask-list'][] = $task_id;
             } else {
-                $projects[$result['project_id']]['task-list'][$task_id] = $result;
+                $projects[$result['project_id']]['task-list'][] = $task_id;
             }
         }
     }
@@ -98,6 +106,28 @@ function show_sidebar() {
 
 }
 
+function show_tasks_list($tasks_list) {
+    global $tasks;
+    echo "
+        <div class='task-list'>";
+        foreach ($tasks_list as $task_id) {
+            $task = $tasks[$task_id];
+            echo "
+            <div class='task task-$task_id'>
+                <div class='task-id'>$task_id</div>
+                <div class='task-summary'>
+                    <a href='task.php?id=$task_id'>${task['task-summary']}</a>
+                </div>";
+            if (count($task['subtask-list']) > 0) {
+                show_tasks_list($task['subtask-list']);
+            }
+            echo "
+            </div> <!-- /task-$task_id -->";
+        }
+        echo "
+        </div> <!-- /task-list -->";
+}
+
 function show_content() 
 {
     global $projects, $user;
@@ -112,26 +142,18 @@ function show_content()
     
     echo "
             <div id='projects-list'>";
-    foreach ($projects as $project) {
+    foreach ($projects as $project_id => &$project) {
         echo "
-                <div class='project project-${project['project_id']}'>
-                    <div class='project-id'>${project['project_id']}</div>
+                <div class='project project-$project_id'>
+                    <div class='project-id'>$project_id</div>
                     <div class='project-name'>
-                        <a href='project.php?id=${project['project_id']}'>${project['project_name']}</a>
+                        <a href='project.php?id=$project_id'>${project['project-name']}</a>
                     </div>";
-        foreach ($project['task-list'] as $task) {
-            echo "
-                    <div class='task-list'>
-                        <div class='task task-${task['task_id']}'>
-                            <div class='task-id'>${task['task_id']}</div>
-                            <div class='task-summary'>
-                                <a href='task.php?id=${task['task_id']}'>${task['task_summary']}</a>
-                            </div>
-                        </div> <!-- /task${task['task_id']} -->
-                    </div> <!-- /task-list -->";
+        if (count($project['task-list']) > 0) {
+            show_tasks_list($project['task-list']);
         }
         echo "
-                </div> <!-- /project${project['project_id']} -->";
+                </div> <!-- /project$project_id -->";
     }
     echo "
             </div> <!-- /projects-list -->";
