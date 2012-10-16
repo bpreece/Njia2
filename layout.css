@@ -72,28 +72,3 @@ html {
 #login-page #login-form {
     margin-right: 240px;
 }
-
-#todo-projects-list .project-id,
-#todo-projects-list .task-id
-{
-    display: inline;
-    width: 25px;
-    padding-left: 5px;
-}
-
-#todo-projects-list .project-name, 
-#todo-projects-list .task-summary,
-#todo-projects-list .task-timebox-end-date
-{
-    display: inline;
-}
-
-#todo-projects-list .project-tasks-list {
-    padding-left: 2.5em;
-}
-
-#todo-projects-list .task-timebox-id,
-#todo-projects-list .task-timebox-name
-{
-    display: none;
-}

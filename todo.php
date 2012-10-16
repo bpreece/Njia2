@@ -3,7 +3,7 @@
 include_once('common.inc');
 
 function get_stylesheets() {
-    $stylesheets = array('todo-page.css');
+    $stylesheets = array('todo.css');
     return $stylesheets;
 }
 
