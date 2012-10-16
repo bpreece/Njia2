@@ -23,9 +23,41 @@ function process_query_string() {
 }
 
 function process_form_data() {
-    if (isset($_POST['user-id'])) {
+    if (isset($_POST['show-todo-button'])) {
         header("Location: todo.php?id=${_POST['user-id']}");
+    } else if (isset($_POST['add-project-button'])) {
+        process_add_project_form();
     }
+}
+
+function process_add_project_form() {
+    $connection = connect_to_database_session();
+    if (!$connection) {
+        return null;
+    }
+    
+    $user_id = get_session_user_id();
+
+    $project_name = mysqli_real_escape_string($connection, $_POST['project-name']);
+
+    $project_query = "INSERT INTO `project_table` 
+            ( `project_name` ) VALUES ( '$project_name' )";
+    $project_results = mysqli_query($connection, $project_query);
+    if (! $project_results) {
+        set_user_message(mysqli_error($connection), 'failure');
+        return;
+    }
+    $project_id = mysqli_insert_id($connection);
+    
+    $access_query = "INSERT INTO `access_table` 
+            ( `user_id` , `project_id` ) VALUES ( '$user_id' , '$project_id' )";
+    $access_results = mysqli_query($connection, $access_query);
+    if (! $access_results) {
+        set_user_message(mysqli_error($connection), 'failure');
+        return;
+    }
+    
+    header ("Location: project.php?id=$project_id");
 }
 
 function query_tasks($user_id) {
@@ -64,29 +96,23 @@ function query_tasks($user_id) {
         return;
     }
     $num_tasks = mysqli_num_rows($task_results);
-    if ($num_tasks == 0) {
-        set_user_message("There are no tasks in your current todo list.", 'info');
-    } else {
+    if ($num_tasks > 0) {
         $projects = array();
         for ($i = 0; $i < $num_tasks; $i++) {
             $result = mysqli_fetch_array($task_results);
 
             $project_id = $result['project_id'];
-            if (array_key_exists($project_id, $projects)) {
-                $project = &$projects[$project_id];
-            } else {
+            if (! array_key_exists($project_id, $projects)) {
                 $project = array();
                 $project['project-id'] = $project_id;
                 $project['project-name'] = $result['project_name'];
                 $project['project-tasks'] = array();
                 $projects[$project_id] = $project;
             }
-            $tasks = &$project['project-tasks'];
+            $tasks = $projects[$project_id]['project-tasks'];
 
             $task_id = $result['task_id'];
-            if (array_key_exists($task_id, $tasks)) {
-                $task = $tasks[$task_id];
-            } else {
+            if (! array_key_exists($task_id, $tasks)) {
                 $task = array();
                 $task['task-id'] = $task_id;
                 $task['parent-task-id'] = $result['parent_task_id'];
@@ -94,7 +120,7 @@ function query_tasks($user_id) {
                 $task['timebox-id'] = $result['timebox_id'];
                 $task['timebox-name'] = $result['timebox_name'];
                 $task['timebox-end-date'] = $result['timebox_end_date'];
-                $tasks[$task_id] = $task;
+                $projects[$project_id]['project-tasks'][$task_id] = $task;
             }
         }
     }
@@ -153,7 +179,16 @@ function show_sidebar() {
             echo "
                     </select>
                 </div>
-                <input type='submit' name='show-button' value='Show to-do list'></input>
+                <input type='submit' name='show-todo-button' value='Show to-do list'></input>
+            </form>
+        </div>
+        <div class='sidebar-block'>
+            <form id='add-project-form' method='post'>
+                <div id='subtask-summary'>
+                    <label for='project-name'>Project name:</label>
+                    <input style='width:100%' type='text' name='project-name'></input>
+                </div>
+                <input type='submit' name='add-project-button' value='Create new project'></input>
             </form>
         </div>";
 }
@@ -161,12 +196,16 @@ function show_sidebar() {
 function show_content() 
 {
     global $projects, $user;
-    if (! $projects) {
-        return;
-    }
     
     echo "
-        <h3>To-do list for <span class='h3-user'>${user['login_name']}</span></h3>
+        <h3>To-do list for <span class='h3-user'>${user['login_name']}</span></h3>";
+    if (! $projects) {
+        echo "
+            <div>There are no tasks in your current to-do list.</div>";
+        return;
+    }
+
+    echo "
         <div id=todo-projects-list>";
     foreach ($projects as $project_id => &$project) {
         echo "
