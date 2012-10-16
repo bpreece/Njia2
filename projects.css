@@ -1,0 +1,9 @@
+
+.project-id,
+.task-id {
+    display: none;
+}
+
+.task-list {
+    margin-left: 2em;
+}

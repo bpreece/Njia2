@@ -18,6 +18,8 @@ function process_query_string() {
     $user_id = NULL;
     if (isset($_GET['id'])) {
         $user_id = $_GET['id'];
+    } else {
+        $user_id = get_session_user_id();
     }
     $projects = query_tasks($user_id);
 }
@@ -165,7 +167,11 @@ function query_user($connection, $user_id) {
 function show_sidebar() {
     global $user, $user_list;
     echo "
-        <h3>To-do options</h3>
+        <h3>To-do options</h3>";
+    if (! $user) {
+        return;
+    }
+    echo "
         <div class='sidebar-block'>
             <form id='add-subtask-form' method='post'>
                 <div id='subtask-summary'>
@@ -196,6 +202,10 @@ function show_sidebar() {
 function show_content() 
 {
     global $projects, $user;
+    
+    if (! $user) {
+        return;
+    }
     
     echo "
         <h3>To-do list for <span class='h3-user'>${user['login_name']}</span></h3>";
