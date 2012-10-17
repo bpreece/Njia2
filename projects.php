@@ -114,6 +114,14 @@ function show_tasks_list($tasks_list) {
             $task = $tasks[$task_id];
             echo "
             <div class='task task-$task_id'>
+                <div class='task-info'>
+                    <div class='task-user'>
+                        <a href='user.php?id=${task['user-id']}'>${task['user-name']}</a>
+                    </div>
+                    <div class='task-timebox'>
+                        <a href='timebox.php?id=${task['timebox-id']}'>${task['timebox-end-date']}</a>
+                    </div>
+                </div> <!-- /task-info -->
                 <div class='task-id'>$task_id</div>
                 <div class='task-summary'>
                     <a href='task.php?id=$task_id'>${task['task-summary']}</a>

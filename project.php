@@ -238,6 +238,20 @@ function query_project($project_id) {
         $project['timebox_list'] = $timebox_list;
     }
     
+    $user_query = "SELECT U.`user_id` , U.`login_name` 
+                FROM `access_table` AS A
+                INNER JOIN `user_table` AS U ON A.`user_id` = U.`user_id`
+                WHERE A.`project_id` = '$project_id'
+                ORDER BY U.`login_name`";
+    $user_result = mysqli_query($connection, $user_query);
+    if (mysqli_num_rows($user_result) > 0) {
+        $user_list = array();
+        while ($user = mysqli_fetch_array($user_result)) {
+            $user_list[$user['user_id']] = $user['login_name'];
+        }
+        $project['user_list'] = $user_list;
+    }
+    
     return $project;
 }
 
@@ -361,16 +375,29 @@ function show_content()
         echo "
             Timeboxes:
             <ul>";
-        foreach ($project['timebox_list'] as $timebox) {
+        foreach ($project['timebox_list'] as $timebox_id => $timebox) {
             echo "
                 <li>
-                    <a href='timebox.php?id=${timebox['timebox_id']}'>${timebox['timebox_name']}</a>
+                    <a href='timebox.php?id=$timebox_id'>${timebox['timebox_name']}</a>
                     &mdash; ${timebox['timebox_end_date']}
                 </li>";
         }
         echo "
             </ul>";
     }
+    
+    echo "
+        People:
+        <ul>";
+    foreach ($project['user_list'] as $user_id => $user_name) {
+        echo "
+            <li>
+                <a href='user.php?id=$user_id'>$user_name</a>
+            </li>";
+    }
+    echo "
+        </ul>
+        ";
 }
 
 include_once ('template.inc');

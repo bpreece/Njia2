@@ -7,3 +7,18 @@
 .task-list {
     margin-left: 2em;
 }
+
+.task-info {
+    float:right;
+}
+
+.task-user {
+    display: inline-block;
+    width: 3em;
+}
+
+.task-timebox {
+    display: inline-block;
+    width: 7.5em;
+}
+
