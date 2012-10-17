@@ -189,11 +189,13 @@ function query_project($project_id) {
 
     $session_id = get_session_id();
     $project_id = mysqli_real_escape_string($connection, $project_id);
-    $project_query = "SELECT P.*
-                FROM `session_table` AS S
-                INNER JOIN `access_table` AS A ON S.`user_id` = A.`user_id` 
-                INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
-                WHERE S.`session_id` = '$session_id' and P.`project_id` = '$project_id'";
+    $project_query = "SELECT P.* , 
+            O.`user_id` AS `owner_id` , O.`login_name` AS `owner_name` 
+        FROM `session_table` AS S
+        INNER JOIN `access_table` AS A ON S.`user_id` = A.`user_id` 
+        INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
+        INNER JOIN `user_table` AS O ON P.`project_owner` = O.`user_id`
+        WHERE S.`session_id` = '$session_id' and P.`project_id` = '$project_id'";
     
     $project_result = mysqli_query($connection, $project_query);
     $num_rows = mysqli_num_rows($project_result);
@@ -339,6 +341,11 @@ function show_content()
             <div id='project-discussion'>
                 <label for='project-discussion'>Discussion:</label>
                 <textarea name='project-discussion' rows='4' style='width:50%'>${project['project_discussion']}</textarea>
+            </div>
+                
+            <div id='project-owner'>
+                <label>Owner:</label>
+                <a class='object-ref' href='user.php?id=${project['owner_id']}'>${project['owner_name']}</a>
             </div>
 
             <div id='project-created-date'>
