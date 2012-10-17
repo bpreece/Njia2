@@ -43,7 +43,7 @@ function process_add_project_form() {
     $project_name = mysqli_real_escape_string($connection, $_POST['project-name']);
 
     $project_query = "INSERT INTO `project_table` 
-            ( `project_name` ) VALUES ( '$project_name' )";
+            ( `project_name` , `project_owner` ) VALUES ( '$project_name' , '$user_id' )";
     $project_results = mysqli_query($connection, $project_query);
     if (! $project_results) {
         set_user_message(mysqli_error($connection), 'failure');
