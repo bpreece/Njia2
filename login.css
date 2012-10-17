@@ -1,0 +1,49 @@
+
+#login-page #login-form {
+    margin-left: 240px;
+    margin-right: 240px;
+}
+
+#login-page #login-controls {
+    float:right;
+    width: 240px;
+    margin-left: -240px;
+}
+
+#login-page #login-form {
+    margin-right: 240px;
+}
+
+#login-page #content {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#login-page #login-controls form {
+    padding: 25px;
+    border: 1px solid #a0a0a0;
+}
+
+#login-page #login-form label {
+    margin-top: 15px;
+}
+
+#login-page #login-form input[type=text],
+#login-page #login-form input[type=password] {
+        font-size: 135%;
+        border: none;
+        border-bottom: 1px solid #a0a0a0;
+        background-color: #f0f0f0;
+        color: #555;
+        padding: 10px 15px;
+        margin-bottom: 10px;
+}
+
+#login-page #login-form input[type=text]:focus,
+#login-page #login-form input[type=password]:focus {
+        background-color: lightblue;
+}
+
+#login-form label {
+    display:block;
+}

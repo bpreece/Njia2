@@ -3,7 +3,7 @@
 include_once('common.inc');
 
 function get_stylesheets() {
-    $stylesheets = array('task-form.css');
+    $stylesheets = array('task.css');
     return $stylesheets;
 }
 
@@ -278,14 +278,14 @@ function show_content()
             
             <div id='project_name'>
                 <label>Project:</label>
-                <a href='project.php?id=${task['project_id']}'>${task['project_name']}</a>
+                <a class='object-ref' href='project.php?id=${task['project_id']}'>${task['project_name']}</a>
             </div>";
             
     if (isset($task['parent_task_summary'])) {
         echo "
             <div id='parent-task'>
                 <label>Parent task:</label>
-                <a href='task.php?id=${task['parent_task_id']}'>${task['parent_task_summary']}</a>
+                <a class='object-ref' href='task.php?id=${task['parent_task_id']}'>${task['parent_task_summary']}</a>
             </div>";
     }
 
@@ -360,7 +360,7 @@ function show_content()
         foreach ($task['subtask_list'] as $subtask) {
             echo "
                 <li>
-                    <a href='task.php?id=${subtask['task_id']}'>${subtask['task_summary']}</a>";
+                    <a class='object-ref' href='task.php?id=${subtask['task_id']}'>${subtask['task_summary']}</a>";
             if ($subtask['task_status'] == 'closed') {
                 echo " <span class='subtask-closed'>&mdash; Closed</span>";
             }

@@ -104,15 +104,15 @@ function show_tasks_list($tasks_list) {
             <div class='task task-$task_id'>
                 <div class='task-info'>
                     <div class='task-user'>
-                        <a href='user.php?id=${task['user-id']}'>${task['user-name']}</a>
+                        <a class='object-ref' href='user.php?id=${task['user-id']}'>${task['user-name']}</a>
                     </div>
                     <div class='task-timebox'>
-                        <a href='timebox.php?id=${task['timebox-id']}'>${task['timebox-end-date']}</a>
+                        <a class='object-ref' href='timebox.php?id=${task['timebox-id']}'>${task['timebox-end-date']}</a>
                     </div>
                 </div> <!-- /task-info -->
                 <div class='task-id'>$task_id</div>
                 <div class='task-summary'>
-                    <a href='task.php?id=$task_id'>${task['task-summary']}</a>
+                    <a class='object-ref' href='task.php?id=$task_id'>${task['task-summary']}</a>
                 </div>";
             if (count($task['subtask-list']) > 0) {
                 show_tasks_list($task['subtask-list']);
@@ -143,7 +143,7 @@ function show_content()
                 <div class='project project-$project_id'>
                     <div class='project-id'>$project_id</div>
                     <div class='project-name'>
-                        <a href='project.php?id=$project_id'>${project['project-name']}</a>
+                        <a class='object-ref' href='project.php?id=$project_id'>${project['project-name']}</a>
                     </div>";
         if (count($project['task-list']) > 0) {
             show_tasks_list($project['task-list']);

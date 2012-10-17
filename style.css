@@ -13,15 +13,31 @@ root {
 
 body,
 html {
-    color: slateblue;
-    background: cornsilk;
+    color: #52514F;
+    background: #5E4834;
     font-family: Verdana, sans-serif;
     font-size: 11pt;
 }
 
 form label {
+    color: #558;
     font-variant: small-caps;
     font-size: 85%;
+}
+
+form label,
+form input {
+    margin: 0.5em 0;
+}
+
+a.object-ref,
+a.object-ref:visited {
+    color:inherit;
+    text-decoration: none;
+}
+
+a.object-ref:hover {
+    text-decoration: underline;
 }
 
 .main-form label {
@@ -33,19 +49,53 @@ form label {
     margin: 1em 2em;
 }
 
+#page {
+    background-color: white;
+    margin-left: 25px;
+    margin-right: 25px;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+}
+
 #header,
 #footer {
-    background: darksalmon;
+    background-color: #E0DBD6;
+    padding: 1em .75em;
+}
+
+#footer {
+    font-size: 85%;
 }
 
 #title {
     font-size: 300%;
 }
 
+#main-menu ul {
+    padding: 0;
+    margin: 1em 0 0 0;
+}
+
 #main-menu li {
     display: inline-block;
     list-style-type: none;
     width: 5em;
+    font-size: 115%;
+    background-color: #CCBFB2;
+    padding: 0.25em 0.5em;
+    text-align: center;
+    border: 1px solid #ACA9A4;
+    border-radius: 0.25em;
+}
+
+#main-menu li a,
+#main-menu li a:visited {
+    color: #8D663F;
+    text-decoration: none;
+}
+
+#main-menu li a:hover {
+    color: #CE6700;
 }
 
 .user-message {
@@ -88,39 +138,9 @@ form label {
 }
 
 .sidebar-block {
-    background: khaki;
-}
-
-#login-page #content {
-    padding-left: 10px;
-    padding-right: 10px;
-}
-
-#login-page #login-controls form {
-    padding: 25px;
-    border: 1px solid #a0a0a0;
-}
-
-#login-page #login-form label {
-    margin-top: 15px;
-}
-
-#login-page #login-form input[type=text],
-#login-page #login-form input[type=password] {
-        font-size: 135%;
-        border: none;
-        border-bottom: 1px solid #a0a0a0;
-        background-color: #f0f0f0;
-        color: #555;
-        padding: 10px 15px;
-        margin-bottom: 10px;
-}
-
-#login-page #login-form input[type=text]:focus,
-#login-page #login-form input[type=password]:focus {
-        background-color: lightblue;
-}
-
-#login-form label {
-    display:block;
+    padding: 1.5em 1em;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #eee;
+    border-radius: 1em;
 }

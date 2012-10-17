@@ -3,7 +3,7 @@
 include_once('common.inc');
 
 function get_stylesheets() {
-    $stylesheets = array('timebox-form.css');
+    $stylesheets = array('timebox.css');
     return $stylesheets;
 }
 
@@ -124,7 +124,7 @@ function show_content()
             
             <div id='project_name'>
                 <label>Project:</label>
-                <a href='project.php?id=${timebox['project_id']}'>${timebox['project_name']}</a>
+                <a class='object-ref' href='project.php?id=${timebox['project_id']}'>${timebox['project_name']}</a>
             </div>
 
             <div id='timebox-name'>
@@ -155,7 +155,7 @@ function show_content()
         foreach ($timebox['task_list'] as $task) {
             echo "
                 <li>
-                    <a href='task.php?id=${task['task_id']}'>${task['task_summary']}</a>";
+                    <a class='object-ref' href='task.php?id=${task['task_id']}'>${task['task_summary']}</a>";
             if ($task['task_status'] == 'closed') {
                 echo " <span class='subtask-closed'>&mdash; Closed</span>";
             }

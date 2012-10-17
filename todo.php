@@ -223,7 +223,7 @@ function show_content()
                 <div class='project-info'>
                 <div class='project-id'>$project_id</div>
                 <div class='project-name'>
-                    <a href='project.php?id=$project_id'>{$project['project-name']}</a>
+                    <a class='object-ref' href='project.php?id=$project_id'>{$project['project-name']}</a>
                 </div>
                 </div> <!-- /project-info -->";
         $tasks = &$project['project-tasks'];
@@ -233,12 +233,16 @@ function show_content()
             echo "        
                     <div id='task-$task_id' class='task-item'>
                         <div class='task-info'>
-                            <div class='task-id'>$task_id</div>
-                            <div class='task-summary'><a href='task.php?id=$task_id'>{$task['task-summary']}</a></div>
                             <div class='task-timebox-id'>{$task['timebox-id']}</div>
                             <div class='task-timebox-name'>{$task['timebox-name']}</div>
-                            <div class='task-timebox-end-date'>{$task['timebox-end-date']}</div>
+                            <div class='task-timebox-end-date'>
+                                <a class='object-ref' href='timebox.php?id=${task['timebox-id']}'>{$task['timebox-end-date']}</a>
+                            </div>
                         </div> <!-- /task-info -->
+                        <div class='task-id'>$task_id</div>
+                        <div class='task-summary'>
+                            <a class='object-ref' href='task.php?id=$task_id'>{$task['task-summary']}</a>
+                        </div>
                     </div> <!-- /task-$task_id -->";
         }
         echo "    

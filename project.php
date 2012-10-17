@@ -360,7 +360,7 @@ function show_content()
         foreach ($project['task_list'] as $task) {
             echo "
                 <li>
-                    <a href='task.php?id=${task['task_id']}'>${task['task_summary']}</a>";
+                    <a class='object-ref' href='task.php?id=${task['task_id']}'>${task['task_summary']}</a>";
             if ($task['task_status'] == 'closed') {
                 echo " <span class='subtask-closed'>&mdash; Closed</span>";
             }
@@ -378,7 +378,7 @@ function show_content()
         foreach ($project['timebox_list'] as $timebox_id => $timebox) {
             echo "
                 <li>
-                    <a href='timebox.php?id=$timebox_id'>${timebox['timebox_name']}</a>
+                    <a class='object-ref' href='timebox.php?id=$timebox_id'>${timebox['timebox_name']}</a>
                     &mdash; ${timebox['timebox_end_date']}
                 </li>";
         }
@@ -392,7 +392,7 @@ function show_content()
     foreach ($project['user_list'] as $user_id => $user_name) {
         echo "
             <li>
-                <a href='user.php?id=$user_id'>$user_name</a>
+                <a class='object-ref' href='user.php?id=$user_id'>$user_name</a>
             </li>";
     }
     echo "

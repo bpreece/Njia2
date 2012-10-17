@@ -21,3 +21,8 @@
 {
     display: none;
 }
+
+.task-info {
+    float:right;
+    width: 10em;
+}
