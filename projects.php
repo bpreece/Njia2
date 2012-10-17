@@ -87,7 +87,7 @@ function query_projects() {
 function show_sidebar() {
     global $projects;
     echo "
-        <h3>Projects Options</h3>";
+        <h3>Options</h3>";
     if (! $projects) {
         return;
     }

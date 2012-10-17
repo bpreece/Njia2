@@ -167,7 +167,7 @@ function query_user($connection, $user_id) {
 function show_sidebar() {
     global $user, $user_list;
     echo "
-        <h3>To-do options</h3>";
+        <h3>Options</h3>";
     if (! $user) {
         return;
     }

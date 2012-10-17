@@ -102,7 +102,7 @@ function query_timebox($timebox_id) {
 function show_sidebar() {
     global $timebox;
     echo "
-        <h3>Timebox Options</h3>";
+        <h3>Options</h3>";
     if (! $timebox) {
         return;
     }
@@ -116,11 +116,10 @@ function show_content()
         return;
     }
     
-    echo "
+    echo "                
+        <h3>Timebox ${timebox['timebox_id']}</h3>
         <form id='timebox-form' class='main-form' method='post'>
             <input type='hidden' name='timebox-id' value='${timebox['timebox_id']}'>
-                
-            <div id='timebox-id'>Timebox ${timebox['timebox_id']}</div>
             
             <div id='project_name'>
                 <label>Project:</label>

@@ -258,7 +258,7 @@ function query_project($project_id) {
 function show_sidebar() {
     global $project;
     echo "
-        <h3>Project Options</h3>";
+        <h3>Options</h3>";
     if (! $project) {
         return;
     }
@@ -327,11 +327,10 @@ function show_content()
     }
     
     echo "
+        <h3>Project ${project['project_id']}</h3>
         <form id='project-form' class='main-form' method='post'>
             <input type='hidden' name='project-id' value='${project['project_id']}'>
                 
-            <div id='project-id'>Project ${project['project_id']}</div>
-
             <div id='project-name'>
                 <label for='project-name'>Name:</label>
                 <input style='width:50%' type='text' name='project-name' value='${project['project_name']}'></input>

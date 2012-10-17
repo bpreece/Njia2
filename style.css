@@ -151,3 +151,7 @@ a.object-ref:hover {
     border-color: #eee;
     border-radius: 1em;
 }
+
+#sidebar h3 {
+    color: #558;
+}

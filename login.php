@@ -71,6 +71,7 @@ if (isset($_POST['login_button'])) {
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="stylesheet" href="layout.css" type="text/css" media="all" />
         <link rel="stylesheet" href="style.css" type="text/css" media="all" />
+        <link rel="stylesheet" href="login.css" type="text/css" media="all" />
         <title><?php echo get_global_title() ?></title>
     </head>
     <body id="login-page">

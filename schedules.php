@@ -79,7 +79,7 @@ function query_schedules() {
 function show_sidebar() {
     global $timeboxes;
     echo "
-        <h3>Schedule Options</h3>";
+        <h3>Options</h3>";
     if (! $timeboxes) {
         return;
     }

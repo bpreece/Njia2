@@ -222,7 +222,7 @@ function query_task($task_id) {
 function show_sidebar() {
     global $task;
     echo "
-        <h3>Task Options</h3>";
+        <h3>Options</h3>";
     if (! $task) {
         return;
     }
@@ -270,11 +270,10 @@ function show_content()
     }
     
     echo "
+        <h3>Task ${task['task_id']}</h3>
         <form id='task-form' class='main-form' method='post'>
             <input type='hidden' name='task-id' value='${task['task_id']}'>
-            <input type='hidden' name='project-id' value='${task['project_id']}'>
-                
-            <div id='task-id'>Task ${task['task_id']}</div>
+            <input type='hidden' name='project-id' value='${task['project_id']}'>                
             
             <div id='project_name'>
                 <label>Project:</label>
