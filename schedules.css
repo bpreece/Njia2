@@ -1,0 +1,39 @@
+
+.timebox-info {
+    float: right;
+    width: 7.5em;
+}
+
+.timebox-end-date {
+    text-align: right;
+}
+
+.timebox-id {
+    display: none;
+}
+
+.project-info {
+    margin-left: 2em;
+}
+
+.project-id {
+    display: none;
+}
+
+.task-list {
+    margin: 0 2em;
+}
+
+.task-id {
+    display: none;
+}
+
+.task-info {
+    float: right;
+    width: 3em;
+    margin-left: -3em;
+}
+
+.task-summary {
+    margin-right: 7.5em;
+}

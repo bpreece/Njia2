@@ -8,19 +8,7 @@ function get_stylesheets() {
 }
 
 function get_page_id() {
-    return 'task-page';
-}
-
-function get_page_class() {
-    global $task;
-    if (! $task) {
-        return "";
-    }
-    $page_class = "task-${task['task_id']}";
-    if ($task['task_status'] == 'closed') {
-        $page_class .= " task-closed";
-    }
-    return $page_class;
+    return 'projects-page';
 }
 
 global $projects, $tasks;

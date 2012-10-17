@@ -109,7 +109,7 @@ if (function_exists('process_query_string')) {
                         <?php if ($page_id == 'timeboxes-page') : ?>
                             <li class='selected'>Schedules</li>
                         <?php else: ?>
-                            <li><a href='schedule.php'>Schedules</a></li>
+                            <li><a href='schedules.php'>Schedules</a></li>
                         <?php endif; ?>
                     </ul>
                 </div> <!-- /main-menu -->
