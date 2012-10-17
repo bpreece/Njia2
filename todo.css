@@ -5,7 +5,6 @@
     display: none;
 }
 
-#todo-projects-list .project-name, 
 #todo-projects-list .task-summary,
 #todo-projects-list .task-timebox-end-date
 {
@@ -25,4 +24,14 @@
 .task-info {
     float:right;
     width: 10em;
+}
+
+
+.project-name {
+    margin: 0.5em 0;
+}
+
+.task-list {
+    padding: 0.3em 2em;
+    border-left: 1px solid #eee;
 }

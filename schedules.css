@@ -1,4 +1,9 @@
 
+
+.timebox-name {
+    margin: 0.5em 0;
+}
+
 .timebox-info {
     float: right;
     width: 7.5em;
@@ -13,15 +18,20 @@
 }
 
 .project-info {
-    margin-left: 2em;
+    margin-left: 1em;
 }
 
 .project-id {
     display: none;
 }
 
+.project-name {
+    font-size: 75%;
+}
+
 .task-list {
-    margin: 0 2em;
+    padding: 0.3em 2em;
+    border-left: 1px solid #eee;
 }
 
 .task-id {

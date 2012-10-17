@@ -208,7 +208,7 @@ function show_content()
     }
     
     echo "
-        <h3>To-do list for <span class='h3-user'>${user['login_name']}</span></h3>";
+        <h3>To-do &mdash; <span class='h3-user'>${user['login_name']}</span></h3>";
     if (! $projects) {
         echo "
             <div>There are no tasks in your current to-do list.</div>";
@@ -228,7 +228,7 @@ function show_content()
                 </div> <!-- /project-info -->";
         $tasks = &$project['project-tasks'];
         echo "    
-                <div class='project-tasks-list'>";
+                <div class='task-list'>";
         foreach ($tasks as $task_id => &$task) {
             echo "        
                     <div id='task-$task_id' class='task-item'>
@@ -246,7 +246,7 @@ function show_content()
                     </div> <!-- /task-$task_id -->";
         }
         echo "    
-                </div> <!-- /project-tasks-list -->
+                </div> <!-- /task-list -->
             </div> <!-- /project-$$project_id -->";
     }
     echo "</div> <!-- /todo-projects-list -->";

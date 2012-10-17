@@ -24,6 +24,10 @@ html {
     
 }
 
+#logo-and-title {
+    float: right;
+}
+
 #logo {
     float: left;
 }
