@@ -110,21 +110,30 @@ function validate_user($connection)
 {
     global $session_id, $session_user;
     
-    $query = "SELECT U.*
+    $user_query = "SELECT U.*
         FROM `session_table` AS S 
         INNER JOIN `user_table` AS U on U.`user_id` = S.`user_id`
-        WHERE S.`session_id` = '$session_id'";
-    $results = mysqli_query($connection, $query);
-    if (! $results) {
+        WHERE S.`session_id` = '$session_id' AND 
+            S.`session_expiration_date` >= CURRENT_TIME()";
+    $user_results = mysqli_query($connection, $user_query);
+    if (! $user_results) {
         set_user_message(mysqli_error($connection), "warning");
         return;
     }
-    $num_rows = mysqli_num_rows($results);
+    $num_rows = mysqli_num_rows($user_results);
     if ($num_rows == 0) {
         return;
     }
+    $session_user = mysqli_fetch_array($user_results);
+    
+    $expire_query = "UPDATE `session_table` 
+        SET `session_expiration_date` = DATE_ADD(CURRENT_TIME(), INTERVAL 1 HOUR)
+        WHERE `session_id` = '$session_id'";
+    $expire_results = mysqli_query($connection, $expire_query);
+    if (! $expire_results) {
+        set_user_message(mysqli_error($connection), "warning");
+    }
 
-    $session_user = mysqli_fetch_array($results);
     return TRUE;
 }
 
@@ -138,7 +147,9 @@ function validate_user($connection)
 function set_session_id($user_id, $connection) 
 {
     $session_id = md5(microtime());
-    $query = "INSERT INTO `session_table` (`session_id`, `user_id`) VALUES ('$session_id', '$user_id')";
+    $query = "INSERT INTO `session_table` 
+        ( `session_id` , `user_id` , `session_expiration_date`  ) 
+        VALUES ( '$session_id' , '$user_id' , DATE_ADD(CURRENT_TIME(), INTERVAL 1 HOUR) )";
     if (! mysqli_query($connection, $query)) {
         set_user_message(mysqli_error($connection), 'failure');
         return;
@@ -151,7 +162,7 @@ function connect_to_database_session()
 {
     $session = get_session_id_cookie();
     if (!$session) {
-        set_user_message("You must log in to access this page", "warning");
+        set_user_message("You must <a href='login.php'>log in</a> to view this page", 'warning');
         return;
     }
 
@@ -162,7 +173,7 @@ function connect_to_database_session()
     }
     
     if (! validate_user($connection)) {
-        set_user_message("You must be logged in to view this page", 'warning');
+        set_user_message("You must <a href='login.php'>log in</a> to view this page", 'warning');
         return;
     }
     
