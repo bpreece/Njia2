@@ -1,37 +1,77 @@
 
-#todo-projects-list .project-id,
-#todo-projects-list .task-id
+.project-id,
+.task-id
 {
     display: none;
 }
 
-#todo-projects-list .task-summary,
-#todo-projects-list .task-timebox-end-date
+.task-item {
+    font-size: 90%;
+    margin: 4px 0 0 4px;
+    border-radius: 4px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #eee;
+    display: inline-block;
+    height: 85px;
+    width: 100px;
+    overflow: hidden;
+    padding: 4px;
+    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.67);
+    background-image: -moz-linear-gradient(top,
+        rgba(255, 255, 255, .75),
+        rgba(255, 255, 255, 0));
+    background-image: -o-linear-gradient(top,
+        rgba(255, 255, 255, .75),
+        rgba(255, 255, 255, 0));
+    background-image: -webkit-gradient(
+        linear, 0% 0%, 0% 100%,
+        from(rgba(255, 255, 255, .75)),
+        to(rgba(255, 255, 255, 0)));
+    background-image: linear-gradient(top,
+        rgba(255, 255, 255, .75),
+        rgba(255, 255, 255, 0));
+    background-repeat: repeat-x;
+    background-color: #d0dfc0;
+    vertical-align: top;
+}
+
+.task-summary,
+.task-timebox-end-date
 {
     display: inline;
 }
 
-#todo-projects-list .project-tasks-list {
-    padding-left: 2.5em;
+.task-timebox-end-date {
+    font-size: 85%;
 }
 
-#todo-projects-list .task-timebox-id,
-#todo-projects-list .task-timebox-name
+.task-list {
+    padding: 0.3em 2em;
+/*    border-left: 1px solid #eee;*/
+}
+
+.task-timebox-id,
+.task-timebox-name
 {
     display: none;
 }
 
 .task-info {
-    float:right;
-    width: 10em;
+    margin-bottom: 4px;
+    text-align: right;
+    background-color: white;
+/*    float:right;
+    width: 10em;*/
 }
 
+.project-item {
+}
 
 .project-name {
-    margin: 0.5em 0;
-}
-
-.task-list {
-    padding: 0.3em 2em;
-    border-left: 1px solid #eee;
+    margin-top: 1em;
+    padding: 2px 4px;
+    border-bottom: 1px solid #eee;
+    border-radius: 2px;
+    background-color: #f8f3ed;
 }
