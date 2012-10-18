@@ -127,7 +127,7 @@ function validate_user($connection)
     $session_user = mysqli_fetch_array($user_results);
     
     $expire_query = "UPDATE `session_table` 
-        SET `session_expiration_date` = DATE_ADD(CURRENT_TIME(), INTERVAL 1 HOUR)
+        SET `session_expiration_date` = DATE_ADD(NOW(), INTERVAL 1 HOUR)
         WHERE `session_id` = '$session_id'";
     $expire_results = mysqli_query($connection, $expire_query);
     if (! $expire_results) {
