@@ -16,7 +16,7 @@
     background-color: #ffebd2;
     display: inline-block;
     height: 6em;
-    width: 6em;
+    width: 6.5em;
     overflow: hidden;
     padding: 0.5em;
     vertical-align: top;
@@ -38,6 +38,14 @@
     -moz-box-shadow: 2px 3px 5px 2px #ccc;
     -webkit-box-shadow: 2px 3px 5px 2px #ccc;
     box-shadow: 1px 3px 7px 0px #ccc;
+}
+
+.task-item input[type="submit"].close-button {
+    height: 12px;
+    width: 12px;
+    margin: 0 0 2px 2px;
+    background: #ecc url('image/close.png') no-repeat top left;
+    border: none;
 }
 
 .task-summary,

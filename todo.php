@@ -29,6 +29,8 @@ function process_form_data() {
         header("Location: todo.php?id=${_POST['user-id']}");
     } else if (isset($_POST['add-project-button'])) {
         process_add_project_form();
+    } else if (isset($_POST['close-task-button'])) {
+        process_close_task();
     }
 }
 
@@ -60,6 +62,23 @@ function process_add_project_form() {
     }
     
     header ("Location: project.php?id=$project_id");
+}
+
+function process_close_task() {
+    $connection = connect_to_database_session();
+    if (!$connection) {
+        return null;
+    }
+
+    $task_id = mysqli_real_escape_string($connection, $_POST['task-id']);
+    $query = "UPDATE `task_table` 
+        SET `task_status` = 'closed' 
+        WHERE `task_id` = '$task_id'";
+    $results = mysqli_query($connection, $query);
+    if (! $results) {
+        set_user_message(mysqli_error($connection), "warning");
+        return null;
+    }    
 }
 
 function query_tasks($user_id) {
@@ -244,6 +263,12 @@ function show_content()
             foreach ($timebox['task-list'] as $task_id => &$task) {
                 echo "        
                     <div id='task-$task_id' class='task-item'>
+                        <div style='float:right'>
+                            <form id='close-task-$task_id' method='post'>
+                                <input type='hidden' name='task-id' value='$task_id'></input>
+                                <input type='submit' class='close-button' name='close-task-button' value=''></input>
+                            </form>
+                        </div>
                         <div class='task-id'>$task_id</div>
                         <div class='task-summary'>
                             <a class='object-ref' href='task.php?id=$task_id'>{$task['task-summary']}</a>
