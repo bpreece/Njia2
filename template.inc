@@ -91,7 +91,7 @@ $user = get_session_user();
         <div id="page">
             <div id="header">
                 <div id="user-name">
-                    <a class='object-ref' href='user?id=<?php echo $user['login_name']; ?>'><?php echo $user['login_name']; ?></a>
+                    <a class='object-ref' href='user.php?id=<?php echo $user['user_id']; ?>'><?php echo $user['login_name']; ?></a>
                     <a href='logout.php'>Log out</a>
                 </div>
                 <div id="logo-and-title">

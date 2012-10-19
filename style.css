@@ -113,33 +113,33 @@ a.object-ref:hover {
 }
 
 .user-message.failure {
-    background-color: #ff8080;
-    color: #600000;
-    border: 1px solid #600000;
+    background-color: #e92500;
+    color: #ffea96;
+    border: 1px solid #000000;
 }
 
 .user-message.warning {
-    background-color: #ffa080;
-    color: #444400;
-    border: 1px solid #444400;
+    background-color: #ffdfbd;
+    color: #a53b00;
+    border: 1px solid #fad1bb;
 }
 
 .user-message.success {
-    background-color: #80ff80;
-    color: #006000;
-    border: 1px solid #006000;
+    background-color: #dffadf;
+    color: #437543;
+    border: 1px solid #cbf1cb;
 }
 
 .user-message.info {
-    background-color: #8080ff;
-    color: #000060;
-    border: 1px solid #000060;
+    background-color: #eee;
+    color: #474770;
+    border: 1px solid #b5b5ca;
 }
 
 .user-message.debug {
-    background-color: #cff;
-    color: #ccc;
-    border: 1px solid #ccc;
+    background-color: #effdfd;
+    color: #85b1ca;
+    border: 1px solid #d3e6f1;
     font-family: "Andale Mono", monospace;
     white-space: pre-wrap;
 }
@@ -148,7 +148,7 @@ a.object-ref:hover {
     padding: 1.5em 1em;
     border-width: 1px;
     border-style: solid;
-    border-color: #eee;
+    border-color: #ddd;
     border-radius: 1em;
 }
 
