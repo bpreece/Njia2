@@ -8,17 +8,17 @@
 
 .task-item {
     font-size: 90%;
-    margin: 4px 0 0 4px;
+    margin: 4px 4px 4px 0;
     border-radius: 4px;
     border-width: 1px;
     border-style: solid;
     border-color: #bababd;
     background-color: #ffebd2;
     display: inline-block;
-    height: 85px;
-    width: 100px;
+    height: 6em;
+    width: 6em;
     overflow: hidden;
-    padding: 4px;
+    padding: 0.5em;
     vertical-align: top;
     text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.67);
     background-image: -moz-linear-gradient(top,

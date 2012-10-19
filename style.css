@@ -25,9 +25,23 @@ form label {
     font-size: 85%;
 }
 
-form label,
-form input {
+.main-form label,
+.main-form input[type="password"],
+.main-form input[type="text"] {
     margin: 0.5em 0;
+}
+
+.main-form input[type="submit"] {
+    
+}
+
+.main-form label {
+    display: inline-block;
+    width: 7.5em;
+}
+
+.main-form #form-controls {
+    margin: 1em 2em 1em 7.5em;
 }
 
 a.object-ref,
@@ -38,15 +52,6 @@ a.object-ref:visited {
 
 a.object-ref:hover {
     text-decoration: underline;
-}
-
-.main-form label {
-    display: inline-block;
-    width: 7.5em;
-}
-
-.main-form #form-controls {
-    margin: 1em 2em;
 }
 
 #page {

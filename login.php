@@ -22,7 +22,9 @@ function process_login() {
 
     $query = "SELECT `user_id`, `login_name`
                 FROM `user_table` 
-                WHERE `login_name` = '$login_name' AND `password` = MD5(CONCAT(`password_salt`, '$password'))";
+                WHERE `login_name` = '$login_name' AND 
+                    `password` = MD5(CONCAT(`password_salt`, '$password')) AND 
+                    `account_closed_date` IS NULL";
     $results = mysqli_query($connection, $query);
     if (!$results) {
         set_user_message(mysqli_error($connection), "failure");

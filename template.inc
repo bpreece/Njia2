@@ -92,7 +92,7 @@ $user = get_session_user();
             <div id="header">
                 <div id="user-name">
                     <a class='object-ref' href='user.php?id=<?php echo $user['user_id']; ?>'><?php echo $user['login_name']; ?></a>
-                    <a href='logout.php'>Log out</a>
+                    <a style='font-variant: small-caps; font-size: 85%' href='logout.php'>Log out</a>
                 </div>
                 <div id="logo-and-title">
                     <div id="logo"><img src="<?php get_logo_image(); ?>" /></div>
@@ -116,6 +116,13 @@ $user = get_session_user();
                             <li class='selected'>Schedules</li>
                         <?php else: ?>
                             <li><a href='schedules.php'>Schedules</a></li>
+                        <?php endif; ?>
+                        <?php if(is_admin_session()) : ?>
+                            <?php if ($page_id == 'users-page') : ?>
+                                <li class='selected'>Users</li>
+                            <?php else: ?>
+                                <li><a href='users.php'>Users</a></li>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </ul>
                 </div> <!-- /main-menu -->

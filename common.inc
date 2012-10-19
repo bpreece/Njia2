@@ -89,6 +89,11 @@ function get_session_user_id() {
     return $session_user['user_id'];
 }
 
+function is_admin_session() {
+    global $session_user;
+    return $session_user['user_permissions'] == 'admin';
+}
+
 function get_session_id_cookie() 
 {
     global $session_id, $session_user_id;

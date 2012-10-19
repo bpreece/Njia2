@@ -67,7 +67,7 @@ function process_task_form() {
         return null;
     }
 
-    header("Location:task.php?id=${_POST['task-id']}");
+    set_user_message("The changes have been applied", 'success');
 }
 
 function process_add_subtask_form() {

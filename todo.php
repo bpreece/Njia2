@@ -214,7 +214,7 @@ function show_content()
     }
     
     echo "
-        <h3>To-do &mdash; <span class='h3-user'>${user['login_name']}</span></h3>";
+        <h3>To-do &mdash; <a class='object-ref' href='user.php?id=${user['user_id']}'>${user['login_name']}</a></h3>";
     if (! $projects) {
         echo "
             <div>There are no tasks in your current to-do list.</div>";
