@@ -114,7 +114,7 @@ function validate_user($connection)
         FROM `session_table` AS S 
         INNER JOIN `user_table` AS U on U.`user_id` = S.`user_id`
         WHERE S.`session_id` = '$session_id' AND 
-            S.`session_expiration_date` >= CURRENT_TIME()";
+            S.`session_expiration_date` >= NOW()";
     $user_results = mysqli_query($connection, $user_query);
     if (! $user_results) {
         set_user_message(mysqli_error($connection), "warning");
@@ -149,7 +149,7 @@ function set_session_id($user_id, $connection)
     $session_id = md5(microtime());
     $query = "INSERT INTO `session_table` 
         ( `session_id` , `user_id` , `session_expiration_date`  ) 
-        VALUES ( '$session_id' , '$user_id' , DATE_ADD(CURRENT_TIME(), INTERVAL 1 HOUR) )";
+        VALUES ( '$session_id' , '$user_id' , DATE_ADD(NOW(), INTERVAL 1 HOUR) )";
     if (! mysqli_query($connection, $query)) {
         set_user_message(mysqli_error($connection), 'failure');
         return;

@@ -1,5 +1,6 @@
 
 .project-id,
+.timebox-id,
 .task-id
 {
     display: none;
@@ -11,12 +12,14 @@
     border-radius: 4px;
     border-width: 1px;
     border-style: solid;
-    border-color: #eee;
+    border-color: #bababd;
+    background-color: #ffebd2;
     display: inline-block;
     height: 85px;
     width: 100px;
     overflow: hidden;
     padding: 4px;
+    vertical-align: top;
     text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.67);
     background-image: -moz-linear-gradient(top,
         rgba(255, 255, 255, .75),
@@ -32,8 +35,9 @@
         rgba(255, 255, 255, .75),
         rgba(255, 255, 255, 0));
     background-repeat: repeat-x;
-    background-color: #d0dfc0;
-    vertical-align: top;
+    -moz-box-shadow: 2px 3px 5px 2px #ccc;
+    -webkit-box-shadow: 2px 3px 5px 2px #ccc;
+    box-shadow: 1px 3px 7px 0px #ccc;
 }
 
 .task-summary,
@@ -47,14 +51,8 @@
 }
 
 .task-list {
-    padding: 0.3em 2em;
-/*    border-left: 1px solid #eee;*/
-}
-
-.task-timebox-id,
-.task-timebox-name
-{
-    display: none;
+    padding: 0.3em 0 0 1.25em;
+    border-left: 1px solid #ccc;
 }
 
 .task-info {
@@ -65,13 +63,44 @@
     width: 10em;*/
 }
 
+.timebox-info {
+    padding-left: 1.25em;
+    font-size: 85%;
+    color: #777;
+}
+
+.timebox-end-date {
+    float:right;
+    width: 7.5em;
+}
+
+#project-list {
+}
+
 .project-item {
+    margin-top: 1.5em;
+}
+
+.project-info {
+    padding: 2px 4px;
+    border-top-left-radius: 4px;
+    border: 1px solid #ccc;    
+    background-color: #CCBFB2;
+    background-image: -moz-linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));
+    background-image: -o-linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));
+    background-image: -webkit-gradient(
+        linear, 0% 0%, 0% 100%,
+        from(rgba(255, 255, 255, 0)),
+        to(rgba(255, 255, 255, .85)));
+    background-image: linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));
 }
 
 .project-name {
-    margin-top: 1em;
-    padding: 2px 4px;
-    border-bottom: 1px solid #eee;
-    border-radius: 2px;
-    background-color: #f8f3ed;
+    font-size: 115%;
 }

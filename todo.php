@@ -90,7 +90,7 @@ function query_tasks($user_id) {
                 WHERE A.`user_id` = '$user_id' AND
                     T.`user_id` = '$user_id' AND
                     T.`task_status` <> 'closed' AND X.`timebox_end_date` >= CURRENT_DATE()
-                ORDER BY T.`task_id`";
+                ORDER BY X.`timebox_end_date` , P.`project_id` , T.`task_id`";
 
     $task_results = mysqli_query($connection, $task_query);
     if ($task_results == false) {
@@ -105,24 +105,30 @@ function query_tasks($user_id) {
 
             $project_id = $result['project_id'];
             if (! array_key_exists($project_id, $projects)) {
-                $project = array();
-                $project['project-id'] = $project_id;
-                $project['project-name'] = $result['project_name'];
-                $project['project-tasks'] = array();
-                $projects[$project_id] = $project;
+                $projects[$project_id] = array(
+                    'project-id' => $project_id,
+                    'project-name' => $result['project_name'],
+                    'timebox-list' => array(),
+                );
             }
-            $tasks = $projects[$project_id]['project-tasks'];
+            
+            $timebox_id = $result['timebox_id'];
+            if (! array_key_exists($timebox_id, $projects[$project_id]['timebox-list'])) {
+                $projects[$project_id]['timebox-list'][$timebox_id] = array(
+                    'timebox-id' => $result['timebox_id'],
+                    'timebox-name' => $result['timebox_name'],
+                    'timebox-end-date' => $result['timebox_end_date'],
+                    'task-list' => array(),
+                );
+            }
 
             $task_id = $result['task_id'];
-            if (! array_key_exists($task_id, $tasks)) {
-                $task = array();
-                $task['task-id'] = $task_id;
-                $task['parent-task-id'] = $result['parent_task_id'];
-                $task['task-summary'] = $result['task_summary'];
-                $task['timebox-id'] = $result['timebox_id'];
-                $task['timebox-name'] = $result['timebox_name'];
-                $task['timebox-end-date'] = $result['timebox_end_date'];
-                $projects[$project_id]['project-tasks'][$task_id] = $task;
+            if (! array_key_exists($task_id, $projects[$project_id]['timebox-list'][$timebox_id]['task-list'])) {
+                $projects[$project_id]['timebox-list'][$timebox_id]['task-list'][$task_id] = array(
+                    'task-id' => $task_id,
+                    'parent-task-id' => $result['parent_task_id'],
+                    'task-summary' => $result['task_summary'],
+                );
             }
         }
     }
@@ -216,40 +222,40 @@ function show_content()
     }
 
     echo "
-        <div id=todo-projects-list>";
+        <div id=project-list>";
     foreach ($projects as $project_id => &$project) {
-        echo "
+        foreach($project['timebox-list'] as $timebox_id => &$timebox) {
+            echo "
             <div id='project-$project_id' class='project-item'>
                 <div class='project-info'>
-                <div class='project-id'>$project_id</div>
-                <div class='project-name'>
-                    <a class='object-ref' href='project.php?id=$project_id'>{$project['project-name']}</a>
-                </div>
-                </div> <!-- /project-info -->";
-        $tasks = &$project['project-tasks'];
-        echo "    
+                    <div class='project-id'>$project_id</div>
+                    <div class='project-name'>
+                        <a class='object-ref' href='project.php?id=$project_id'>{$project['project-name']}</a>
+                    </div>
+                    <div class='timebox-info'>
+                        <div class='timebox-id'>$timebox_id</div>
+                        <div class='timebox-end-date'>${timebox['timebox-end-date']}</div>
+                        <div class='timebox-name'>
+                            <a class='object-ref' href='timebox.php?id=$timebox_id'>{$timebox['timebox-name']}</a>
+                        </div> <!-- /timebox-name -->
+                    </div> <!-- /timebox-info -->
+                </div> <!-- /project-info -->
                 <div class='task-list'>";
-        foreach ($tasks as $task_id => &$task) {
-            echo "        
+            foreach ($timebox['task-list'] as $task_id => &$task) {
+                echo "        
                     <div id='task-$task_id' class='task-item'>
-                        <div class='task-info'>
-                            <div class='task-timebox-id'>{$task['timebox-id']}</div>
-                            <div class='task-timebox-name'>{$task['timebox-name']}</div>
-                            <div class='task-timebox-end-date'>
-                                <a class='object-ref' href='timebox.php?id=${task['timebox-id']}'>{$task['timebox-end-date']}</a>
-                            </div>
-                        </div> <!-- /task-info -->
                         <div class='task-id'>$task_id</div>
                         <div class='task-summary'>
                             <a class='object-ref' href='task.php?id=$task_id'>{$task['task-summary']}</a>
                         </div>
                     </div> <!-- /task-$task_id -->";
-        }
-        echo "    
+            }
+            echo "    
                 </div> <!-- /task-list -->
             </div> <!-- /project-$$project_id -->";
+        }
     }
-    echo "</div> <!-- /todo-projects-list -->";
+    echo "</div> <!-- /project-list -->";
 }
 
 include_once ('template.inc');
