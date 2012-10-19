@@ -56,6 +56,18 @@ if (function_exists('process_form_data')) {
 if (function_exists('process_query_string')) {
     process_query_string();
 }
+
+$page_id = '';
+if (function_exists('get_page_id')) {
+    $page_id = "id='" . get_page_id() . "'";
+}
+
+$page_class = '';
+if (function_exists('get_page_class')) {
+    $page_class = "class='" . get_page_class() . "'";
+}
+
+$user = get_session_user();
     
 ?>
 
@@ -75,19 +87,13 @@ if (function_exists('process_query_string')) {
         <title><?php echo get_global_title(); ?></title>
     </head>
     
-    <?php
-        $page_id = '';
-        if (function_exists('get_page_id')) {
-            $page_id = "id='" . get_page_id() . "'";
-        }
-        $page_class = '';
-        if (function_exists('get_page_class')) {
-            $page_class = "class='" . get_page_class() . "'";
-        }
-    ?>
     <body <?php echo $page_id?> <?php echo $page_class ?> >
         <div id="page">
             <div id="header">
+                <div id="user-name">
+                    <a class='object-ref' href='user?id=<?php echo $user['login_name']; ?>'><?php echo $user['login_name']; ?></a>
+                    <a href='logout.php'>Log out</a>
+                </div>
                 <div id="logo-and-title">
                     <div id="logo"><img src="<?php get_logo_image(); ?>" /></div>
                     <div id="title"><?php echo get_global_title(); ?></div>
