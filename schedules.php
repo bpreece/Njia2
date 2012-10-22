@@ -102,33 +102,37 @@ function show_content() {
     foreach ($timeboxes as $timebox_id => $timebox) {
         $project_id = $timebox['project-id'];
         echo "
-                <div class='timebox timebox-$timebox_id'>
+                <div id='timebox-$timebox_id' class='timebox'>
                     <div class='timebox-info'>
-                        <div class='timebox-end-date'>${timebox['timebox-end-date']}</div>
-                    </div>
-                    <div class='timebox-id'>$timebox_id</div>
-                    <div class='timebox-name'>
-                        <a class='object-ref' href='timebox.php?id=$timebox_id'>${timebox['timebox-name']}</a>
-                    </div>
-                    <div class='project-info'>
-                        <div class='project-id'>$project_id</div>
-                        <div class='project-name'>
-                            <a class='object-ref' href='project.php?id=$project_id'>${timebox['project-name']}</a>
+                        <div class='timebox-details'>
+                            <div class='timebox-end-date'>${timebox['timebox-end-date']}</div>
                         </div>
-                    </div> <!-- /project-info -->
+                        <div class='timebox-id'>$timebox_id</div>
+                        <div class='timebox-name'>
+                            <a class='object-ref' href='timebox.php?id=$timebox_id'>${timebox['timebox-name']}</a>
+                        </div>
+                        <div class='project-info'>
+                            <div class='project-id'>$project_id</div>
+                            <div class='project-name'>
+                                <a class='object-ref' href='project.php?id=$project_id'>${timebox['project-name']}</a>
+                            </div>
+                        </div> <!-- /project-info -->
+                    </div> <!-- /timebox-info -->
                     <div class='task-list'>";
         foreach ($timebox['task-list'] as $task_id => $task) {
             echo "
-                        <div class='task task-$task_id'>
+                        <div id='task-$task_id' class='task'>
                             <div class='task-info'>
-                                 <div class='task-user'>
-                                     <a class='object-ref' href='user.php?id=${task['user-id']}'>${task['user-name']}</a>
+                                <div class='task-details'>
+                                     <div class='task-user'>
+                                         <a class='object-ref' href='user.php?id=${task['user-id']}'>${task['user-name']}</a>
+                                     </div>
+                                 </div> <!-- /task-details -->
+                                 <div class='task-id'>$task_id</div>
+                                 <div class='task-summary'>
+                                     <a class='object-ref' href='task.php?id=$task_id'>${task['task-summary']}</a>
                                  </div>
                              </div> <!-- /task-info -->
-                             <div class='task-id'>$task_id</div>
-                             <div class='task-summary'>
-                                 <a class='object-ref' href='task.php?id=$task_id'>${task['task-summary']}</a>
-                             </div>
                         </div> <!-- /task-$task_id -->";
         }
         echo "
