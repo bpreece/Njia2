@@ -59,12 +59,12 @@ if (function_exists('process_query_string')) {
 
 $page_id = '';
 if (function_exists('get_page_id')) {
-    $page_id = "id='" . get_page_id() . "'";
+    $page_id = get_page_id();
 }
 
 $page_class = '';
 if (function_exists('get_page_class')) {
-    $page_class = "class='" . get_page_class() . "'";
+    $page_class = get_page_class();
 }
 
 $user = get_session_user();
@@ -87,46 +87,43 @@ $user = get_session_user();
         <title><?php echo get_global_title(); ?></title>
     </head>
     
-    <body <?php echo $page_id?> <?php echo $page_class ?> >
+    <body <?php if (isset($page_id)) echo "id='$page_id'"; ?> <?php echo "class='$page_class'"; ?> >
+        <div id="logo-and-title">
+            <div id="logo"><img src="<?php echo get_logo_image(); ?>" /></div>
+            <!--
+            <div id="title"><?php echo get_global_title(); ?></div>
+            -->
+        </div> <!-- /logo-and-title -->
         <div id="page">
             <div id="header">
-                <div id="user-name">
-                    <a class='object-ref' href='user.php?id=<?php echo $user['user_id']; ?>'><?php echo $user['login_name']; ?></a>
-                    <a style='font-variant: small-caps; font-size: 85%' href='logout.php'>Log out</a>
-                </div>
-                <div id="logo-and-title">
-                    <div id="logo"><img src="<?php get_logo_image(); ?>" /></div>
-                    <div id="title"><?php echo get_global_title(); ?></div>
-                </div> <!-- /logo-and-title -->
                 
-                <?php if (function_exists('show_main_menu')): ?>
                 <div id="main-menu">
                     <ul class='main-menu'>
                         <?php if ($page_id == 'todo-page') : ?>
-                            <li class='selected'>To-do</li>
+                            <li class='selected'>TO-DO</li>
                         <?php else: ?>
-                            <li><a href='todo.php'>To-do</a></li>
+                            <li><a href='todo.php'>TO-DO</a></li>
                         <?php endif; ?>
                         <?php if ($page_id == 'projects-page') : ?>
-                            <li class='selected'>Projects</li>
+                            <li class='selected'>PROJECTS</li>
                         <?php else: ?>
-                            <li><a href='projects.php'>Projects</a></li>
+                            <li><a href='projects.php'>PROJECTS</a></li>
                         <?php endif; ?>
-                        <?php if ($page_id == 'timeboxes-page') : ?>
-                            <li class='selected'>Schedules</li>
+                        <?php if ($page_id == 'schedules-page') : ?>
+                            <li class='selected'>SCHEDULES</li>
                         <?php else: ?>
-                            <li><a href='schedules.php'>Schedules</a></li>
+                            <li><a href='schedules.php'>SCHEDULES</a></li>
                         <?php endif; ?>
                         <?php if(is_admin_session()) : ?>
                             <?php if ($page_id == 'users-page') : ?>
-                                <li class='selected'>Users</li>
+                                <li class='selected'>USERS</li>
                             <?php else: ?>
-                                <li><a href='users.php'>Users</a></li>
+                                <li><a href='users.php'>USERS</a></li>
                             <?php endif; ?>
                         <?php endif; ?>
+                            <li><a style='font-variant: small-caps; font-size: 85%' href='logout.php'>Log out</a></li>
                     </ul>
                 </div> <!-- /main-menu -->
-                <?php endif; ?>
             </div> <!-- /header -->
             
             <div id="content">

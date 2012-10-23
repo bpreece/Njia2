@@ -14,7 +14,6 @@ root {
 body,
 html {
     color: #52514F;
-    background: #5E4834;
     font-family: Tahoma, sans-serif;
     font-size: 10pt;
 }
@@ -56,25 +55,43 @@ a.object-ref:hover {
 
 #page {
     background-color: white;
-    margin: 15px;
     border-radius: 0.75em;
 }
 
-#header,
+#header {
+    padding: 1.25em .75em 0 .75em
+}
+
 #footer {
     background-color: #E0DBD6;
     padding: 1em .75em;
 }
 
 #header {
-    border-top-left-radius: 0.75em;
+/*    border-top-left-radius: 0.75em;
     border-top-right-radius: 0.75em;
     border-bottom: 1px solid #C2B4A7;
+    background-image: -moz-linear-gradient(top,
+        rgba(255, 255, 255, .85),
+        rgba(255, 255, 255, 0) 25%,
+        rgba(0, 0, 0, 0) 85%,
+        rgba(0, 0, 0, 0.10));
+    background-image: -o-linear-gradient(top,
+        rgba(255, 255, 255, .75),
+        rgba(255, 255, 255, 0));
+    background-image: -webkit-gradient(
+        linear, 0% 0%, 0% 100%,
+        from(rgba(255, 255, 255, .85)),
+        color-stop(25%, rgba(255, 255, 255, 0)),
+        color-stop(85%, rgba(0, 0, 0, 0)),
+        to(rgba(0, 0, 0, 0.10)));
+    background-image: linear-gradient(top,
+        rgba(255, 255, 255, .75),
+        rgba(255, 255, 255, 0));*/
 }
 
 #footer {
     border-bottom-left-radius: 0.75em;
-    border-bottom-right-radius: 0.75em;
     border-top: 1px solid #C2B4A7;
     font-size: 75%;
 }
@@ -85,19 +102,16 @@ a.object-ref:hover {
 
 #main-menu ul {
     padding: 0;
-    margin: 1em 0 0 0;
+    margin: 0;
 }
 
 #main-menu li {
     display: inline-block;
     list-style-type: none;
-    width: 5em;
     font-size: 115%;
-    background-color: #CCBFB2;
-    padding: 0.25em 0.5em;
+    font-weight: bold;
+    padding: 0.25em 2.5em;
     text-align: center;
-    border: 1px solid #ACA9A4;
-    border-radius: 0.25em;
 }
 
 #main-menu li a,
@@ -108,6 +122,11 @@ a.object-ref:hover {
 
 #main-menu li a:hover {
     color: #CE6700;
+}
+
+#content {
+    background-color: #f8f8f4;
+    border-top-left-radius: 1em;
 }
 
 .user-message {
@@ -153,10 +172,10 @@ a.object-ref:hover {
     padding: 1.5em 1em;
     border-width: 1px;
     border-style: solid;
-    border-color: #ddd;
+    border-color: #eee;
     border-radius: 1em;
+    background-color: #fcfcfc;
 }
 
 #sidebar h3 {
-    color: #855;
 }

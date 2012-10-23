@@ -29,8 +29,8 @@ function show_user_message($message, $message_type)  {
 }
 
 global $global_title, $logo_image;
-$global_title = "Njia 2";
-$logo_image = "image/logo.png";
+$global_title = "";
+$logo_image = "image/NJIA-v.png";
 
 function get_global_title() {
     global $global_title;

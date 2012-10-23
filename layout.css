@@ -17,7 +17,7 @@ html {
 }
 
 #page {
-
+    margin-left: 4.5em;
 }
 
 #header {
@@ -25,27 +25,31 @@ html {
 }
 
 #logo-and-title {
-    float: right;
+    float: left;
+    margin-right: -3em;
 }
 
 #logo {
     float: left;
 }
 
+#main-menu {
+    text-align: center;
+}
+
 #content {
-    clear: both;
 }
 
 #main {
     padding: 10px;
-    margin-left: 225px;
+    margin-left: 200px;
 }
 
 #sidebar {
     float: left;
-    width: 200px;
-    margin-right: -210px;
+    width: 180px;
     padding: 10px;
+    margin-right: -190px;  /* margin = -(width + padding) */
 }
 
 .sidebar-block {
