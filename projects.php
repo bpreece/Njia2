@@ -100,9 +100,15 @@ function show_tasks_list($tasks_list) {
         <div class='task-list'>";
         foreach ($tasks_list as $task_id) {
             $task = $tasks[$task_id];
+            $task_info_css = '';
+            if (count($task['subtask-list']) > 0) {
+                $task_info_css .= " parent-task";
+            } else if (! isset($task['timebox-id']) || $task['timebox-id'] == 0) {
+                $task_info_css .= " unscheduled-task";
+            }
             echo "
             <div id='task-$task_id' class='task'>
-                <div class='task-info'>
+                <div class='task-info $task_info_css'>
                     <div class='task-details'>
                         <div class='task-user'>
                             <a class='object-ref' href='user.php?id=${task['user-id']}'>${task['user-name']}</a>

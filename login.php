@@ -77,6 +77,12 @@ if (isset($_POST['login_button'])) {
         <title><?php echo get_global_title() ?></title>
     </head>
     <body id="login-page">
+        <div id="logo-and-title">
+            <div id="logo"><img src="<?php echo get_logo_image(); ?>" /></div>
+            <!--
+            <div id="title"><?php echo get_global_title(); ?></div>
+            -->
+        </div> <!-- /logo-and-title -->
         <div id="page">
             <div id="header">
                 <div id="logo-and-title">

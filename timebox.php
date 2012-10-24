@@ -133,7 +133,7 @@ function show_content()
             
             <div id='timebox-discussion'>
                 <label for='timebox-discussion'>Discussion:</label>
-                <textarea name='timebox-discussion' rows='4' style='width:50%'>${timebox['timebox_discussion']}</textarea>
+                <textarea name='timebox-discussion' rows='10' style='width:50%'>${timebox['timebox_discussion']}</textarea>
             </div>
 
             <div id='timebox-end-date'>
@@ -149,20 +149,29 @@ function show_content()
                 
     if (array_key_exists('task_list', $timebox)) {
         echo "
-            Tasks:
-            <ul>";
-        foreach ($timebox['task_list'] as $task) {
+            <h4>Tasks</h4>
+            <div class='task-list'>";
+        foreach ($timebox['task_list'] as $task_id => $task) {
             echo "
-                <li>
-                    <a class='object-ref' href='task.php?id=${task['task_id']}'>${task['task_summary']}</a>";
-            if ($task['task_status'] == 'closed') {
-                echo " <span class='subtask-closed'>&mdash; Closed</span>";
+                <div id='task-$task_id' class='task'>
+                    <div class='task-info task-${task['task_status']}'>
+                        <div class='task-details'>";
+            if ($task['task_status'] != 'open') {
+                echo "
+                            ${task['task_status']}";
             }
             echo "
-                </li>";
+                        </div> <!-- /task-details -->
+                        <div class='task-id'>$task_id</div>
+                        <div class='task-summary'>
+                            <a class='object-ref' href='task.php?id=$task_id'>${task['task_summary']}</a>
+                        </div> <!-- /task-summary -->";
+            echo "
+                    </div> <!-- /task-info -->
+                </div> <!-- /task-$task_id -->";
         }
         echo "
-            </ul>";
+            </div> <!-- /task-list -->";
     }
 }
 

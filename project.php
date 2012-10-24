@@ -3,7 +3,7 @@
 include_once('common.inc');
 
 function get_stylesheets() {
-    $stylesheets = array('project-form.css');
+    $stylesheets = array('project.css');
     return $stylesheets;
 }
 
@@ -212,7 +212,7 @@ function query_project($project_id) {
     }
     $project_id = $project['project_id'];
     
-    $task_query = "SELECT T.`task_id` , T.`task_summary` , `task_status`
+    $task_query = "SELECT T.`task_id` , T.`task_summary` , `task_status` ,  `timebox_id` 
                  FROM `task_table` AS T
                  WHERE T.`project_id` = '$project_id' AND T.`parent_task_id` is null
                  ORDER BY T.`task_id`";
@@ -340,7 +340,7 @@ function show_content()
             
             <div id='project-discussion'>
                 <label for='project-discussion'>Discussion:</label>
-                <textarea name='project-discussion' rows='4' style='width:50%'>${project['project_discussion']}</textarea>
+                <textarea name='project-discussion' rows='10' style='width:50%'>${project['project_discussion']}</textarea>
             </div>
                 
             <div id='project-owner'>
@@ -361,48 +361,67 @@ function show_content()
 
     if (array_key_exists('task_list', $project)) {
         echo "
-            Tasks:
-            <ul>";
-        foreach ($project['task_list'] as $task) {
+            <h4>Tasks</h4>
+            <div class='task-list'>";
+        foreach ($project['task_list'] as $task_id => $task) {
             echo "
-                <li>
-                    <a class='object-ref' href='task.php?id=${task['task_id']}'>${task['task_summary']}</a>";
-            if ($task['task_status'] == 'closed') {
-                echo " <span class='subtask-closed'>&mdash; Closed</span>";
+                <div id='task-$task_id' class='task'>
+                    <div class='task-info task-${task['task_status']}'>
+                        <div class='task-details'>";
+            if ($task['task_status'] != 'open') {
+                echo "
+                            ${task['task_status']}";
             }
             echo "
-                </li>";
+                        </div> <!-- /task-details -->
+                        <div class='task-id'>$task_id</div>
+                        <div class='task-summary'>
+                            <a class='object-ref' href='task.php?id=$task_id'>${task['task_summary']}</a>
+                        </div> <!-- /task-summary -->";
+            echo "
+                    </div> <!-- /task-info -->
+                </div> <!-- /task-$task_id -->";
         }
         echo "
-            </ul>";
+            </div> <!-- /task-list -->";
     }
 
     if (array_key_exists('timebox_list', $project)) {
         echo "
-            Timeboxes:
-            <ul>";
+            <h4>Timeboxes</h4>
+            <div class='timebox-list'>";
         foreach ($project['timebox_list'] as $timebox_id => $timebox) {
             echo "
-                <li>
-                    <a class='object-ref' href='timebox.php?id=$timebox_id'>${timebox['timebox_name']}</a>
-                    &mdash; ${timebox['timebox_end_date']}
-                </li>";
+                <div id='timebox-$timebox_id' class='timebox'>
+                    <div class='timebox-details'>${timebox['timebox_end_date']}</div>
+                    <div class='timebox-info'>
+                        <div class='timebox-id'>$timebox_id</div>
+                        <div class='timebox-name'>
+                            <a class='object-ref' href='timebox.php?id=$timebox_id'>${timebox['timebox_name']}</a>
+                        </div> <!-- /timebox-name -->
+                    </div> <!-- /timebox-info -->
+                </div> <!-- /timebox-$timebox_id -->";
         }
         echo "
-            </ul>";
+            </div> <!-- /timebox-list -->";
     }
     
     echo "
-        People:
-        <ul>";
+        <h4>People</h4>
+        <div class='user-list'>";
     foreach ($project['user_list'] as $user_id => $user_name) {
         echo "
-            <li>
-                <a class='object-ref' href='user.php?id=$user_id'>$user_name</a>
-            </li>";
+            <div id='user-$user_id' class='user'>
+                <div class='user-info'>
+                    <div class='user-id'>$user_id</div>
+                    <div class='user-name'>
+                        <a class='object-ref' href='user.php?id=$user_id'>$user_name</a>
+                    </div> <!-- /user-name -->
+                </div> <!-- /user-info -->
+            </div> <!-- /user-$user_id -->";
     }
     echo "
-        </ul>
+        </div> <!-- /user-list -->
         ";
 }
 

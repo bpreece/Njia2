@@ -1,29 +1,20 @@
 
-.project-info,
-.task-info {
+.project-info {
     padding: 2px 4px;
-    background-image: -moz-linear-gradient(top,
+    background-color: #fcfcff;
+/*    background-image: -moz-linear-gradient(top,
         rgba(255, 255, 255, 0),
         rgba(255, 255, 255, .85));
     background-image: -o-linear-gradient(top,
         rgba(255, 255, 255, 0),
-        rgba(255, 255, 255, .85));
+        rgba(255, 255, 255, .85));*/
     background-image: -webkit-gradient(
         linear, 0% 0%, 0% 100%,
-        from(rgba(255, 255, 255, 0)),
-        to(rgba(255, 255, 255, .85)));
-    background-image: linear-gradient(top,
+        from(rgba(245, 220, 162, 1.00)),
+        to(rgba(245, 220, 162, 0.00)));
+/*    background-image: linear-gradient(top,
         rgba(255, 255, 255, 0),
-        rgba(255, 255, 255, .85));
-}
-
-.project-info {
-    background-color: #f3ede5;
-}
-
-.task-info {
-    background-color: #EFF2FC;
-    font-size: 85%;
+        rgba(255, 255, 255, .85));*/
 }
 
 .project-id,
@@ -50,6 +41,33 @@
 
 .task {
     margin: 0.5em 0;;
+}
+
+.task-info {
+    padding: 2px 4px;
+    background-color: #e8f0f8;
+    font-size: 85%;
+}
+
+.task-info.parent-task {
+    background-color: #fcfcff;
+/*    background-image: -moz-linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));
+    background-image: -o-linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));*/
+    background-image: -webkit-gradient(
+        linear, 0% 0%, 0% 100%,
+        from(rgba(232, 240, 248, 1.00)),
+        to(rgba(232, 240, 248, 0.00)));
+/*    background-image: linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));*/
+}
+
+.task-info.unscheduled-task {
+    background-color: #f8e8f8;
 }
 
 .task-details {

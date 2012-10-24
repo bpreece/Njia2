@@ -296,7 +296,7 @@ function show_content()
             
             <div id='task-discussion'>
                 <label for='task-discussion'>Discussion:</label>
-                <textarea name='task-discussion' rows='4' style='width:50%'>${task['task_discussion']}</textarea>
+                <textarea name='task-discussion' rows='10' style='width:50%'>${task['task_discussion']}</textarea>
             </div>";
 
     if (! array_key_exists('subtask_list', $task)) {

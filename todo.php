@@ -219,7 +219,7 @@ function show_sidebar() {
                     <label for='project-name'>Project name:</label>
                     <input style='width:100%' type='text' name='project-name'></input>
                 </div>
-                <input type='submit' name='add-project-button' value='Create new project'></input>
+                <input type='submit' name='add-project-button' value='Create a new project'></input>
             </form>
         </div>";
 }
@@ -245,7 +245,7 @@ function show_content()
     foreach ($projects as $project_id => &$project) {
         foreach($project['timebox-list'] as $timebox_id => &$timebox) {
             echo "
-            <div id='project-$project_id' class='project-item'>
+            <div id='project-$project_id' class='project'>
                 <div class='project-info'>
                     <div class='project-id'>$project_id</div>
                     <div class='project-name'>
@@ -253,7 +253,9 @@ function show_content()
                     </div>
                     <div class='timebox-info'>
                         <div class='timebox-id'>$timebox_id</div>
-                        <div class='timebox-end-date'>${timebox['timebox-end-date']}</div>
+                        <div class='timebox-end-date'>
+                            <a class='object-ref' href='timebox.php?id=$timebox_id'>${timebox['timebox-end-date']}</a>
+                        </div>
                         <div class='timebox-name'>
                             <a class='object-ref' href='timebox.php?id=$timebox_id'>{$timebox['timebox-name']}</a>
                         </div> <!-- /timebox-name -->
@@ -262,11 +264,11 @@ function show_content()
                 <div class='task-list'>";
             foreach ($timebox['task-list'] as $task_id => &$task) {
                 echo "        
-                    <div id='task-$task_id' class='task-item'>
+                    <div id='task-$task_id' class='task'>
                         <div style='float:right'>
                             <form id='close-task-$task_id' method='post'>
                                 <input type='hidden' name='task-id' value='$task_id'></input>
-                                <input type='submit' class='close-button' name='close-task-button' value=''></input>
+                                <input type='submit' class='close-button' name='close-task-button' title='Close this task' value=''></input>
                             </form>
                         </div>
                         <div class='task-id'>$task_id</div>

@@ -1,49 +1,49 @@
 
-#login-page #login-form {
-    margin-left: 240px;
-    margin-right: 240px;
+#content {
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
-#login-page #login-controls {
+#login-controls {
     float:right;
     width: 240px;
     margin-left: -240px;
 }
 
-#login-page #login-form {
-    margin-right: 240px;
-}
-
-#login-page #content {
-    padding-left: 10px;
-    padding-right: 10px;
-}
-
-#login-page #login-controls form {
+#login-controls form {
     padding: 25px;
     border: 1px solid #a0a0a0;
 }
 
-#login-page #login-form label {
-    margin-top: 15px;
+#login-main {
+    background: #f1f1ee;
+    padding-bottom: 1em;
 }
 
-#login-page #login-form input[type=text],
-#login-page #login-form input[type=password] {
-        font-size: 135%;
-        border: none;
-        border-bottom: 1px solid #a0a0a0;
-        background-color: #f0f0f0;
-        color: #555;
-        padding: 10px 15px;
-        margin-bottom: 10px;
-}
-
-#login-page #login-form input[type=text]:focus,
-#login-page #login-form input[type=password]:focus {
-        background-color: lightblue;
+#login-form {
+    margin: 0 240px;
+    padding: .5em 1em;
+    background-color: #fcfcff;
+    border-radius: 4px;
 }
 
 #login-form label {
+    margin-top: 15px;
+}
+
+#login-form input[type=text],
+#login-form input[type=password] {
+        font-size: 135%;
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        width: 100%;
+}
+
+#login-form input[type=text]:focus,
+#login-form input[type=password]:focus {
+        background-color: lightblue;
+}
+
+label {
     display:block;
 }
