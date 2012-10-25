@@ -118,12 +118,12 @@ a.object-ref:hover {
 
 #main-menu li a,
 #main-menu li a:visited {
-    color: #b85f06;
+    color: #ba8200;
     text-decoration: none;
 }
 
 #main-menu li a:hover {
-    color: #ff9429;
+    color: #f5ab00;
     text-decoration: underline;
 }
 

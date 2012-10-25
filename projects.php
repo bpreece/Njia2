@@ -2,6 +2,11 @@
 
 include_once('common.inc');
 
+global $show_closed_tasks;
+global $show_closed_projects;
+$show_closed_tasks = "";
+$show_closed_projects = "";
+
 function get_stylesheets() {
     $stylesheets = array('projects.css');
     return $stylesheets;
@@ -14,11 +19,25 @@ function get_page_id() {
 global $projects, $tasks;
 
 function process_form_data() {
-    
+    if (isset($_POST['apply-list-options-button'])) {
+        process_apply_list_options();
+    }
 }
 
 function process_query_string() {
     $projects = query_projects();
+}
+
+function process_apply_list_options() {
+    global $show_closed_tasks;
+    global $show_closed_projects;
+
+    if (isset($_POST['closed-tasks-option'])) {
+        $show_closed_tasks = "checked";
+    }                    
+    if (isset($_POST['closed-projects-option'])) {
+        $show_closed_projects = "checked";
+    }
 }
 
 function query_projects() {
@@ -27,21 +46,31 @@ function query_projects() {
         return null;
     }
 
+    global $show_closed_tasks;
+    global $show_closed_projects;
+
     $user_id = get_session_user_id();
     $projects_query = "SELECT T.* , 
-                P.`project_id` , P.`project_name` , P.`project_status` , 
-                X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` , 
-                U.`user_id` , U.`login_name`
-                FROM `access_table` AS A 
-                INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
-                INNER JOIN `task_table` AS T ON P.`project_id` = T.`project_id` 
-                LEFT JOIN `timebox_table` AS X ON T.`timebox_id` = X.`timebox_id` 
-                LEFT JOIN `user_table` AS U ON T.`user_id` = U.`user_id`
-                LEFT JOIN `task_table` AS PT ON T.`parent_task_id` = PT.`task_id`
-                WHERE A.`user_id` = '$user_id' AND
-                    P.`project_status` <> 'closed' AND
-                    T.`task_status` <> 'closed' 
-                    ORDER BY T.`task_id`";
+        P.`project_id` , P.`project_name` , P.`project_status` , 
+        X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` , 
+        U.`user_id` , U.`login_name`
+        FROM `access_table` AS A 
+        INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
+        INNER JOIN `task_table` AS T ON P.`project_id` = T.`project_id` 
+        LEFT JOIN `timebox_table` AS X ON T.`timebox_id` = X.`timebox_id` 
+        LEFT JOIN `user_table` AS U ON T.`user_id` = U.`user_id`
+        LEFT JOIN `task_table` AS PT ON T.`parent_task_id` = PT.`task_id`
+        WHERE A.`user_id` = '$user_id' ";
+    if (! $show_closed_projects) {
+        $projects_query .= "
+            AND P.`project_status` <> 'closed' ";
+    }
+    if (! $show_closed_tasks) {
+        $projects_query .= "
+            AND T.`task_status` <> 'closed' ";
+    }                    
+    $projects_query .= "
+        ORDER BY T.`task_id`";
     
     $projects_result = mysqli_query($connection, $projects_query);
     $num_rows = mysqli_num_rows($projects_result);
@@ -60,6 +89,7 @@ function query_projects() {
             $projects[$project_id] = array();
             $projects[$project_id]['project-id'] = $result['project_id'];
             $projects[$project_id]['project-name'] = $result['project_name'];
+            $projects[$project_id]['project-status'] = $result['project_status'];
             $projects[$project_id]['task-list'] = array();
         }
         $task_id = $result['task_id'];
@@ -70,6 +100,7 @@ function query_projects() {
             $tasks[$task_id]['timebox-id'] = $result['timebox_id'];
             $tasks[$task_id]['timebox-name'] = $result['timebox_name'];
             $tasks[$task_id]['timebox-end-date'] = $result['timebox_end_date'];
+            $tasks[$task_id]['task-status'] = $result['task_status'];;
             $tasks[$task_id]['user-id'] = $result['user_id'];
             $tasks[$task_id]['user-name'] = $result['login_name'];
             $tasks[$task_id]['subtask-list'] = array();
@@ -86,11 +117,33 @@ function query_projects() {
     
 function show_sidebar() {
     global $projects;
+    global $show_closed_tasks;
+    global $show_closed_projects;
+
     echo "
         <h3>Options</h3>";
     if (! $projects) {
         return;
     }
+    echo "
+        <div class='sidebar-block'>
+            <form id='list-options-form' method='post'>
+                <div id='list-options'>
+                    <input type='checkbox' name='closed-tasks-option' value='show-closed-tasks' $show_closed_tasks> Show closed tasks</br>
+                    <input type='checkbox' name='closed-projects-option' value='show-closed-projects' $show_closed_projects> Show closed projects</br>
+                </div>
+                <input type='submit' name='apply-list-options-button' value='Apply these options'></input>
+            </form>
+        </div>
+        <div class='sidebar-block'>
+            <form id='add-project-form' method='post'>
+                <div id='subtask-summary'>
+                    <label for='project-name'>Project name:</label>
+                    <input style='width:100%' type='text' name='project-name'></input>
+                </div>
+                <input type='submit' name='add-project-button' value='Create a new project'></input>
+            </form>
+        </div>";
 
 }
 
@@ -100,7 +153,7 @@ function show_tasks_list($tasks_list) {
         <div class='task-list'>";
         foreach ($tasks_list as $task_id) {
             $task = $tasks[$task_id];
-            $task_info_css = '';
+            $task_info_css = "task-${task['task-status']}";
             if (count($task['subtask-list']) > 0) {
                 $task_info_css .= " parent-task";
             } else if (! isset($task['timebox-id']) || $task['timebox-id'] == 0) {
@@ -149,7 +202,7 @@ function show_content()
     foreach ($projects as $project_id => &$project) {
         echo "
                 <div id='project-$project_id' class='project'>
-                    <div class='project-info'>
+                    <div class='project-info project-${project['project-status']}'>
                         <div class='project-id'>$project_id</div>
                         <div class='project-name'>
                             <a class='object-ref' href='project.php?id=$project_id'>${project['project-name']}</a>

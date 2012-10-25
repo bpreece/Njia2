@@ -68,7 +68,7 @@
 }
 
 .task-info {
-    background-color: #e8f0f8;
+    background-color: #dfe9f2;
     font-size: 85%;
 }
 
@@ -82,8 +82,8 @@
         rgba(255, 255, 255, .85));*/
     background-image: -webkit-gradient(
         linear, 0% 0%, 0% 100%,
-        from(rgba(232, 240, 248, 1.00)),
-        to(rgba(232, 240, 248, 0.00)));
+        from(rgba(223, 233, 242, 1.00)),
+        to(rgba(223, 233, 242, 0.00)));
 /*    background-image: linear-gradient(top,
         rgba(255, 255, 255, 0),
         rgba(255, 255, 255, .85));*/
