@@ -199,9 +199,9 @@ function show_sidebar() {
     echo "
         <div class='sidebar-block'>
             <form id='add-subtask-form' method='post'>
-                <div id='subtask-summary'>
+                <div id='subtask-summary' class='group'>
                     <label for='subtask-summary'>Show to-do list for:</label>
-                    <select name='user-id'>";
+                    <select name='user-id' style='width:100%'>";
             foreach ($user_list as $todo_user_id => $login_name) {
                 $selected = ($user['user_id'] == $todo_user_id) ? "selected='selected'" : "";
                 echo "
@@ -215,7 +215,7 @@ function show_sidebar() {
         </div>
         <div class='sidebar-block'>
             <form id='add-project-form' method='post'>
-                <div id='subtask-summary'>
+                <div id='subtask-summary' class='group'>
                     <label for='project-name'>Project name:</label>
                     <input style='width:100%' type='text' name='project-name'></input>
                 </div>

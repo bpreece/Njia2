@@ -56,7 +56,7 @@ function query_projects() {
         U.`user_id` , U.`login_name`
         FROM `access_table` AS A 
         INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
-        INNER JOIN `task_table` AS T ON P.`project_id` = T.`project_id` 
+        INNER JOIN `task_table` AS T ON T.`project_id` = P.`project_id` 
         LEFT JOIN `timebox_table` AS X ON T.`timebox_id` = X.`timebox_id` 
         LEFT JOIN `user_table` AS U ON T.`user_id` = U.`user_id`
         LEFT JOIN `task_table` AS PT ON T.`parent_task_id` = PT.`task_id`
@@ -128,16 +128,17 @@ function show_sidebar() {
     echo "
         <div class='sidebar-block'>
             <form id='list-options-form' method='post'>
-                <div id='list-options'>
+                <div id='list-options' class='group'>
                     <input type='checkbox' name='closed-tasks-option' value='show-closed-tasks' $show_closed_tasks> Show closed tasks</br>
                     <input type='checkbox' name='closed-projects-option' value='show-closed-projects' $show_closed_projects> Show closed projects</br>
                 </div>
                 <input type='submit' name='apply-list-options-button' value='Apply these options'></input>
             </form>
-        </div>
+        </div>";
+    echo "
         <div class='sidebar-block'>
             <form id='add-project-form' method='post'>
-                <div id='subtask-summary'>
+                <div id='subtask-summary' class='group'>
                     <label for='project-name'>Project name:</label>
                     <input style='width:100%' type='text' name='project-name'></input>
                 </div>
