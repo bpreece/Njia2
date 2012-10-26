@@ -2,6 +2,9 @@
 
 include_once('common.inc');
 
+global $show_closed_tasks;
+$show_closed_tasks = '';
+
 function get_stylesheets() {
     $stylesheets = array('timebox.css');
     return $stylesheets;
@@ -25,6 +28,16 @@ global $timebox;
 function process_form_data() {
     if (isset($_POST['update-button'])) {
         process_timebox_form();
+    } else if (isset($_POST['apply-list-options-button'])) {
+        process_apply_list_options();
+    }
+}
+
+function process_apply_list_options() {
+    global $show_closed_tasks;
+
+    if (isset($_POST['closed-tasks-option'])) {
+        $show_closed_tasks = "checked";
     }
 }
 
@@ -83,9 +96,14 @@ function query_timebox($timebox_id) {
     }
     $timebox = mysqli_fetch_array($timebox_result);
     
+    global $show_closed_tasks;
     $task_query = "SELECT T.`task_id` , T.`task_summary` , T.`task_status` 
                 FROM `task_table` AS T
-                WHERE T.`timebox_id` = '$timebox_id'";
+                WHERE T.`timebox_id` = '$timebox_id' ";
+    if (! $show_closed_tasks) {
+        $task_query .= "
+                    AND T.`task_status` <> 'closed' ";
+    }
     $task_result = mysqli_query($connection, $task_query);
     $num_rows = mysqli_num_rows($task_result);
     if ($num_rows > 0) {
@@ -101,11 +119,23 @@ function query_timebox($timebox_id) {
 
 function show_sidebar() {
     global $timebox;
+    global $show_closed_tasks;
+
     echo "
         <h3>Options</h3>";
     if (! $timebox) {
         return;
     }
+    
+    echo "
+        <div class='sidebar-block'>
+            <form id='list-options-form' method='post'>
+                <div id='list-options' class='group'>
+                    <input type='checkbox' name='closed-tasks-option' value='show-closed-tasks' $show_closed_tasks> Show closed tasks</br>
+                </div>
+                <input type='submit' name='apply-list-options-button' value='Apply these options'></input>
+            </form>
+        </div>";
 }
 
 function show_content() 

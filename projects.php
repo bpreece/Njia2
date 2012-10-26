@@ -138,6 +138,7 @@ function show_sidebar() {
     if (! $projects) {
         return;
     }
+    
     echo "
         <div class='sidebar-block'>
             <form id='list-options-form' method='post'>
