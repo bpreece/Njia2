@@ -84,7 +84,6 @@ function query_projects() {
     }
     $projects_query .= "
         ORDER BY P.`project_id` , T.`task_id`";
-    set_user_message($projects_query, 'debug');
     
     $projects_result = mysqli_query($connection, $projects_query);
     if (! $projects_result) {
