@@ -4,8 +4,10 @@ include_once('common.inc');
 
 global $show_closed_tasks;
 global $show_closed_projects;
+global $show_empty_projects;
 $show_closed_tasks = "";
 $show_closed_projects = "";
+$show_empty_projects = "";
 
 function get_stylesheets() {
     $stylesheets = array('projects.css');
@@ -31,12 +33,16 @@ function process_query_string() {
 function process_apply_list_options() {
     global $show_closed_tasks;
     global $show_closed_projects;
+    global $show_empty_projects;
 
     if (isset($_POST['closed-tasks-option'])) {
         $show_closed_tasks = "checked";
-    }                    
+    }
     if (isset($_POST['closed-projects-option'])) {
         $show_closed_projects = "checked";
+    }
+    if (isset($_POST['empty-projects-option'])) {
+        $show_empty_projects = "checked";
     }
 }
 
@@ -48,15 +54,17 @@ function query_projects() {
 
     global $show_closed_tasks;
     global $show_closed_projects;
+    global $show_empty_projects;
 
     $user_id = get_session_user_id();
-    $projects_query = "SELECT T.* , 
+    $task_join = $show_empty_projects ? "LEFT JOIN" : "INNER JOIN";
+    $projects_query = "SELECT T.`task_id` , T.`task_summary` , T.`task_status` , T.`parent_task_id` , 
         P.`project_id` , P.`project_name` , P.`project_status` , 
         X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` , 
         U.`user_id` , U.`login_name`
         FROM `access_table` AS A 
         INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
-        INNER JOIN `task_table` AS T ON T.`project_id` = P.`project_id` 
+        $task_join `task_table` AS T ON T.`project_id` = P.`project_id` 
         LEFT JOIN `timebox_table` AS X ON T.`timebox_id` = X.`timebox_id` 
         LEFT JOIN `user_table` AS U ON T.`user_id` = U.`user_id`
         LEFT JOIN `task_table` AS PT ON T.`parent_task_id` = PT.`task_id`
@@ -66,16 +74,21 @@ function query_projects() {
             AND P.`project_status` <> 'closed' ";
     }
     if (! $show_closed_tasks) {
-        $projects_query .= "
+        if ($show_empty_projects) {
+            $projects_query .= "
+            AND ( T.`task_id` IS NULL OR T.`task_status` <> 'closed' ) ";
+        } else {
+            $projects_query .= "
             AND T.`task_status` <> 'closed' ";
-    }                    
+        }
+    }
     $projects_query .= "
-        ORDER BY T.`task_id`";
+        ORDER BY P.`project_id` , T.`task_id`";
+    set_user_message($projects_query, 'debug');
     
     $projects_result = mysqli_query($connection, $projects_query);
-    $num_rows = mysqli_num_rows($projects_result);
-    if ($num_rows == 0) {
-        set_user_message("There are no open projects with open tasks", 'warning');
+    if (! $projects_result) {
+        set_user_message("There are no results to display", 'warning');
         return null;
     }
 
@@ -93,7 +106,7 @@ function query_projects() {
             $projects[$project_id]['task-list'] = array();
         }
         $task_id = $result['task_id'];
-        if (!array_key_exists($task_id, $tasks)) {
+        if ($task_id && ! array_key_exists($task_id, $tasks)) {
             $tasks[$task_id] = array();
             $tasks[$task_id]['task-id'] = $task_id;
             $tasks[$task_id]['task-summary'] = $result['task_summary'];
@@ -119,6 +132,7 @@ function show_sidebar() {
     global $projects;
     global $show_closed_tasks;
     global $show_closed_projects;
+    global $show_empty_projects;
 
     echo "
         <h3>Options</h3>";
@@ -131,6 +145,7 @@ function show_sidebar() {
                 <div id='list-options' class='group'>
                     <input type='checkbox' name='closed-tasks-option' value='show-closed-tasks' $show_closed_tasks> Show closed tasks</br>
                     <input type='checkbox' name='closed-projects-option' value='show-closed-projects' $show_closed_projects> Show closed projects</br>
+                    <input type='checkbox' name='empty-projects-option' value='show-empty-projects' $show_empty_projects> Show empty projects</br>
                 </div>
                 <input type='submit' name='apply-list-options-button' value='Apply these options'></input>
             </form>
