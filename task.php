@@ -351,23 +351,36 @@ function show_content()
             </div> <!-- /form-controls -->
         </form>
         ";
+
+
                 
     if (array_key_exists('subtask_list', $task)) {
         echo "
-            Subtasks:
-            <ul>";
-        foreach ($task['subtask_list'] as $subtask) {
+            <div id='tasks-header'>
+                <h4>Subtasks</h4>
+            </div>
+            <div class='task-list'>";
+        foreach ($task['subtask_list'] as $subtask_id => $subtask) {
             echo "
-                <li>
-                    <a class='object-ref' href='task.php?id=${subtask['task_id']}'>${subtask['task_summary']}</a>";
-            if ($subtask['task_status'] == 'closed') {
-                echo " <span class='subtask-closed'>&mdash; Closed</span>";
+                <div id='task-$subtask_id' class='task'>
+                    <div class='task-info task-${subtask['task_status']}'>
+                        <div class='task-details'>";
+            if ($subtask['task_status'] != 'open') {
+                echo "
+                            ${subtask['task_status']}";
             }
             echo "
-                </li>";
+                        </div> <!-- /task-details -->
+                        <div class='task-id'>$subtask_id</div>
+                        <div class='task-summary'>
+                            <a class='object-ref' href='task.php?id=$subtask_id'>${subtask['task_summary']}</a>
+                        </div> <!-- /task-summary -->";
+            echo "
+                    </div> <!-- /task-info -->
+                </div> <!-- /task-$subtask_id -->";
         }
         echo "
-            </ul>";
+            </div> <!-- /task-list -->";
     }
 }
 
