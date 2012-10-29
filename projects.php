@@ -23,6 +23,8 @@ global $projects, $tasks;
 function process_form_data() {
     if (isset($_POST['apply-list-options-button'])) {
         process_apply_list_options();
+    } else if (isset($_POST['add-project-button'])) {
+        process_add_project_form();
     }
 }
 
@@ -44,6 +46,36 @@ function process_apply_list_options() {
     if (isset($_POST['empty-projects-option'])) {
         $show_empty_projects = "checked";
     }
+}
+
+function process_add_project_form() {
+    $connection = connect_to_database_session();
+    if (!$connection) {
+        return null;
+    }
+    
+    $user_id = get_session_user_id();
+
+    $project_name = mysqli_real_escape_string($connection, $_POST['project-name']);
+
+    $project_query = "INSERT INTO `project_table` 
+            ( `project_name` , `project_owner` ) VALUES ( '$project_name' , '$user_id' )";
+    $project_results = mysqli_query($connection, $project_query);
+    if (! $project_results) {
+        set_user_message(mysqli_error($connection), 'failure');
+        return;
+    }
+    $project_id = mysqli_insert_id($connection);
+    
+    $access_query = "INSERT INTO `access_table` 
+            ( `user_id` , `project_id` ) VALUES ( '$user_id' , '$project_id' )";
+    $access_results = mysqli_query($connection, $access_query);
+    if (! $access_results) {
+        set_user_message(mysqli_error($connection), 'failure');
+        return;
+    }
+    
+    header ("Location: project.php?id=$project_id");
 }
 
 function query_projects() {
