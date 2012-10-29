@@ -118,10 +118,6 @@ function show_sidebar() {
 
     echo "
         <h3>Options</h3>";
-    if (! $timeboxes) {
-        return;
-    }
-
     echo "
         <div class='sidebar-block'>
             <form id='list-options-form' method='post'>
@@ -137,6 +133,9 @@ function show_sidebar() {
                 <input type='submit' name='apply-list-options-button' value='Apply these options'></input>
             </form>
         </div>";
+    if (! $timeboxes) {
+        return;
+    }
 }
 
 function show_content() {

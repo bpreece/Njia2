@@ -6,7 +6,50 @@
         Purpose of the stylesheet follows.
 */
 
-root { 
-    display: block;
+.project-list {
+    padding: 0.5em 0 0.5em 1em;
+    font-size: 85%;
 }
 
+.project-info {
+    padding: 2px 4px;
+    background-color: #fcfcff;
+/*    background-image: -moz-linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));
+    background-image: -o-linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));*/
+    background-image: -webkit-gradient(
+        linear, 0% 0%, 0% 100%,
+        from(rgba(245, 220, 162, 1.00)),
+        to(rgba(245, 220, 162, 0.00)));
+/*    background-image: linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));*/
+}
+
+.project-info.project-closed {
+    background-color: #e6e6e3;
+    color: #b0b0ae;
+    text-decoration: line-through;
+}
+
+.project-details {
+    float:right;
+}
+
+.project-id {
+    display: none;
+}
+
+.project-name {
+}
+
+.project {
+    margin-bottom: 0.5em;
+    border-top-left-radius: 4px;
+    border: 1px solid #ddd;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+}

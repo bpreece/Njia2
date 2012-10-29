@@ -19,7 +19,7 @@ function get_page_id() {
 function get_page_class() {
     global $project;
     if (! $project) {
-        return "";
+        return '';
     }
     $page_class = "project-${project['project_id']}";
     if ($project['project_status'] == 'closed') {
@@ -28,13 +28,27 @@ function get_page_class() {
     return $page_class;
 }
 
+function process_query_string() {
+    global $show_closed_tasks;
+    global $past_timeboxes_date;
+    global $project_id, $project;
+    if (isset($_GET['T'])) {
+        $show_closed_tasks = 'checked';
+    }
+    if (isset($_GET['X'])) {
+        $past_timeboxes_date = $_GET['X'];
+    }
+    if (isset($_GET['id'])) {
+        $project_id = $_GET['id'];
+        $project = query_project($project_id);
+    }
+}
+
 global $project, $project_id;
 
 function process_form_data() {
     if (isset($_POST['update-button'])) {
         process_project_form();
-    } else if (isset($_POST['apply-list-options-button'])) {
-        process_apply_list_options();
     } else if (isset($_POST['add-task-button'])) {
         process_add_task_form();
     } else if (isset($_POST['add-timebox-button'])) {
@@ -192,14 +206,6 @@ function update_project_status($status) {
     header("Location:project.php?id=$project_id");
 }
 
-function process_query_string() {
-    global $project_id, $project;
-    if (isset($_GET['id'])) {
-        $project_id = $_GET['id'];
-        $project = query_project($project_id);
-    }
-}
-
 function query_project($project_id) {
     $connection = connect_to_database_session();
     if (!$connection) {
@@ -207,18 +213,17 @@ function query_project($project_id) {
     }
 
     $session_id = get_session_id();
+    $user_id = get_session_user_id();
     $project_id = mysqli_real_escape_string($connection, $project_id);
     $project_query = "SELECT P.* , 
             O.`user_id` AS `owner_id` , O.`login_name` AS `owner_name` 
-        FROM `session_table` AS S
-        INNER JOIN `access_table` AS A ON S.`user_id` = A.`user_id` 
+        FROM `access_table` AS A 
         INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
         INNER JOIN `user_table` AS O ON P.`project_owner` = O.`user_id`
-        WHERE S.`session_id` = '$session_id' and P.`project_id` = '$project_id'";
+        WHERE P.`project_id` = '$project_id' AND A.`user_id` = $user_id";
     
     $project_result = mysqli_query($connection, $project_query);
-    $num_rows = mysqli_num_rows($project_result);
-    if ($num_rows == 0) {
+    if (! $project_result) {
         set_user_message("Project ID $project_id not recognized", 'warning');
         return null;
     }
@@ -241,7 +246,7 @@ function query_project($project_id) {
     }
     $task_query .= "
         ORDER BY T.`task_id`";
-
+    
     $task_result = mysqli_query($connection, $task_query);
     if (mysqli_num_rows($task_result) > 0) {
         $task_list = array();
@@ -266,6 +271,7 @@ function query_project($project_id) {
     }
     $timebox_query .= "
         ORDER BY X.`timebox_end_date`";
+    
     $timebox_result = mysqli_query($connection, $timebox_query);
     if (mysqli_num_rows($timebox_result) > 0) {
         $timebox_list = array();
@@ -314,19 +320,6 @@ global $past_timeboxes_date;
             </form>
         </div>";
     } else {
-        echo "
-        <div class='sidebar-block'>
-            <form id='list-options-form' method='post'>
-                <div id='list-options' class='group'>
-                    <input type='checkbox' name='closed-tasks-option' value='show-closed-tasks' $show_closed_tasks> Show closed tasks</br>
-                </div>
-                <div class='group'>
-                    <label for='past-timeboxes-date'>Show timeboxes after:</label></br>
-                    <input style='width:100%' type='text' name='past-timeboxes-date' value='$past_timeboxes_date' />
-                </div> <!-- /group -->
-                <input type='submit' name='apply-list-options-button' value='Apply these options'></input>
-            </form>
-        </div>";
         echo "
         <div class='sidebar-block'>
             <form id='add-task-form' method='post'>
@@ -378,7 +371,9 @@ global $past_timeboxes_date;
 
 function show_content() 
 {
-    global $project;
+    global $show_closed_tasks;
+    global $past_timeboxes_date;
+    global $project_id, $project;
     if (! $project) {
         set_user_message("There was an error retrieving the project information", 'warning');
         return;
@@ -395,7 +390,7 @@ function show_content()
             </div>
             
             <div id='project-discussion'>
-                <label for='project-discussion'>Discussion:</label>
+                <label for='project-discussion' style='vertical-align:top'>Discussion:</label>
                 <textarea name='project-discussion' rows='10' style='width:50%'>${project['project_discussion']}</textarea>
             </div>
                 
@@ -417,7 +412,21 @@ function show_content()
 
     if (array_key_exists('task_list', $project)) {
         echo "
-            <h4>Tasks</h4>
+            <div id='tasks-header'>
+                <div class='header-controls' style='float:right'>
+                    <form method='GET'>
+                        <input type='hidden' name='id' value='$project_id' />";
+        if ($past_timeboxes_date) {
+            echo"
+                        <input type='hidden' name='X' value='$past_timeboxes_date' />";
+        }
+        echo "
+                        <input type='checkbox' name='T' value='YES' $show_closed_tasks /><label>Show closed tasks</label>
+                        <input type='submit' style='font-size:85%' value='&#x2713;' title='Apply options' />
+                    </form>
+                </div>
+                <h4>Tasks</h4>
+            </div>
             <div class='task-list'>";
         foreach ($project['task_list'] as $task_id => $task) {
             echo "
@@ -444,7 +453,22 @@ function show_content()
 
     if (array_key_exists('timebox_list', $project)) {
         echo "
-            <h4>Timeboxes</h4>
+            <div id='tasks-header'>
+                <div class='header-controls' style='float:right'>
+                    <form method='GET'>
+                        <input type='hidden' name='id' value='$project_id' />";
+        if ($show_closed_tasks) {
+            echo "
+                        <input type='hidden' name='T' value='YES' />";
+        }
+        echo "
+                        <label for='X'>Show since</label>
+                        <input type='text' size='12' style='font-size:small' name='X' value='$past_timeboxes_date' />
+                        <input type='submit' style='font-size:85%' value='&#x2713;' title='Apply options' />
+                    </form>
+                </div>
+                <h4>Timeboxes</h4>
+            </div>
             <div class='timebox-list'>";
         foreach ($project['timebox_list'] as $timebox_id => $timebox) {
             echo "

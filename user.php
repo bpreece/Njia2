@@ -166,8 +166,11 @@ function query_user($user_id) {
     }
     
     $query_user['project-list'] = array();
-    $project_query = "SELECT P.`project_id` , P.`project_name` , P.`project_status` 
-        FROM `project_table` AS P 
+    $project_query = "SELECT P.* , 
+            O.`user_id` AS `owner_id` , O.`login_name` AS `owner_name` 
+        FROM `access_table` AS A 
+        INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
+        INNER JOIN `user_table` AS O ON P.`project_owner` = O.`user_id`
         WHERE P.`project_owner` = '$user_id'
         ORDER BY P.`project_id`";
     $project_results = mysqli_query($connection, $project_query);
@@ -254,22 +257,29 @@ function show_content()
             </div> <!-- /form-controls -->
 
         </form>";
-                
-    if (count($query_user['project-list']) > 0) {
+    
+    echo "
+        <h4>Projects</h4>
+        <div class='project-list'>";
+    foreach ($query_user['project-list'] as $project_id => $project) {
         echo "
-            Projects:
-            <ul>";
-        foreach ($query_user['project-list'] as $project_id => $project) {
+                <div id='project-$project_id' class='project'>";
+        if ($project['project_status'] != 'open') {
             echo "
-                <li><a href='project.php?id=$project_id'>${project['project_name']}</a>";
-            if ($project['project_status'] != 'open') {
-                echo " &mdash; ${project['project_status']}";
-            }
-            echo "</li>";
+                    <div class='project-details'>${project['project_status']}</div>";
         }
         echo "
-            </ul>";
+                    <div class='project-info project-${project['project_status']}'>
+                        <div class='project-id'>$project_id</div>
+                        <div class='project-name'>
+                            <a class='object-ref' href='project.php?id=$project_id'>${project['project_name']}</a>
+                        </div> <!-- /project-name -->
+                    </div> <!-- /project-info -->
+                </div> <!-- /project-$project_id -->";
     }
+    echo "
+        </div> <!-- /user-list -->
+        ";
 }
 
 include_once ('template.inc');

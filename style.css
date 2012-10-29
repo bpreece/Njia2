@@ -35,7 +35,7 @@ h1, h3 {
 }
 
 .main-form input[type="submit"] {
-    
+
 }
 
 .main-form label {
@@ -176,7 +176,7 @@ a.object-ref:hover {
 }
 
 .sidebar-block {
-    padding: 1em 1em;
+    padding: .75em 1em;
     border-width: 1px;
     border-style: solid;
     border-color: #ebebe8;
