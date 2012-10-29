@@ -70,34 +70,8 @@ a.object-ref:hover {
 #footer {
     background-color: #E0DBD6;
     padding: 1em .75em;
-}
-
-#header {
-/*    border-top-left-radius: 0.75em;
-    border-top-right-radius: 0.75em;
-    border-bottom: 1px solid #C2B4A7;
-    background-image: -moz-linear-gradient(top,
-        rgba(255, 255, 255, .85),
-        rgba(255, 255, 255, 0) 25%,
-        rgba(0, 0, 0, 0) 85%,
-        rgba(0, 0, 0, 0.10));
-    background-image: -o-linear-gradient(top,
-        rgba(255, 255, 255, .75),
-        rgba(255, 255, 255, 0));
-    background-image: -webkit-gradient(
-        linear, 0% 0%, 0% 100%,
-        from(rgba(255, 255, 255, .85)),
-        color-stop(25%, rgba(255, 255, 255, 0)),
-        color-stop(85%, rgba(0, 0, 0, 0)),
-        to(rgba(0, 0, 0, 0.10)));
-    background-image: linear-gradient(top,
-        rgba(255, 255, 255, .75),
-        rgba(255, 255, 255, 0));*/
-}
-
-#footer {
     border-bottom-left-radius: 0.75em;
-    border-top: 1px solid #C2B4A7;
+    border-top: 1px solid #d8cdc2;
     font-size: 75%;
 }
 

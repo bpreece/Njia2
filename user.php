@@ -3,6 +3,9 @@
 
 include_once('common.inc');
 
+global $show_closed_member_projects;
+global $show_closed_owned_projects;
+
 function get_stylesheets() {
     $stylesheets = array('user.css');
     return $stylesheets;
@@ -21,7 +24,15 @@ function get_page_class() {
 global $query_user;
 
 function process_query_string() {
+    global $show_closed_member_projects;
+    global $show_closed_owned_projects;
     global $query_user;
+    if (isset($_GET['po'])) {
+        $show_closed_owned_projects = 'checked';
+    }
+    if (isset($_GET['pm'])) {
+        $show_closed_member_projects = 'checked';
+    }
     $session_user = get_session_user();
     if (isset($_GET['id'])) {
         $user_id = $_GET['id'];
@@ -164,21 +175,52 @@ function query_user($user_id) {
     } else {
         $query_user = mysqli_fetch_array($user_result);
     }
+
+    global $show_closed_member_projects;
+    global $show_closed_owned_projects;
     
-    $query_user['project-list'] = array();
-    $project_query = "SELECT P.* , 
-            O.`user_id` AS `owner_id` , O.`login_name` AS `owner_name` 
+    $session_user_id = get_session_user_id();
+    // projects which are owned by $user_id, but which are accessible to
+    // get_session_user_id();
+    $query_user['owned-project-list'] = array();
+    $owner_query = "SELECT P.`project_id` , P.`project_name` , P.`project_status` 
         FROM `access_table` AS A 
         INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
-        INNER JOIN `user_table` AS O ON P.`project_owner` = O.`user_id`
-        WHERE P.`project_owner` = '$user_id'
+        WHERE P.`project_owner` = '$user_id' AND A.`user_id` = '$session_user_id' ";
+    if (! $show_closed_owned_projects) {
+        $owner_query .= "
+            AND P.`project_status` <> 'closed'";
+    }
+    $owner_query .= "
         ORDER BY P.`project_id`";
-    $project_results = mysqli_query($connection, $project_query);
-    if (! $project_results) {
+    $owner_results = mysqli_query($connection, $owner_query);
+    if (! $owner_results) {
         set_user_message(mysqli_error($connection), 'failure');
     } else {
-        while ($project = mysqli_fetch_array($project_results)) {
-            $query_user['project-list'][$project['project_id']] = $project;
+        while ($project = mysqli_fetch_array($owner_results)) {
+            $query_user['owned-project-list'][$project['project_id']] = $project;
+        }
+    }
+    
+    // projects which are owned by $user_id, but which are accessible to
+    // get_session_user_id();
+    $query_user['project-member-list'] = array();
+    $member_query = "SELECT P.`project_id` , P.`project_name` , P.`project_status` 
+        FROM `access_table` AS A 
+        INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
+        WHERE P.`project_owner` <> '$user_id' AND A.`user_id` = '$user_id' ";
+    if (! $show_closed_member_projects) {
+        $member_query .= "
+            AND P.`project_status` <> 'closed'";
+    }
+    $member_query .= "
+        ORDER BY P.`project_id`";
+    $member_results = mysqli_query($connection, $member_query);
+    if (! $member_results) {
+        set_user_message(mysqli_error($connection), 'failure');
+    } else {
+        while ($project = mysqli_fetch_array($member_results)) {
+            $query_user['project-member-list'][$project['project_id']] = $project;
         }
     }
     
@@ -221,16 +263,19 @@ function show_sidebar() {
 
 function show_content() 
 {    
+    global $show_closed_member_projects;
+    global $show_closed_owned_projects;
     global $query_user;
     if (!$query_user) {
         show_user_message("There was an error retrieving the information", 'warning');
         return;
     }
     
+    $query_id = $query_user['user_id'];
     echo "
-        <h3>User ${query_user['user_id']} &mdash; ${query_user['login_name']}</h3>
+        <h3>User $query_id &mdash; ${query_user['login_name']}</h3>
         <form id='user-form' class='main-form' method='post'>
-            <input type='hidden' name='user-id' value='${query_user['user_id']}'>
+            <input type='hidden' name='user-id' value='$query_id'>
 
             <div id='login-name'>
                 <label for='login-name'>Login name:</label>
@@ -259,9 +304,60 @@ function show_content()
         </form>";
     
     echo "
-        <h4>Projects</h4>
+        <div id='owned-projects-header'>
+            <div class='header-controls' style='float:right'>
+                <form method='GET'>
+                    <input type='hidden' name='id' value='$query_id' />";
+    if ($show_closed_member_projects) {
+        echo"
+                    <input type='hidden' name='pm' value='$show_closed_member_projects' />";
+    }
+    echo "
+                    <input type='checkbox' name='po' value='YES' $show_closed_owned_projects /><label>Show closed projects</label>
+                    <input type='submit' style='font-size:85%' value='&#x2713;' title='Apply options' />
+                </form>
+            </div>
+            <h4>Project owner</h4>
+        </div>
         <div class='project-list'>";
-    foreach ($query_user['project-list'] as $project_id => $project) {
+    foreach ($query_user['owned-project-list'] as $project_id => $project) {
+        echo "
+                <div id='project-$project_id' class='project'>";
+        if ($project['project_status'] != 'open') {
+            echo "
+                    <div class='project-details'>${project['project_status']}</div>";
+        }
+        echo "
+                    <div class='project-info project-${project['project_status']}'>
+                        <div class='project-id'>$project_id</div>
+                        <div class='project-name'>
+                            <a class='object-ref' href='project.php?id=$project_id'>${project['project_name']}</a>
+                        </div> <!-- /project-name -->
+                    </div> <!-- /project-info -->
+                </div> <!-- /project-$project_id -->";
+    }
+    echo "
+        </div> <!-- /user-list -->
+        ";
+    
+    echo "
+        <div id='project-member-header'>
+            <div class='header-controls' style='float:right'>
+                <form method='GET'>
+                    <input type='hidden' name='id' value='$query_id' />";
+    if ($show_closed_owned_projects) {
+        echo"
+                    <input type='hidden' name='po' value='$show_closed_owned_projects' />";
+    }
+    echo "
+                    <input type='checkbox' name='pm' value='YES' $show_closed_member_projects /><label>Show closed projects</label>
+                    <input type='submit' style='font-size:85%' value='&#x2713;' title='Apply options' />
+                </form>
+            </div>
+            <h4>Project member</h4>
+        </div>
+        <div class='project-list'>";
+    foreach ($query_user['project-member-list'] as $project_id => $project) {
         echo "
                 <div id='project-$project_id' class='project'>";
         if ($project['project_status'] != 'open') {
