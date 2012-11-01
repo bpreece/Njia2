@@ -120,9 +120,6 @@ function query_timebox($timebox_id) {
 function show_sidebar() {
     global $timebox;
     global $show_closed_tasks;
-
-    echo "
-        <h3>Options</h3>";
     if (! $timebox) {
         return;
     }

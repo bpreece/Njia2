@@ -34,6 +34,8 @@ function process_form_data() {
         process_close_task_form();
     } else if (isset($_POST['reopen-task-button'])) {
         process_reopen_task_form();
+    } else if (isset($_POST['add-task-log-button'])) {
+        process_add_task_log();
     }
 }
 
@@ -128,6 +130,38 @@ function update_task_status($status) {
     header("Location:task.php?id=$task_id");
 }
 
+function process_add_task_log() {
+    $connection = connect_to_database_session();
+    if (!$connection) {
+        return null;
+    }
+
+    $user_id = get_session_user_id();
+    $task_id = mysqli_real_escape_string($connection, $_POST['task-id']);
+    $description = mysqli_real_escape_string($connection, $_POST['description']);
+    $work_hours = mysqli_real_escape_string($connection, $_POST['work-hours']);
+    $query = "INSERT INTO `log_table` (
+            `user_id` , `task_id` , `description` ";
+    if ($_POST['work-hours']) {
+        $query .=  ", `work_hours` ";
+    }
+    $query .= "
+        ) VALUES (
+            '$user_id' , '$task_id' , '$description' ";
+    if ($_POST['work-hours']) {
+        $query .=  ", '$work_hours' ";
+    }
+    $query .= "
+        )";
+    $results = mysqli_query($connection, $query);
+    if (! $results) {
+        set_user_message(mysqli_error($connection), "warning");
+        return null;
+    }    
+    
+    set_user_message("The log entry has been created.", 'success');
+}
+
 function process_query_string() {
     global $task_id, $task;
     if (isset($_GET['id'])) {
@@ -178,9 +212,8 @@ function query_task($task_id) {
                  ORDER BY T.`task_id`";
     $subtask_result = mysqli_query($connection, $subtask_query);
     if (mysqli_num_rows($subtask_result) > 0) {
-        $subtask_list = array();
         while ($subtask = mysqli_fetch_array($subtask_result)) {
-            $subtask_list[$subtask['task_id']] = $subtask;
+            $task['subtask_list'][$subtask['task_id']] = $subtask;
             if ($subtask['task_status'] != 'closed') {
                 $task['can-close'] = FALSE;
             }
@@ -194,11 +227,9 @@ function query_task($task_id) {
                      ORDER BY U.`login_name`";
         $user_result = mysqli_query($connection, $user_query);
         if (mysqli_num_rows($user_result) > 0) {
-            $user_list = array();
             while ($user = mysqli_fetch_array($user_result)) {
-                $user_list[$user['user_id']] = $user;
+                $task['users_list'][$user['user_id']] = $user;
             }
-            $task['users_list'] = $user_list;
         }
 
         $timebox_query = "SELECT X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` 
@@ -207,22 +238,36 @@ function query_task($task_id) {
                      ORDER BY X.`timebox_end_date`, X.`timebox_id`";
         $timebox_result = mysqli_query($connection, $timebox_query);
         if (mysqli_num_rows($timebox_result) > 0) {
-            $timebox_list = array();
             while ($timebox = mysqli_fetch_array($timebox_result)) {
-                $timebox_list[$timebox['timebox_id']] = $timebox;
+                $task['timebox_list'][$timebox['timebox_id']] = $timebox;
             }
-            $task['timebox_list'] = $timebox_list;
+        }
+    }
+    
+    $log_query = "SELECT L.`log_id` , L.`work_hours` , L.`description` , 
+            L.`user_id` , L.`log_time` , 
+            U.`login_name` AS `user_name`
+        FROM `log_table` AS L
+        LEFT JOIN `user_table` AS U ON U.`user_id` = L.`user_id` 
+        WHERE L.`task_id` = '$task_id'
+            AND DATE( L.`log_time` ) >= DATE_SUB( DATE( NOW() ), INTERVAL 6 DAY)
+        ORDER BY L.`log_id` DESC";
+
+    $log_result = mysqli_query($connection, $log_query);
+    $task['log-list'] = array();
+    if (! $log_result) {
+        set_user_message(mysqli_errno($connection), 'failure');
+    } else {
+        while ($log = mysqli_fetch_array($log_result)) {
+            $task['log-list'][$log['log_id']] = $log;
         }
     }
     
     return $task;
 }
 
-
 function show_sidebar() {
     global $task;
-    echo "
-        <h3>Options</h3>";
     if (! $task) {
         return;
     }
@@ -249,6 +294,21 @@ function show_sidebar() {
                 <input type='submit' name='add-subtask-button' value='Add Subtask'></input>
             </form>
         </div>";
+        echo "
+        <div class='sidebar-block'>
+            <form id='add-task-log-form' method='post'>
+                <input type='hidden' name='task-id' value='${task['task_id']}' />
+                <div id='log-description'>
+                    <label for='description'>Description:</label>
+                    <textarea style='width:100%' rows='10' name='description'></textarea>
+                </div>
+                <div id='work-hours'>
+                    <label for='work-hours'>Hours worked:</label>
+                    <input type='text' size='5' name='work-hours'></input>
+                </div>
+                <input type='submit' name='add-task-log-button' value='Add log entry'></input>
+            </form>
+        </div>";
         if ($task['can-close']) {
             echo "
         <div class='sidebar-block'>
@@ -269,10 +329,11 @@ function show_content()
         return;
     }
     
+    $task_id = $task['task_id'];
     echo "
-        <h3>Task ${task['task_id']}</h3>
+        <h3>Task $task_id</h3>
         <form id='task-form' class='main-form' method='post'>
-            <input type='hidden' name='task-id' value='${task['task_id']}'>
+            <input type='hidden' name='task-id' value='$task_id'>
             <input type='hidden' name='project-id' value='${task['project_id']}'>                
             
             <div id='project_name'>
@@ -352,14 +413,12 @@ function show_content()
         </form>
         ";
 
-
-                
     if (array_key_exists('subtask_list', $task)) {
         echo "
             <div id='tasks-header'>
                 <h4>Subtasks</h4>
             </div>
-            <div class='task-list'>";
+            <div id='task-$task_id-subtask-list' class='task-list'>";
         foreach ($task['subtask_list'] as $subtask_id => $subtask) {
             echo "
                 <div id='task-$subtask_id' class='task'>
@@ -381,6 +440,33 @@ function show_content()
         }
         echo "
             </div> <!-- /task-list -->";
+    }
+
+    if (array_key_exists('log-list', $task)) {
+        echo "
+            <div id='work-log-header'>
+                <h4>Work log</h4>
+            </div>
+            <div id='task-$task_id-work-log-list' class='work-log-list'>";
+        foreach ($task['log-list'] as $log_id => $log) {
+            echo "
+                <div id='log-$log_id' class='log-entry'>
+                    <div class='log-time'>${log['log_time']}</div>
+                    <div class='log-description'>
+                        ${log['description']}
+                    </div> <!-- /log-description -->
+                    <div class='log-details'>
+                        <a class='object-ref' href='user.php?id=${log['user_id']}'>${log['user_name']}</a>";
+            if ($log['work_hours']) {
+                echo ", ${log['work_hours']} hours";
+            }
+            echo "
+                    </div>
+                </div> <!-- /log-$log_id -->
+                ";
+        }
+        echo "
+            </div> <!-- /work-log-list ;-->";
     }
 }
 

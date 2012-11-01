@@ -11,10 +11,10 @@ function get_page_id() {
     return 'todo-page';
 }
 
-global $projects, $user, $user_list;
+global $projects, $user, $user_id, $user_list;
 
 function process_query_string() {
-    global $projects;
+    global $projects, $user_id;
     $user_id = NULL;
     if (isset($_GET['id'])) {
         $user_id = $_GET['id'];
@@ -191,16 +191,14 @@ function query_user($connection, $user_id) {
 
 function show_sidebar() {
     global $user, $user_list;
-    echo "
-        <h3>Options</h3>";
     if (! $user) {
         return;
     }
     echo "
         <div class='sidebar-block'>
-            <form id='add-subtask-form' method='post'>
-                <div id='subtask-summary' class='group'>
-                    <label for='subtask-summary'>Show to-do list for:</label>
+            <form id='show-todo-form' method='post'>
+                <div id='user-id-field' class='group'>
+                    <label for='user-id'>Show to-do list for:</label>
                     <select name='user-id' style='width:100%'>";
             foreach ($user_list as $todo_user_id => $login_name) {
                 $selected = ($user['user_id'] == $todo_user_id) ? "selected='selected'" : "";

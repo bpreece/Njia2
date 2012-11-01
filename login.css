@@ -16,14 +16,15 @@
 }
 
 #login-main {
-    background: #f1f1ee;
     padding-bottom: 1em;
 }
 
 #login-form {
+    width: 30em;
     margin: 0 240px;
     padding: .5em 1em;
-    background-color: #fcfcff;
+    background-color: #fafaf7;
+    border: 1px solid #ebebe8;
     border-radius: 1em;
 }
 

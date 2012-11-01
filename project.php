@@ -301,10 +301,8 @@ function query_project($project_id) {
 function show_sidebar() {
     global $project;
     global $show_closed_tasks;
-global $past_timeboxes_date;
+    global $past_timeboxes_date;
 
-    echo "
-        <h3>Options</h3>";
     if (! $project) {
         return;
     }

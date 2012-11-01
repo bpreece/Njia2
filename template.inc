@@ -104,6 +104,11 @@ $user = get_session_user();
                         <?php else: ?>
                             <li><a href='todo.php'>TO-DO</a></li>
                         <?php endif; ?>
+                        <?php if ($page_id == 'log-page') : ?>
+                            <li class='selected'>LOG</li>
+                        <?php else: ?>
+                            <li><a href='log.php'>LOG</a></li>
+                        <?php endif; ?>
                         <?php if ($page_id == 'projects-page') : ?>
                             <li class='selected'>PROJECTS</li>
                         <?php else: ?>

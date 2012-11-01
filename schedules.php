@@ -115,9 +115,6 @@ function show_sidebar() {
     global $timeboxes;
     global $show_closed_tasks;
     global $past_timeboxes_date;
-
-    echo "
-        <h3>Options</h3>";
     echo "
         <div class='sidebar-block'>
             <form id='list-options-form' method='post'>

@@ -17,7 +17,7 @@ html {
 }
 
 #page {
-    margin-left: 34px;  /* width of logo, plus 7px */
+    margin: 0 34px;  /* width of logo, plus 7px */
 }
 
 #header {
@@ -48,12 +48,11 @@ html {
 #sidebar {
     float: left;
     width: 180px;
-    padding: 10px;
+    padding: 0 10px;
     margin-right: -190px;  /* margin = -(width + padding) */
 }
 
 .sidebar-block {
-    margin-top: 10px;
     margin-bottom: 10px;
 }
 

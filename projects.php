@@ -165,8 +165,6 @@ function show_sidebar() {
     global $show_closed_projects;
     global $show_empty_projects;
 
-    echo "
-        <h3>Options</h3>";
     if (! $projects) {
         return;
     }
