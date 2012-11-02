@@ -23,7 +23,7 @@ function get_page_class() {
     return $page_class;
 }
 
-global $task;
+global $task, $total_hours;
 
 function process_form_data() {
     if (isset($_POST['update-button'])) {
@@ -244,6 +244,8 @@ function query_task($task_id) {
         }
     }
     
+    global $total_hours;
+    
     $log_query = "SELECT L.`log_id` , L.`work_hours` , L.`description` , 
             L.`user_id` , L.`log_time` , 
             U.`login_name` AS `user_name`
@@ -260,6 +262,7 @@ function query_task($task_id) {
     } else {
         while ($log = mysqli_fetch_array($log_result)) {
             $task['log-list'][$log['log_id']] = $log;
+            $total_hours += $log['work_hours'];
         }
     }
     
@@ -323,7 +326,7 @@ function show_sidebar() {
 
 function show_content() 
 {    
-    global $task;
+    global $task, $total_hours;
     if (!$task) {
         set_user_message("There was an error retrieving the task", 'warning');
         return;
@@ -445,6 +448,7 @@ function show_content()
     if (array_key_exists('log-list', $task)) {
         echo "
             <div id='work-log-header'>
+                <div class='work-log-details'>Total hours: $total_hours</div>
                 <h4>Work log</h4>
             </div>
             <div id='task-$task_id-work-log-list' class='work-log-list'>";

@@ -11,7 +11,7 @@
     background-color: #fffaed;
     padding: 1em 1.5em;
     border: 1px solid #e6e3da;
-    border-radius: 0.75em;
+    border-top-left-radius: 0.75em;
 }
 
 .log-entry {
@@ -27,7 +27,13 @@
     float: right;
 }
 
+.date-log {
+    margin-bottom: 1.5em;
+}
+
 .date-header {
+    font-size: 115%;
+    border-bottom: 1px solid;
     margin-bottom: 1em;
 }
 
@@ -36,7 +42,6 @@
 }
 
 .task-log-list {
-    padding-left: 1em;
 }
 
 .task-header {
@@ -48,7 +53,7 @@
 }
 
 .log-list {
-    padding-left: 0.5em;
+    padding-left: 1.5em;
 }
 
 .log {

@@ -59,7 +59,11 @@ span.subtask-closed {
     background-color: #fffaed;
     padding: 1em 1.5em;
     border: 1px solid #e6e3da;
-    border-radius: 0.75em;
+    border-top-left-radius: 0.75em;
+}
+
+.work-log-details {
+    float: right;
 }
 
 .log-entry {

@@ -27,15 +27,18 @@ function process_query_string() {
 /*
  * Process submitted form data
  */
-
+/*
 function process_form_data() {
+
 }
+ */
 
 /*
  * Fetch page contents from the database
  */
 function prepare_page_data() {
     global $user_id, $user_list, $log_date_list, $start_date, $end_date;
+    
     $connection = connect_to_database_session();
     if (! $connection) {
         set_user_message("Failed accessing database", 'failure');
@@ -48,36 +51,7 @@ function prepare_page_data() {
         $user_id = $session_user_id;
     }
     
-    /*
-     * Use the database to get start and end dates
-     */
-    $date_query = "SELECT ";
-    if ($end_date) {
-        $date_query .= "'$end_date' AS `end_date` ";
-    } else {
-        $date_query .= "DATE( NOW() ) AS `end_date` ";
-    }
-    if ($start_date) {
-        $date_query .= " , 
-            '$start_date' AS `start_date` ";
-    } else {
-        if ($end_date) {
-            $date_query .= " , 
-                DATE( DATE_SUB( '$end_date', INTERVAL 13 DAY ) ) AS `start_date` ";
-        } else {
-            $date_query .= " , 
-                DATE( DATE_SUB( NOW(), INTERVAL 13 DAY ) ) AS `start_date` ";
-        }
-    }
-    $date_results = mysqli_query($connection, $date_query);
-    if (! $date_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return;
-    } else {
-        $date_result = mysqli_fetch_array($date_results);
-        $start_date = $date_result['start_date'];
-        $end_date = $date_result['end_date'];
-    }
+    get_range_dates($connection);
 
     /*
      * Fetch list of users with common projects and verify that this user is
@@ -86,22 +60,37 @@ function prepare_page_data() {
 
     $user_list = fetch_user_list($connection);
     if (!array_key_exists($user_id, $user_list)) {
+        set_user_message("User $user_id was not found; displaying your information instead.", 'warning');
         $user_id = $session_user_id;
     }
     
     $log_query = "SELECT L.`log_id` , L.`description` , L.`work_hours` , 
         DATE( L.`log_time` ) AS `log_date` , 
         T.`task_id` , T.`task_summary` 
-        FROM `project_table` AS P
-        INNER JOIN  `access_table` AS A1 ON P.`project_id` = A1.`project_id` 
-        INNER JOIN  `access_table` AS A2 ON P.`project_id` = A2.`project_id` 
-        INNER JOIN  `user_table` AS U ON A1.`user_id` = U.`user_id` 
-        INNER JOIN `task_table` AS T ON P.`project_id` = T.`project_id` 
-        INNER JOIN `log_table` AS L ON L.`task_id` = T.`task_id` 
-        WHERE A2.`user_id` = '$session_user_id' 
-            AND L.`user_id` = '$user_id' 
-            AND DATE( L.`log_time` ) <= '$end_date' 
-            AND DATE( L.`log_time` ) >= '$start_date' 
+        FROM `log_table` AS L
+        INNER JOIN `task_table` AS T ON L.`task_id` = T.`task_id` 
+        INNER JOIN  `user_table` AS U ON L.`user_id` = U.`user_id` 
+        WHERE L.`user_id` = '$user_id' ";
+    if ($end_date) {
+        $log_query .= "
+            AND DATE( L.`log_time` ) <= '$end_date' ";
+    } else {
+        $log_query .= "
+            AND DATE( L.'log_time` ) <= DATE( NOW() ) ";
+    }
+    if ($start_date) {
+        $log_query .= "
+            AND DATE( L.`log_time` ) >= '$start_date' ";
+    } else {
+        if ($end_date) {
+            $log_query .= "
+                AND DATE( L.`log_time` ) >= DATE( DATE_SUB( '$end_date' , INTERVAL 13 DAY ) ) ";
+        } else {
+            $log_query .= "
+                AND DATE( L.`log_time` ) >= DATE( DATE_SUB( NOW() , INTERVAL 13 DAY ) ) ";
+        }
+    }
+    $log_query .= "
         ORDER BY  L.`log_time` ASC , T.`task_id` ";
 
     // sort the log results by date first, then task, and log entry
@@ -138,18 +127,55 @@ function prepare_page_data() {
     }
 }
 
+/**
+ * Use the database to get start and end dates
+ * Sets: $start_date, $end_date
+ */
+function get_range_dates($connection) {
+    global $start_date, $end_date;
+    
+    $date_query = "SELECT ";
+    if ($end_date) {
+        $date_query .= "'$end_date' AS `end_date` ";
+    } else {
+        $date_query .= "DATE( NOW() ) AS `end_date` ";
+    }
+    if ($start_date) {
+        $date_query .= " , 
+            '$start_date' AS `start_date` ";
+    } else {
+        if ($end_date) {
+            $date_query .= " , 
+                DATE( DATE_SUB( '$end_date', INTERVAL 13 DAY ) ) AS `start_date` ";
+        } else {
+            $date_query .= " , 
+                DATE( DATE_SUB( NOW(), INTERVAL 13 DAY ) ) AS `start_date` ";
+        }
+    }
+    $date_results = mysqli_query($connection, $date_query);
+    if (! $date_results) {
+        set_user_message(mysqli_error($connection), 'failure');
+        return FALSE;
+    } else {
+        $date_result = mysqli_fetch_array($date_results);
+        $start_date = $date_result['start_date'];
+        $end_date = $date_result['end_date'];
+        return TRUE;
+    }
+}
+
 function get_stylesheets() {
     $stylesheets = array('log.css');
     return $stylesheets;
 }
 
 function get_page_id() {
-    return 'log-page';
+    global $user_id;
+    return "log-page-user-$user_id";
 }
 
 function get_page_class() {
-    global $user_id;
-    return "log-user-$user_id";
+    return 'log-page';
 }
 
 function show_sidebar() {

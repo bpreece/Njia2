@@ -13,11 +13,9 @@ include_once('common.inc');
  * 
  * @return array
  */
-/*
 function get_stylesheets() {
-    return array("stub.css");
+    return array("njia.css");
 }
- */
 
 /**
  * OPTIONAL.  Use this function to return the value of an 'id' attribute
