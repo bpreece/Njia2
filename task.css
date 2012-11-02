@@ -56,8 +56,10 @@ span.subtask-closed {
 }
 
 .work-log-list {
-    background-color: #ffffff;
+    background-color: #fffaed;
     padding: 1em 1.5em;
+    border: 1px solid #e6e3da;
+    border-radius: 0.75em;
 }
 
 .log-entry {
