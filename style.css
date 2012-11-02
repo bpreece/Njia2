@@ -72,6 +72,10 @@ a.object-ref:hover {
     font-size: 75%;
 }
 
+#footer #copyright {
+    float: right;
+}
+
 #title {
     font-size: 300%;
 }
@@ -162,4 +166,5 @@ a.object-ref:hover {
     background-color: #f1f1ee;
     border-top-left-radius: 0.75em;
     border-top-right-radius: 0.75em;
+    border: 1px solid #e6e6e4;
 }
