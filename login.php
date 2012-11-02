@@ -76,7 +76,7 @@ if (isset($_POST['login_button'])) {
         <link rel="stylesheet" href="login.css" type="text/css" media="all" />
         <title><?php echo get_global_title() ?></title>
     </head>
-    <body id="login-page">
+    <body id="login-page" OnLoad="document.login_form.name_field.focus();">
         <div id="logo-and-title">
             <div id="logo"><img src="<?php echo get_logo_image(); ?>" /></div>
             <!--
@@ -123,7 +123,7 @@ if (isset($_POST['login_button'])) {
                 <h1>Sign on</h1>
 
                 <div id="login-main">
-                    <form id="login-form" method='post'>
+                    <form name='login_form' id="login-form" method='post'>
                         <label for='name_field'>Sign-on name:</label>
                         <input type='text' name='name_field'></input>
                         <label for='password_field'>Password:</label>
