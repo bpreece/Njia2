@@ -108,8 +108,9 @@ a.object-ref:hover {
 .user-message {
     padding: 15px;
     background-color: #558;
-    color: #ccf;
+    color: #eef;
     border: 1px solid #335;
+    border-radius: 0.5em;
 }
 
 .user-message.failure {
@@ -131,7 +132,7 @@ a.object-ref:hover {
 }
 
 .user-message.info {
-    background-color: #eee;
+    background-color: #f0f4ff;
     color: #474770;
     border: 1px solid #b5b5ca;
 }

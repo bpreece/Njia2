@@ -45,7 +45,6 @@ function process_query_string() {
         $work_log_end_date = $_GET['le'];
     }
     
-    $session_user = get_session_user();
     if (isset($_GET['id'])) {
         $user_id = $_GET['id'];
     } else {
@@ -171,6 +170,7 @@ function query_user($user_id) {
         return;
     }
 
+    // fetch the user information only if we share a common project
     $session_user_id = get_session_user_id();
     $user_id = mysqli_real_escape_string($connection, $user_id);
     $user_query = "SELECT U.`user_id` , U.`login_name` AS  `user_name` 
@@ -193,8 +193,7 @@ function query_user($user_id) {
     global $show_closed_member_projects;
     global $show_closed_owned_projects;
     
-    $session_user_id = get_session_user_id();
-    // projects which are owned by $user_id, but which are accessible to
+    // projects which are owned by $user_id, and which are accessible to
     // get_session_user_id();
     $query_user['owned-project-list'] = array();
     $owner_query = "SELECT P.`project_id` , P.`project_name` , P.`project_status` 
@@ -216,8 +215,7 @@ function query_user($user_id) {
         }
     }
     
-    // projects which are owned by $user_id, but which are accessible to
-    // get_session_user_id();
+    // projects which are accessible to both $user_id and get_session_user_id();
     $query_user['project-member-list'] = array();
     $member_query = "SELECT P.`project_id` , P.`project_name` , P.`project_status` 
         FROM `access_table` AS A 

@@ -40,6 +40,14 @@ if (! function_exists('get_all_scripts')) {
 // output, so that the functions can, for example, redirect to another page
 // if necessary.
 
+// Call the page's process_query_string() function, if it's defined.  This
+// function handles the query strings in the $_GET paramemters.  Typically, it
+// uses these parameters to load information for the page, or redirect to
+// another page.
+if (function_exists('process_query_string')) {
+    process_query_string();
+}
+
 // Call the page's process_form_data() function, if it's defined.  This function
 // handles form input in the $_POST parameters.  Typically, this will validate
 // the values, sanitize it, and write it to the database.  It will probably also
@@ -49,12 +57,12 @@ if (function_exists('process_form_data')) {
     process_form_data();
 }
 
-// Call the page's process_query_string() function, if it's defined.  This
-// function handles the query strings in the $_GET paramemters.  Typically, it
-// uses these parameters to load information for the page, or redirect to
-// another page.
-if (function_exists('process_query_string')) {
-    process_query_string();
+// Call the page's prepare_page_data() function, if it's defined.  This function
+// typically retrieves data from the database, or calculates or otherwise 
+// prepares information to be used by get_page_id(), get_page_class(), 
+// show_sidebar(), show_content(), or show_footer().
+if (function_exists('prepare_page_data')) {
+    prepare_page_data();
 }
 
 $page_id = '';

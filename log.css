@@ -1,0 +1,54 @@
+/* 
+    Document   : log
+    Created on : Nov 2, 2012, 9:10:48 AM
+    Author     : benpreece
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+
+.work-log-list {
+    background-color: #ffffff;
+    padding: 1em 1.5em;
+}
+
+.log-entry {
+    margin: 1em 0;
+}
+
+.log-details {
+    color: #9e978c;
+    font-style: italic;
+}
+
+.log-dates {
+    float: right;
+}
+
+.date-header {
+    margin-bottom: 1em;
+}
+
+.date-details {
+    float: right;
+}
+
+.task-log-list {
+    padding-left: 1em;
+}
+
+.task-header {
+    margin-bottom: 1em;
+}
+
+.task-details {
+    float: right;
+}
+
+.log-list {
+    padding-left: 0.5em;
+}
+
+.log {
+    margin: 0.5em 0;
+}
