@@ -32,6 +32,7 @@ function process_query_string() {
     global $show_closed_tasks;
     global $past_timeboxes_date;
     global $project_id, $project;
+    
     if (isset($_GET['T'])) {
         $show_closed_tasks = 'checked';
     }
@@ -40,7 +41,6 @@ function process_query_string() {
     }
     if (isset($_GET['id'])) {
         $project_id = $_GET['id'];
-        $project = query_project($project_id);
     }
 }
 
@@ -206,7 +206,8 @@ function update_project_status($status) {
     header("Location:project.php?id=$project_id");
 }
 
-function query_project($project_id) {
+function prepare_page_data() {
+    global $project_id, $project;
     $connection = connect_to_database_session();
     if (!$connection) {
         return null;
@@ -214,17 +215,17 @@ function query_project($project_id) {
 
     $session_id = get_session_id();
     $user_id = get_session_user_id();
-    $project_id = mysqli_real_escape_string($connection, $project_id);
+    $sql_project_id = mysqli_real_escape_string($connection, $project_id);
     $project_query = "SELECT P.* , 
             O.`user_id` AS `owner_id` , O.`login_name` AS `owner_name` 
         FROM `access_table` AS A 
         INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
         INNER JOIN `user_table` AS O ON P.`project_owner` = O.`user_id`
-        WHERE P.`project_id` = '$project_id' AND A.`user_id` = $user_id";
+        WHERE P.`project_id` = '$sql_project_id' AND A.`user_id` = $user_id";
     
     $project_result = mysqli_query($connection, $project_query);
     if (! $project_result) {
-        set_user_message("Project ID $project_id not recognized", 'warning');
+        set_user_message("Project ID $sql_project_id not recognized", 'warning');
         return null;
     }
     
@@ -239,7 +240,7 @@ function query_project($project_id) {
     global $show_closed_tasks;
     $task_query = "SELECT T.`task_id` , T.`task_summary` , `task_status` ,  `timebox_id` 
         FROM `task_table` AS T
-        WHERE T.`project_id` = '$project_id' AND T.`parent_task_id` IS NULL";
+        WHERE T.`project_id` = '$sql_project_id' AND T.`parent_task_id` IS NULL";
     if (! $show_closed_tasks) {
         $task_query .= "
             AND T.`task_status` <> 'closed' ";
@@ -261,7 +262,7 @@ function query_project($project_id) {
     
     global $past_timeboxes_date;
     $timebox_query = "SELECT X.* FROM `timebox_table` AS X
-        WHERE X.`project_id` = '$project_id'";
+        WHERE X.`project_id` = '$sql_project_id'";
     if ($past_timeboxes_date) {
         $timebox_query .= "
             AND X.`timebox_end_date` >= '$past_timeboxes_date'";
@@ -284,7 +285,7 @@ function query_project($project_id) {
     $user_query = "SELECT U.`user_id` , U.`login_name` 
         FROM `access_table` AS A
         INNER JOIN `user_table` AS U ON A.`user_id` = U.`user_id`
-        WHERE A.`project_id` = '$project_id'
+        WHERE A.`project_id` = '$sql_project_id'
         ORDER BY U.`login_name`";
     $user_result = mysqli_query($connection, $user_query);
     if (mysqli_num_rows($user_result) > 0) {
@@ -299,9 +300,7 @@ function query_project($project_id) {
 }
 
 function show_sidebar() {
-    global $project;
-    global $show_closed_tasks;
-    global $past_timeboxes_date;
+    global $project_id, $project;
 
     if (! $project) {
         return;
@@ -312,7 +311,7 @@ function show_sidebar() {
         <div class='sidebar-block'>
             <form id='close-project-form' method='post'>
                 <div class='group'>
-                    <input type='hidden' name='project-id' value='${project['project_id']}'>
+                    <input type='hidden' name='project-id' value='$project_id'>
                 </div>
                 <input type='submit' name='reopen-project-button' value='Reopen this project'></input>
             </form>
@@ -321,7 +320,7 @@ function show_sidebar() {
         echo "
         <div class='sidebar-block'>
             <form id='add-task-form' method='post'>
-                <input type='hidden' name='project-id' value='${project['project_id']}'>
+                <input type='hidden' name='project-id' value='$project_id'>
                 <div id='task-summary'>
                     <label for='task-summary'>Task Summary:</label>
                     <input style='width:100%' type='text' name='task-summary'></input>
@@ -332,7 +331,7 @@ function show_sidebar() {
         echo "
         <div class='sidebar-block'>
             <form id='add-timebox-form' method='post'>
-                <input type='hidden' name='project-id' value='${project['project_id']}'>
+                <input type='hidden' name='project-id' value='$project_id'>
                 <div id='timebox-name'>
                     <label for='timebox-name'>Timebox name:</label>
                     <input style='width:100%' type='text' name='timebox-name'></input>
@@ -347,7 +346,7 @@ function show_sidebar() {
         echo "
         <div class='sidebar-block'>
             <form id='new-project-form' method='post'>
-                <input type='hidden' name='project-id' value='${project['project_id']}'>
+                <input type='hidden' name='project-id' value='$project_id'>
                 <div id='project-name'>
                     <label for='project-name'>Project name:</label>
                     <input style='width:100%' type='text' name='project-name'></input>
@@ -359,7 +358,7 @@ function show_sidebar() {
             echo "
         <div class='sidebar-block'>
             <form id='close-project-form' method='post'>
-                <input type='hidden' name='project-id' value='${project['project_id']}'>
+                <input type='hidden' name='project-id' value='$project_id'>
                 <input type='submit' name='close-project-button' value='Close this project'></input>
             </form>
         </div>";
@@ -372,15 +371,16 @@ function show_content()
     global $show_closed_tasks;
     global $past_timeboxes_date;
     global $project_id, $project;
+    
     if (! $project) {
-        set_user_message("There was an error retrieving the project information", 'warning');
+        show_user_message("There was an error retrieving the project information", 'warning');
         return;
     }
     
     echo "
-        <h3>Project ${project['project_id']}</h3>
+        <h3>Project $project_id</h3>
         <form id='project-form' class='main-form' method='post'>
-            <input type='hidden' name='project-id' value='${project['project_id']}'>
+            <input type='hidden' name='project-id' value='$project_id'>
                 
             <div id='project-name'>
                 <label for='project-name'>Name:</label>

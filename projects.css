@@ -51,7 +51,7 @@
 
 .task-info {
     padding: 2px 4px;
-    background-color: #dfe9f2;
+    background-color: #eaf1f7;
     font-size: 85%;
 }
 
@@ -73,7 +73,7 @@
 }
 
 .task-info.unscheduled-task {
-    background-color: #f0daf0;
+    background-color: #f3eaf3;
 }
 
 .task-info.task-closed {

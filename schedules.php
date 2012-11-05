@@ -18,6 +18,12 @@ function get_page_id() {
 
 global $timeboxes, $tasks;
 
+/*
+function process_query_string() {
+
+}
+ */
+
 function process_form_data() {
     if (isset($_POST['apply-list-options-button'])) {
         process_apply_list_options();
@@ -36,11 +42,7 @@ function process_apply_list_options() {
     }
 }
 
-function process_query_string() {
-    $timeboxes = query_schedules();
-}
-
-function query_schedules() {
+function prepare_page_data() {
     $connection = connect_to_database_session();
     if (!$connection) {
         return null;

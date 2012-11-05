@@ -21,7 +21,6 @@ function process_query_string() {
     } else {
         $user_id = get_session_user_id();
     }
-    $projects = query_tasks($user_id);
 }
 
 function process_form_data() {
@@ -81,8 +80,8 @@ function process_close_task() {
     }    
 }
 
-function query_tasks($user_id) {
-    global $projects, $user, $user_list;
+function prepare_page_data() {
+    global $projects, $user_id, $user, $user_list;
 
     $connection = connect_to_database_session();
     if (!$connection) {
@@ -112,43 +111,39 @@ function query_tasks($user_id) {
                 ORDER BY X.`timebox_end_date` , P.`project_id` , T.`task_id`";
 
     $task_results = mysqli_query($connection, $task_query);
-    if ($task_results == false) {
+    $projects = array();
+    if (! $task_results) {
         set_user_message(mysqli_error($connection), 'failure');
         return;
     }
     $num_tasks = mysqli_num_rows($task_results);
-    if ($num_tasks > 0) {
-        $projects = array();
-        for ($i = 0; $i < $num_tasks; $i++) {
-            $result = mysqli_fetch_array($task_results);
+    while ($result = mysqli_fetch_array($task_results)) {
+        $project_id = $result['project_id'];
+        if (! array_key_exists($project_id, $projects)) {
+            $projects[$project_id] = array(
+                'project-id' => $project_id,
+                'project-name' => $result['project_name'],
+                'timebox-list' => array(),
+            );
+        }
 
-            $project_id = $result['project_id'];
-            if (! array_key_exists($project_id, $projects)) {
-                $projects[$project_id] = array(
-                    'project-id' => $project_id,
-                    'project-name' => $result['project_name'],
-                    'timebox-list' => array(),
-                );
-            }
-            
-            $timebox_id = $result['timebox_id'];
-            if (! array_key_exists($timebox_id, $projects[$project_id]['timebox-list'])) {
-                $projects[$project_id]['timebox-list'][$timebox_id] = array(
-                    'timebox-id' => $result['timebox_id'],
-                    'timebox-name' => $result['timebox_name'],
-                    'timebox-end-date' => $result['timebox_end_date'],
-                    'task-list' => array(),
-                );
-            }
+        $timebox_id = $result['timebox_id'];
+        if (! array_key_exists($timebox_id, $projects[$project_id]['timebox-list'])) {
+            $projects[$project_id]['timebox-list'][$timebox_id] = array(
+                'timebox-id' => $result['timebox_id'],
+                'timebox-name' => $result['timebox_name'],
+                'timebox-end-date' => $result['timebox_end_date'],
+                'task-list' => array(),
+            );
+        }
 
-            $task_id = $result['task_id'];
-            if (! array_key_exists($task_id, $projects[$project_id]['timebox-list'][$timebox_id]['task-list'])) {
-                $projects[$project_id]['timebox-list'][$timebox_id]['task-list'][$task_id] = array(
-                    'task-id' => $task_id,
-                    'parent-task-id' => $result['parent_task_id'],
-                    'task-summary' => $result['task_summary'],
-                );
-            }
+        $task_id = $result['task_id'];
+        if (! array_key_exists($task_id, $projects[$project_id]['timebox-list'][$timebox_id]['task-list'])) {
+            $projects[$project_id]['timebox-list'][$timebox_id]['task-list'][$task_id] = array(
+                'task-id' => $task_id,
+                'parent-task-id' => $result['parent_task_id'],
+                'task-summary' => $result['task_summary'],
+            );
         }
     }
     

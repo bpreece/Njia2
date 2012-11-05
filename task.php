@@ -23,7 +23,14 @@ function get_page_class() {
     return $page_class;
 }
 
-global $task, $total_hours;
+global $task, $task_id, $total_hours;
+
+function process_query_string() {
+    global $task_id, $task;
+    if (isset($_GET['id'])) {
+        $task_id = $_GET['id'];
+    }
+}
 
 function process_form_data() {
     if (isset($_POST['update-button'])) {
@@ -162,15 +169,9 @@ function process_add_task_log() {
     set_user_message("The log entry has been created.", 'success');
 }
 
-function process_query_string() {
+function prepare_page_data() {
     global $task_id, $task;
-    if (isset($_GET['id'])) {
-        $task_id = $_GET['id'];
-        $task = query_task($task_id);
-    }
-}
 
-function query_task($task_id) {
     $connection = connect_to_database_session();
     if (!$connection) {
         return null;
@@ -192,12 +193,13 @@ function query_task($task_id) {
                 WHERE S.`session_id` = '$session_id' and T.`task_id` = '$task_id'";
     
     $task_result = mysqli_query($connection, $task_query);
-    $num_rows = mysqli_num_rows($task_result);
-    if ($num_rows == 0) {
-        set_user_message("Task ID $task_id not recognized", 'warning');
-        return null;
+    if (! $task_result) {
+        set_user_message(mysqli_error($connection), 'warning');
+        return;
+    } else if (mysqli_num_rows($task_result) == 0) {
+        set_user_message("Task ID $task_id is not recognized", 'warning');
+        return;
     }
-    
     $task = mysqli_fetch_array($task_result);
     if ($task['task_status'] == 'closed') {
         set_user_message('This task has been closed', 'warning');
@@ -205,20 +207,25 @@ function query_task($task_id) {
         $task['can-close'] = TRUE;
     }
     $project_id = $task['project_id'];
+
+    // if the task has subtasks, then we'll list them;  otherwise, this task
+    // can be assigned, so we'll need a list of users and a list of timeboxes.
     
     $subtask_query = "SELECT T.`task_id` , T.`task_summary` , `task_status`
                  FROM `task_table` AS T
                  WHERE T.`parent_task_id` = '$task_id'
                  ORDER BY T.`task_id`";
     $subtask_result = mysqli_query($connection, $subtask_query);
-    if (mysqli_num_rows($subtask_result) > 0) {
+    if (! $subtask_result) {
+        set_user_message(mysqli_error($connection), 'warning');
+    } else if (mysqli_num_rows($subtask_result) > 0) { 
+        $task['subtask_list'] = array();
         while ($subtask = mysqli_fetch_array($subtask_result)) {
             $task['subtask_list'][$subtask['task_id']] = $subtask;
             if ($subtask['task_status'] != 'closed') {
                 $task['can-close'] = FALSE;
             }
         }
-        $task['subtask_list'] = $subtask_list;
     } else {
         $user_query = "SELECT U.`user_id` , U.`login_name`
                      FROM `access_table` AS A 
@@ -226,7 +233,10 @@ function query_task($task_id) {
                      WHERE A.`project_id` = '$project_id'
                      ORDER BY U.`login_name`";
         $user_result = mysqli_query($connection, $user_query);
-        if (mysqli_num_rows($user_result) > 0) {
+        $task['users_list'] = array();
+        if (! $user_result) {
+            set_user_message(mysqli_error($connection), 'warning');
+        } else {
             while ($user = mysqli_fetch_array($user_result)) {
                 $task['users_list'][$user['user_id']] = $user;
             }
@@ -237,7 +247,10 @@ function query_task($task_id) {
                      WHERE X.`project_id` = '$project_id'
                      ORDER BY X.`timebox_end_date`, X.`timebox_id`";
         $timebox_result = mysqli_query($connection, $timebox_query);
-        if (mysqli_num_rows($timebox_result) > 0) {
+        $task['timebox_list'] = array();
+        if (! $timebox_result) {
+            set_user_message(mysqli_error($connection), 'warning');
+        } else {
             while ($timebox = mysqli_fetch_array($timebox_result)) {
                 $task['timebox_list'][$timebox['timebox_id']] = $timebox;
             }
@@ -254,7 +267,6 @@ function query_task($task_id) {
         WHERE L.`task_id` = '$task_id'
             AND DATE( L.`log_time` ) >= DATE_SUB( DATE( NOW() ), INTERVAL 6 DAY)
         ORDER BY L.`log_id` DESC";
-
     $log_result = mysqli_query($connection, $log_query);
     $task['log-list'] = array();
     if (! $log_result) {
@@ -265,8 +277,6 @@ function query_task($task_id) {
             $total_hours += $log['work_hours'];
         }
     }
-    
-    return $task;
 }
 
 function show_sidebar() {
@@ -327,6 +337,7 @@ function show_sidebar() {
 function show_content() 
 {    
     global $task, $total_hours;
+    
     if (!$task) {
         set_user_message("There was an error retrieving the task", 'warning');
         return;

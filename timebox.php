@@ -2,6 +2,7 @@
 
 include_once('common.inc');
 
+global $timebox_id, $timebox;
 global $show_closed_tasks;
 $show_closed_tasks = '';
 
@@ -23,7 +24,12 @@ function get_page_class() {
     return $page_class;
 }
 
-global $timebox;
+function process_query_string() {
+    global $timebox_id, $timebox;
+    if (isset($_GET['id'])) {
+        $timebox_id = $_GET['id'];
+    }
+}
 
 function process_form_data() {
     if (isset($_POST['update-button'])) {
@@ -66,15 +72,9 @@ function process_timebox_form() {
     header("Location:timebox.php?id=${_POST['timebox-id']}");
 }
 
-function process_query_string() {
+function prepare_page_data() {
     global $timebox_id, $timebox;
-    if (isset($_GET['id'])) {
-        $timebox_id = $_GET['id'];
-        $timebox = query_timebox($timebox_id);
-    }
-}
 
-function query_timebox($timebox_id) {
     $connection = connect_to_database_session();
     if (!$connection) {
         return null;
@@ -89,10 +89,12 @@ function query_timebox($timebox_id) {
                 WHERE S.`session_id` = '$session_id' and X.`timebox_id` = '$timebox_id'";
     
     $timebox_result = mysqli_query($connection, $timebox_query);
-    $num_rows = mysqli_num_rows($timebox_result);
-    if ($num_rows == 0) {
+    if (! $timebox_result) {
+        set_user_message(mysqli_error($connection), "warning");
+        return;
+    } else if (mysqli_num_rows($timebox_result) == 0) {
         set_user_message("Timebox ID $timebox_id not recognized", 'warning');
-        return null;
+        return;
     }
     $timebox = mysqli_fetch_array($timebox_result);
     
@@ -105,15 +107,15 @@ function query_timebox($timebox_id) {
                     AND T.`task_status` <> 'closed' ";
     }
     $task_result = mysqli_query($connection, $task_query);
-    $num_rows = mysqli_num_rows($task_result);
-    if ($num_rows > 0) {
-        $tasks = array();
+    $timebox['task_list'] = array();
+    if (! $task_result) {
+        set_user_message(mysqli_error($connection), "warning");
+    } else {
         while ($task = mysqli_fetch_array($task_result)) {
-            $tasks[$task['task_id']] = $task;
+            $timebox['task_list'][$task['task_id']] = $task;
         }
-        $timebox['task_list'] = $tasks;
     }
-    
+
     return $timebox;
 }
 
@@ -137,16 +139,16 @@ function show_sidebar() {
 
 function show_content() 
 {
-    global $timebox;
+    global $timebox, $timebox_id;
     if (! $timebox) {
-        set_user_message("There was an error retrieving the project information", 'warning');
+        show_user_message("There was an error retrieving the project information", 'warning');
         return;
     }
     
     echo "                
-        <h3>Timebox ${timebox['timebox_id']}</h3>
+        <h3>Timebox $timebox_id</h3>
         <form id='timebox-form' class='main-form' method='post'>
-            <input type='hidden' name='timebox-id' value='${timebox['timebox_id']}'>
+            <input type='hidden' name='timebox-id' value='$timebox_id'>
             
             <div id='project_name'>
                 <label>Project:</label>

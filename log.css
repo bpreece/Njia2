@@ -14,19 +14,6 @@
     border-top-left-radius: 0.75em;
 }
 
-.log-entry {
-    margin: 1em 0;
-}
-
-.log-details {
-    color: #9e978c;
-    font-style: italic;
-}
-
-.log-dates {
-    float: right;
-}
-
 .date-log {
     margin-bottom: 1.5em;
 }
@@ -58,4 +45,14 @@
 
 .log {
     margin: 0.5em 0;
+}
+
+.log-details {
+    color: #9e978c;
+    font-size: 85%;
+    font-style: italic;
+}
+
+.log-dates {
+    float: right;
 }

@@ -50,8 +50,6 @@ function process_query_string() {
     } else {
         $user_id = get_session_user_id();
     }
-    
-    $query_user = query_user($user_id);
 }
 
 function process_form_data() {
@@ -164,7 +162,9 @@ function process_new_account() {
     }
 }
 
-function query_user($user_id) {
+function prepare_page_data() {
+    global $query_user, $user_id;
+    
     $connection = connect_to_database_session();
     if (!$connection) {
         return;

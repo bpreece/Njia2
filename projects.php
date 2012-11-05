@@ -20,16 +20,18 @@ function get_page_id() {
 
 global $projects, $tasks;
 
+/*
+function process_query_string() {
+
+}
+ */
+
 function process_form_data() {
     if (isset($_POST['apply-list-options-button'])) {
         process_apply_list_options();
     } else if (isset($_POST['add-project-button'])) {
         process_add_project_form();
     }
-}
-
-function process_query_string() {
-    $projects = query_projects();
 }
 
 function process_apply_list_options() {
@@ -78,7 +80,7 @@ function process_add_project_form() {
     header ("Location: project.php?id=$project_id");
 }
 
-function query_projects() {
+function prepare_page_data() {
     $connection = connect_to_database_session();
     if (!$connection) {
         return null;
