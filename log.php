@@ -3,7 +3,7 @@
 include_once('common.inc');
 include_once('data.inc');
 
-global $user_id, $user_list, $log_date_list, $start_date, $end_date;
+global $user_id, $user_list, $log_date_list, $start_date, $end_date, $total_work_hours;
 $start_date = '';
 $end_date = '';
 
@@ -37,7 +37,7 @@ function process_form_data() {
  * Fetch page contents from the database
  */
 function prepare_page_data() {
-    global $user_id, $user_list, $log_date_list, $start_date, $end_date;
+    global $user_id, $user_list, $log_date_list, $start_date, $end_date, $total_work_hours;
     
     $connection = connect_to_database_session();
     if (! $connection) {
@@ -95,6 +95,7 @@ function prepare_page_data() {
 
     // sort the log results by date first, then task, and log entry
     $log_results = mysqli_query($connection, $log_query);
+    $total_work_hours = 0;
     if (! $log_results) {
         set_user_message(mysqli_error($connection), 'failure');
         return;
@@ -105,6 +106,7 @@ function prepare_page_data() {
             $log_id = $log['log_id'];
             $task_id = $log['task_id'];
             $work_hours = $log['work_hours'];
+            $total_work_hours += $work_hours;
             if (!array_key_exists($date, $log_date_list)) {
                 $log_date_list[$date] = array();
                 $log_date_list[$date]['work-hours'] = 0;
@@ -209,12 +211,13 @@ function show_sidebar() {
 }
 
 function show_content() {
-    global $user_id, $user_list, $log_date_list, $start_date, $end_date;
+    global $user_id, $user_list, $log_date_list, $start_date, $end_date, $total_work_hours;
     
     $user_name = $user_list[$user_id]['login_name'];
     echo "
-        <div class='log-dates'>$start_date &mdash; $end_date</div>
         <h3><a class='object-ref' href='user.php?id=$user_id'>$user_name</a></h3>
+        <div class='work-log-details'>Total hours: $total_work_hours</div>
+        <div class='work-log-dates'>$start_date &mdash; $end_date</div>
         <div class='work-log-list'>";
     foreach ($log_date_list as $date => $date_info) {
         echo "
@@ -233,16 +236,16 @@ function show_content() {
                                 <a class='object-ref' href='task.php?id=$task_id'>${task_info['task-summary']}</a>
                             </div>
                         </div>
-                        <div class='log-list'>";
+                        <div class='log-entry-list'>";
             foreach ($task_info['log-list'] as $log_id => $log) {
                 echo "
-                            <div id='log-$log_id' class='log'>
-                                <div class='log-description'>${log['description']}</div>
-                                <div class='log-details'>${log['work-hours']} hrs.</div>
+                            <div id='log-entry-$log_id' class='log-entry'>
+                                <div class='log-entry-details'>${log['work-hours']} hrs.</div>
+                                <div class='log-entry-description'>${log['description']}</div>
                             </div> <!-- /log-$log_id -->";
             }
             echo "
-                        </div> <!-- /log-list -->
+                        </div> <!-- /log-entry-list -->
                     </div> <!-- /task-$task_id-log -->";
         }
         echo "

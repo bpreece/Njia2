@@ -6,6 +6,15 @@
         Purpose of the stylesheet follows.
 */
 
+.work-log-details {
+    float: right;
+    margin-right: 2.5em;
+}
+
+.work-log-dates {
+    margin-left: 1.5em;
+    font-style: italic;
+}
 
 .work-log-list {
     background-color: #fffaed;
@@ -26,9 +35,15 @@
 
 .date-details {
     float: right;
+    width: 8em;
+    margin-left: -8em;
 }
 
 .task-log-list {
+}
+
+.task-log {
+    margin: 1em 0;
 }
 
 .task-header {
@@ -37,22 +52,35 @@
 
 .task-details {
     float: right;
+    width: 8em;
+    margin-left: -8em;
 }
 
-.log-list {
+.task-summary {
+    margin-right: 10em;
+}
+
+.log-entry-list {
     padding-left: 1.5em;
 }
 
-.log {
+.log-entry {
     margin: 0.5em 0;
 }
 
-.log-details {
+.log-entry-details {
+    float: right;
+    width: 5em;
+    margin-left: -5em;
+}
+
+.log-entry-description {
+    margin-right: 10em;
+}
+
+.log-entry-dates {
     color: #9e978c;
     font-size: 85%;
     font-style: italic;
-}
-
-.log-dates {
-    float: right;
+    padding-left: 1.75em;
 }

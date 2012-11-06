@@ -104,8 +104,12 @@ function process_add_subtask_form() {
     $new_task_id = mysqli_insert_id($connection);
     
     $parent_task_query = "UPDATE `task_table` SET 
-        `user_id` = null , `timebox_id` = null
+        `user_id` = NULL , `timebox_id` = NULL
         WHERE `task_id` = '$parent_task_id'";
+    $parent_task_results = mysqli_query($connection, $parent_task_query);
+    if (! $parent_task_results) {
+        set_user_message(mysqli_error($connection), "warning");
+    }
 
     header("Location:task.php?id=$new_task_id");
 }

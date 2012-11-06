@@ -109,9 +109,11 @@ function process_add_task_form() {
     $task_summary = mysqli_real_escape_string($connection, $_POST['task-summary']);
     
     $task_query = "INSERT INTO `task_table` (
-        `task_summary` , `project_id` , `task_created_date` 
+            `task_summary` , `project_id` , `task_created_date` , `user_id` 
         ) VALUES ( 
-        '$task_summary' , '$project_id' , CURRENT_TIMESTAMP() )";
+            '$task_summary' , '$project_id' , CURRENT_TIMESTAMP() , 
+            ( SELECT `project_owner` FROM `project_table` WHERE `project_id` = '$project_id' )
+        )";
 
     $task_results = mysqli_query($connection, $task_query);
     if (! $task_results) {
@@ -149,16 +151,19 @@ function process_add_timebox_form() {
 }
 
 function process_new_project_form() {
-    global $session_user_id;
-    
     $connection = connect_to_database_session();
     if (!$connection) {
         return null;
     }
 
+    $session_user_id = get_session_user_id();
     $project_name = mysqli_real_escape_string($connection, $_POST['project-name']);
     
-    $project_query = "INSERT INTO `project_table` ( `project_name` ) VALUES ( '$project_name' )";
+    $project_query = "INSERT INTO `project_table` ( 
+            `project_name` , `project_owner` 
+        ) VALUES ( 
+            '$project_name' , '$session_user_id' 
+        )";
     $project_results = mysqli_query($connection, $project_query);
     if (! $project_results) {
         set_user_message(mysqli_error($connection), "warning");
@@ -222,7 +227,6 @@ function prepare_page_data() {
         INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
         INNER JOIN `user_table` AS O ON P.`project_owner` = O.`user_id`
         WHERE P.`project_id` = '$sql_project_id' AND A.`user_id` = $user_id";
-    
     $project_result = mysqli_query($connection, $project_query);
     if (! $project_result) {
         set_user_message("Project ID $sql_project_id not recognized", 'warning');
@@ -249,15 +253,12 @@ function prepare_page_data() {
         ORDER BY T.`task_id`";
     
     $task_result = mysqli_query($connection, $task_query);
-    if (mysqli_num_rows($task_result) > 0) {
-        $task_list = array();
-        while ($task = mysqli_fetch_array($task_result)) {
-            $task_list[$task['task_id']] = $task;
-            if ($task['task_status'] != 'closed') {
-                $project['can-close'] = FALSE;
-            }
+    $project['task_list'] = array();
+    while ($task = mysqli_fetch_array($task_result)) {
+        $project['task_list'][$task['task_id']] = $task;
+        if ($task['task_status'] != 'closed') {
+            $project['can-close'] = FALSE;
         }
-        $project['task_list'] = $task_list;
     }
     
     global $past_timeboxes_date;
@@ -274,12 +275,11 @@ function prepare_page_data() {
         ORDER BY X.`timebox_end_date`";
     
     $timebox_result = mysqli_query($connection, $timebox_query);
+    $project['timebox_list'] = array();
     if (mysqli_num_rows($timebox_result) > 0) {
-        $timebox_list = array();
         while ($timebox = mysqli_fetch_array($timebox_result)) {
-            $timebox_list[$timebox['timebox_id']] = $timebox;
+            $project['timebox_list'][$timebox['timebox_id']] = $timebox;
         }
-        $project['timebox_list'] = $timebox_list;
     }
     
     $user_query = "SELECT U.`user_id` , U.`login_name` 
@@ -288,12 +288,11 @@ function prepare_page_data() {
         WHERE A.`project_id` = '$sql_project_id'
         ORDER BY U.`login_name`";
     $user_result = mysqli_query($connection, $user_query);
+    $project['user_list'] = array();
     if (mysqli_num_rows($user_result) > 0) {
-        $user_list = array();
         while ($user = mysqli_fetch_array($user_result)) {
-            $user_list[$user['user_id']] = $user['login_name'];
+            $project['user_list'][$user['user_id']] = $user['login_name'];
         }
-        $project['user_list'] = $user_list;
     }
     
     return $project;
@@ -408,81 +407,77 @@ function show_content()
         </form>
             ";
 
-    if (array_key_exists('task_list', $project)) {
-        echo "
-            <div id='tasks-header'>
-                <div class='header-controls' style='float:right'>
-                    <form method='GET'>
-                        <input type='hidden' name='id' value='$project_id' />";
-        if ($past_timeboxes_date) {
-            echo"
-                        <input type='hidden' name='X' value='$past_timeboxes_date' />";
-        }
-        echo "
-                        <input type='checkbox' name='T' value='YES' $show_closed_tasks /><label>Show closed tasks</label>
-                        <input type='submit' style='font-size:85%' value='&#x2713;' title='Apply options' />
-                    </form>
-                </div>
-                <h4>Tasks</h4>
-            </div>
-            <div class='task-list'>";
-        foreach ($project['task_list'] as $task_id => $task) {
-            echo "
-                <div id='task-$task_id' class='task'>
-                    <div class='task-info task-${task['task_status']}'>
-                        <div class='task-details'>";
-            if ($task['task_status'] != 'open') {
-                echo "
-                            ${task['task_status']}";
-            }
-            echo "
-                        </div> <!-- /task-details -->
-                        <div class='task-id'>$task_id</div>
-                        <div class='task-summary'>
-                            <a class='object-ref' href='task.php?id=$task_id'>${task['task_summary']}</a>
-                        </div> <!-- /task-summary -->";
-            echo "
-                    </div> <!-- /task-info -->
-                </div> <!-- /task-$task_id -->";
-        }
-        echo "
-            </div> <!-- /task-list -->";
+    echo "
+        <div id='tasks-header'>
+            <div class='header-controls' style='float:right'>
+                <form method='GET'>
+                    <input type='hidden' name='id' value='$project_id' />";
+    if ($past_timeboxes_date) {
+        echo"
+                    <input type='hidden' name='X' value='$past_timeboxes_date' />";
     }
+    echo "
+                    <input type='checkbox' name='T' value='YES' $show_closed_tasks /><label>Show closed tasks</label>
+                    <input type='submit' style='font-size:85%' value='&#x2713;' title='Apply options' />
+                </form>
+            </div>
+            <h4>Tasks</h4>
+        </div>
+        <div class='task-list'>";
+    foreach ($project['task_list'] as $task_id => $task) {
+        echo "
+            <div id='task-$task_id' class='task'>
+                <div class='task-info task-${task['task_status']}'>
+                    <div class='task-details'>";
+        if ($task['task_status'] != 'open') {
+            echo "
+                        ${task['task_status']}";
+        }
+        echo "
+                    </div> <!-- /task-details -->
+                    <div class='task-id'>$task_id</div>
+                    <div class='task-summary'>
+                        <a class='object-ref' href='task.php?id=$task_id'>${task['task_summary']}</a>
+                    </div> <!-- /task-summary -->";
+        echo "
+                </div> <!-- /task-info -->
+            </div> <!-- /task-$task_id -->";
+    }
+    echo "
+        </div> <!-- /task-list -->";
 
-    if (array_key_exists('timebox_list', $project)) {
+    echo "
+        <div id='tasks-header'>
+            <div class='header-controls' style='float:right'>
+                <form method='GET'>
+                    <input type='hidden' name='id' value='$project_id' />";
+    if ($show_closed_tasks) {
         echo "
-            <div id='tasks-header'>
-                <div class='header-controls' style='float:right'>
-                    <form method='GET'>
-                        <input type='hidden' name='id' value='$project_id' />";
-        if ($show_closed_tasks) {
-            echo "
-                        <input type='hidden' name='T' value='YES' />";
-        }
-        echo "
-                        <label for='X'>Show since</label>
-                        <input type='text' size='12' style='font-size:small' name='X' value='$past_timeboxes_date' />
-                        <input type='submit' style='font-size:85%' value='&#x2713;' title='Apply options' />
-                    </form>
-                </div>
-                <h4>Timeboxes</h4>
-            </div>
-            <div class='timebox-list'>";
-        foreach ($project['timebox_list'] as $timebox_id => $timebox) {
-            echo "
-                <div id='timebox-$timebox_id' class='timebox'>
-                    <div class='timebox-details'>${timebox['timebox_end_date']}</div>
-                    <div class='timebox-info'>
-                        <div class='timebox-id'>$timebox_id</div>
-                        <div class='timebox-name'>
-                            <a class='object-ref' href='timebox.php?id=$timebox_id'>${timebox['timebox_name']}</a>
-                        </div> <!-- /timebox-name -->
-                    </div> <!-- /timebox-info -->
-                </div> <!-- /timebox-$timebox_id -->";
-        }
-        echo "
-            </div> <!-- /timebox-list -->";
+                    <input type='hidden' name='T' value='YES' />";
     }
+    echo "
+                    <label for='X'>Show since</label>
+                    <input type='text' size='12' style='font-size:small' name='X' value='$past_timeboxes_date' />
+                    <input type='submit' style='font-size:85%' value='&#x2713;' title='Apply options' />
+                </form>
+            </div>
+            <h4>Timeboxes</h4>
+        </div>
+        <div class='timebox-list'>";
+    foreach ($project['timebox_list'] as $timebox_id => $timebox) {
+        echo "
+            <div id='timebox-$timebox_id' class='timebox'>
+                <div class='timebox-details'>${timebox['timebox_end_date']}</div>
+                <div class='timebox-info'>
+                    <div class='timebox-id'>$timebox_id</div>
+                    <div class='timebox-name'>
+                        <a class='object-ref' href='timebox.php?id=$timebox_id'>${timebox['timebox_name']}</a>
+                    </div> <!-- /timebox-name -->
+                </div> <!-- /timebox-info -->
+            </div> <!-- /timebox-$timebox_id -->";
+    }
+    echo "
+        </div> <!-- /timebox-list -->";
     
     echo "
         <h4>People</h4>
