@@ -112,3 +112,11 @@
 .user-id {
     display: none;
 }
+
+.user input[type="submit"].remove-user {
+    height: 12px;
+    width: 12px;
+    margin: 0 0 2px 2px;
+    background: #ecc url('image/delete.png') no-repeat top left;
+    border: none;
+}

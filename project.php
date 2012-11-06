@@ -53,12 +53,14 @@ function process_form_data() {
         process_add_task_form();
     } else if (isset($_POST['add-timebox-button'])) {
         process_add_timebox_form();
-    } else if (isset($_POST['new-project-button'])) {
-        process_new_project_form();
+    } else if (isset($_POST['add-user-button'])) {
+        process_add_user_form();
     } else if (isset($_POST['close-project-button'])) {
         process_close_project_form();
     } else if (isset($_POST['reopen-project-button'])) {
         process_reopen_project_form();
+    } else if (isset($_POST['remove-user-button'])) {
+        process_remove_user_form();
     }
 }
 
@@ -150,38 +152,27 @@ function process_add_timebox_form() {
     header("Location:timebox.php?id=$new_timebox_id");
 }
 
-function process_new_project_form() {
+function process_add_user_form() {
     $connection = connect_to_database_session();
     if (!$connection) {
         return null;
     }
-
-    $session_user_id = get_session_user_id();
-    $project_name = mysqli_real_escape_string($connection, $_POST['project-name']);
     
-    $project_query = "INSERT INTO `project_table` ( 
-            `project_name` , `project_owner` 
-        ) VALUES ( 
-            '$project_name' , '$session_user_id' 
-        )";
-    $project_results = mysqli_query($connection, $project_query);
-    if (! $project_results) {
-        set_user_message(mysqli_error($connection), "warning");
-        return null;
-    }    
-    $new_project_id = mysqli_insert_id($connection);
-    
+    $project_id = mysqli_real_escape_string($connection, $_POST['project-id']);
+    $user_name = mysqli_real_escape_string($connection, $_POST['user-name']);
     $access_query = "INSERT INTO `access_table` ( 
-        `project_id` , `user_id` 
-        ) VALUES (
-        '$new_project_id' , '$session_user_id' )";
+            `project_id` , `user_id` 
+        ) VALUES ( 
+            '$project_id' , (SELECT `user_id` FROM `user_table` WHERE `login_name` = '$user_name' )
+        )";
+    set_user_message($access_query, 'debug');
     $access_results = mysqli_query($connection, $access_query);
     if (! $access_results) {
         set_user_message(mysqli_error($connection), "warning");
         return null;
     }    
     
-    header("Location:project.php?id=$new_project_id");
+    header("Location:project.php?id=$project_id");
 }
 
 function process_close_project_form() {
@@ -202,6 +193,25 @@ function update_project_status($status) {
     $query = "UPDATE `project_table` 
         SET `project_status` = '$status' 
         WHERE `project_id` = '$project_id'";
+    $results = mysqli_query($connection, $query);
+    if (! $results) {
+        set_user_message(mysqli_error($connection), "warning");
+        return null;
+    }    
+    
+    header("Location:project.php?id=$project_id");
+}
+
+function process_remove_user_form() {
+    $connection = connect_to_database_session();
+    if (!$connection) {
+        return null;
+    }
+
+    $user_id = mysqli_real_escape_string($connection, $_POST['user-id']);
+    $project_id = mysqli_real_escape_string($connection, $_POST['project-id']);
+    $query = "DELETE FROM `access_table` 
+        WHERE `project_id` = '$project_id' AND `user_id` = '$user_id'";
     $results = mysqli_query($connection, $query);
     if (! $results) {
         set_user_message(mysqli_error($connection), "warning");
@@ -307,60 +317,62 @@ function show_sidebar() {
 
     if ($project['project_status'] == 'closed') {
         echo "
-        <div class='sidebar-block'>
-            <form id='close-project-form' method='post'>
-                <div class='group'>
-                    <input type='hidden' name='project-id' value='$project_id'>
-                </div>
-                <input type='submit' name='reopen-project-button' value='Reopen this project'></input>
-            </form>
-        </div>";
+            <div class='sidebar-block'>
+                <form id='close-project-form' method='post'>
+                    <div class='group'>
+                        <input type='hidden' name='project-id' value='$project_id'>
+                    </div>
+                    <input type='submit' name='reopen-project-button' value='Reopen this project'></input>
+                </form>
+            </div>";
     } else {
         echo "
-        <div class='sidebar-block'>
-            <form id='add-task-form' method='post'>
-                <input type='hidden' name='project-id' value='$project_id'>
-                <div id='task-summary'>
-                    <label for='task-summary'>Task Summary:</label>
-                    <input style='width:100%' type='text' name='task-summary'></input>
-                </div>
-                <input type='submit' name='add-task-button' value='Add task'></input>
-            </form>
-        </div>";
+            <div class='sidebar-block'>
+                <form id='add-task-form' method='post'>
+                    <input type='hidden' name='project-id' value='$project_id'>
+                    <div id='task-summary'>
+                        <label for='task-summary'>Task Summary:</label>
+                        <input style='width:100%' type='text' name='task-summary'></input>
+                    </div>
+                    <input type='submit' name='add-task-button' value='Add task'></input>
+                </form>
+            </div>";
         echo "
-        <div class='sidebar-block'>
-            <form id='add-timebox-form' method='post'>
-                <input type='hidden' name='project-id' value='$project_id'>
-                <div id='timebox-name'>
-                    <label for='timebox-name'>Timebox name:</label>
-                    <input style='width:100%' type='text' name='timebox-name'></input>
-                </div>
-                <div id='timebox-end-date'>
-                    <label for='timebox-end-date'>Timebox end date:</label>
-                    <input style='width:100%' type='text' name='timebox-end-date'></input>
-                </div>
-                <input type='submit' name='add-timebox-button' value='Add timebox'></input>
-            </form>
-        </div>";
-        echo "
-        <div class='sidebar-block'>
-            <form id='new-project-form' method='post'>
-                <input type='hidden' name='project-id' value='$project_id'>
-                <div id='project-name'>
-                    <label for='project-name'>Project name:</label>
-                    <input style='width:100%' type='text' name='project-name'></input>
-                </div>
-                <input type='submit' name='new-project-button' value='Create new project'></input>
-            </form>
-        </div>";
+            <div class='sidebar-block'>
+                <form id='add-timebox-form' method='post'>
+                    <input type='hidden' name='project-id' value='$project_id'>
+                    <div id='timebox-name'>
+                        <label for='timebox-name'>Timebox name:</label>
+                        <input style='width:100%' type='text' name='timebox-name'></input>
+                    </div>
+                    <div id='timebox-end-date'>
+                        <label for='timebox-end-date'>Timebox end date:</label>
+                        <input style='width:100%' type='text' name='timebox-end-date'></input>
+                    </div>
+                    <input type='submit' name='add-timebox-button' value='Add timebox'></input>
+                </form>
+            </div>";
+        if ($project['project_owner'] == get_session_user_id()) {
+            echo "
+            <div class='sidebar-block'>
+                <form id='add-user-form' method='post'>
+                    <input type='hidden' name='project-id' value='$project_id'>
+                    <div id='user-field'>
+                        <label for='user-name'>User login name:</label>
+                        <input style='width:100%' type='text' name='user-name'></input>
+                    </div>
+                    <input type='submit' name='add-user-button' value='Add user to project'></input>
+                </form>
+            </div>";
+        }
         if ($project['can-close']) {
             echo "
-        <div class='sidebar-block'>
-            <form id='close-project-form' method='post'>
-                <input type='hidden' name='project-id' value='$project_id'>
-                <input type='submit' name='close-project-button' value='Close this project'></input>
-            </form>
-        </div>";
+            <div class='sidebar-block'>
+                <form id='close-project-form' method='post'>
+                    <input type='hidden' name='project-id' value='$project_id'>
+                    <input type='submit' name='close-project-button' value='Close this project'></input>
+                </form>
+            </div>";
         }
     }
 }
@@ -486,7 +498,19 @@ function show_content()
         echo "
             <div id='user-$user_id' class='user'>
                 <div class='user-info'>
-                    <div class='user-id'>$user_id</div>
+                    <div class='user-id'>$user_id</div>";
+        $project_owner = $project['project_owner'];
+        if ($project_owner == get_session_user_id() && $project_owner != $user_id) {
+            echo "
+                    <div style='float:right'>
+                        <form id='remove-user-$user_id-form' method='post'>
+                            <input type='hidden' name='project-id' value='$project_id'></input>
+                            <input type='hidden' name='user-id' value='$user_id'></input>
+                            <input type='submit' class='remove-user' name='remove-user-button' title='Remove this user' value=''></input>
+                        </form>
+                    </div> <!-- /remove-user-$user_id-form -->";
+        }
+        echo "
                     <div class='user-name'>
                         <a class='object-ref' href='user.php?id=$user_id'>$user_name</a>
                     </div> <!-- /user-name -->
