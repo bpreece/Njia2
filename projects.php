@@ -14,7 +14,7 @@ function get_stylesheets() {
     return $stylesheets;
 }
 
-function get_page_id() {
+function get_page_class() {
     return 'projects-page';
 }
 

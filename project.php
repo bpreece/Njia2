@@ -7,27 +7,6 @@ global $past_timeboxes_date;
 $show_closed_tasks = '';
 $past_timeboxes_date = '';
 
-function get_stylesheets() {
-    $stylesheets = array('project.css');
-    return $stylesheets;
-}
-
-function get_page_id() {
-    return 'project-page';
-}
-
-function get_page_class() {
-    global $project;
-    if (! $project) {
-        return '';
-    }
-    $page_class = "project-${project['project_id']}";
-    if ($project['project_status'] == 'closed') {
-        $page_class .= " project-closed";
-    }
-    return $page_class;
-}
-
 function process_query_string() {
     global $show_closed_tasks;
     global $past_timeboxes_date;
@@ -165,7 +144,6 @@ function process_add_user_form() {
         ) VALUES ( 
             '$project_id' , (SELECT `user_id` FROM `user_table` WHERE `login_name` = '$user_name' )
         )";
-    set_user_message($access_query, 'debug');
     $access_results = mysqli_query($connection, $access_query);
     if (! $access_results) {
         set_user_message(mysqli_error($connection), "warning");
@@ -308,6 +286,27 @@ function prepare_page_data() {
     return $project;
 }
 
+function get_stylesheets() {
+    $stylesheets = array('project.css');
+    return $stylesheets;
+}
+
+function get_page_id() {
+    return 'project-page';
+}
+
+function get_page_class() {
+    global $project;
+    if (! $project) {
+        return '';
+    }
+    $page_class = "project-${project['project_id']}";
+    if ($project['project_status'] == 'closed') {
+        $page_class .= " project-closed";
+    }
+    return $page_class;
+}
+
 function show_sidebar() {
     global $project_id, $project;
 
@@ -365,7 +364,7 @@ function show_sidebar() {
                 </form>
             </div>";
         }
-        if ($project['can-close']) {
+        if ($project['project_owner'] == get_session_user_id() && $project['can-close']) {
             echo "
             <div class='sidebar-block'>
                 <form id='close-project-form' method='post'>

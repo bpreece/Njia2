@@ -285,14 +285,15 @@ function show_sidebar() {
         return;
     }
 
-    echo "
+    if ($query_user == get_session_user_id()) {
+        echo "
         <div class='sidebar-block'>
             <form id='close-account-form' method='post'>
                 <input type='hidden' name='user-id' value='${query_user['user_id']}'>
                 <input type='submit' name='close-account-button' value='Close this account'></input>
             </form>
         </div>";
-        
+    }        
     if (is_admin_session()) {
         echo "
         <div class='sidebar-block'>

@@ -16,32 +16,32 @@
 }
 
 #login-main {
+    margin: 0 240px;
     padding-bottom: 1em;
 }
 
-#login-form {
+#login_form {
     width: 30em;
-    margin: 0 240px;
     padding: .5em 1em;
     background-color: #fafaf7;
     border: 1px solid #ebebe8;
     border-radius: 1em;
 }
 
-#login-form label {
+#login_form label {
     margin-top: 15px;
 }
 
-#login-form input[type=text],
-#login-form input[type=password] {
+#login_form input[type=text],
+#login_form input[type=password] {
         font-size: 135%;
         padding: 10px 15px;
         margin-bottom: 10px;
         width: 100%;
 }
 
-#login-form input[type=text]:focus,
-#login-form input[type=password]:focus {
+#login_form input[type=text]:focus,
+#login_form input[type=password]:focus {
         background-color: lightblue;
 }
 

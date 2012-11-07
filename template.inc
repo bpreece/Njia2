@@ -109,28 +109,28 @@ $user = get_session_user();
                 
                 <div id="main-menu">
                     <ul class='main-menu'>
-                        <?php if ($page_id == 'todo-page') : ?>
+                        <?php if ($page_class == 'todo-page') : ?>
                             <li class='selected'>TO-DO</li>
                         <?php else: ?>
                             <li><a href='todo.php'>TO-DO</a></li>
                         <?php endif; ?>
-                        <?php if ($page_id == 'log-page') : ?>
+                        <?php if ($page_class == 'log-page') : ?>
                             <li class='selected'>LOG</li>
                         <?php else: ?>
                             <li><a href='log.php'>LOG</a></li>
                         <?php endif; ?>
-                        <?php if ($page_id == 'projects-page') : ?>
+                        <?php if ($page_class == 'projects-page') : ?>
                             <li class='selected'>PROJECTS</li>
                         <?php else: ?>
                             <li><a href='projects.php'>PROJECTS</a></li>
                         <?php endif; ?>
-                        <?php if ($page_id == 'schedules-page') : ?>
+                        <?php if ($page_class == 'schedules-page') : ?>
                             <li class='selected'>SCHEDULES</li>
                         <?php else: ?>
                             <li><a href='schedules.php'>SCHEDULES</a></li>
                         <?php endif; ?>
                         <?php if(is_admin_session()) : ?>
-                            <?php if ($page_id == 'users-page') : ?>
+                            <?php if ($page_class == 'users-page') : ?>
                                 <li class='selected'>USERS</li>
                             <?php else: ?>
                                 <li><a href='users.php'>USERS</a></li>

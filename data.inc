@@ -1,6 +1,8 @@
 
 <?php 
 
+include_once 'common.inc';
+
 /**
  * Returns a list of users who share a common project with the session user
  * @param type $connection
@@ -26,6 +28,11 @@ function fetch_user_list($connection) {
         }
     }
     
+    // in case the user doesn't have any projects, still return the session
+    // user in the list
+    if (!array_key_exists($session_user_id, $user_list)) {
+        $user_list[$session_user_id] = get_session_user();
+    }
     return $user_list;
 }
 

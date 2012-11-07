@@ -59,7 +59,7 @@ function prepare_page_data() {
      */
 
     $user_list = fetch_user_list($connection);
-    if (!array_key_exists($user_id, $user_list)) {
+    if ($user_id != $session_user_id && !array_key_exists($user_id, $user_list)) {
         set_user_message("User $user_id was not found; displaying your information instead.", 'warning');
         $user_id = $session_user_id;
     }
