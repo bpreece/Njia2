@@ -256,8 +256,8 @@ a.object-ref:hover {
         rgba(255, 255, 255, .85));*/
 }
 
-.timebox-header.object-unscheduled {
-    
+#schedules-list .timebox-header {
+    background-color: #fcfcfc;
 }
 
 .user-header {
