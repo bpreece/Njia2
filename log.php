@@ -230,7 +230,7 @@ function show_content() {
         foreach ($date_info['task-list'] as $task_id => $task_info) {
             echo "
                     <div id='task-$task_id-log' class='task-log'>
-                        <div class='task-header'>
+                        <div class='task-info'>
                             <div class='task-details'>Total hours: ${task_info['work-hours']}</div>
                             <div class='task-summary'>
                                 <a class='object-ref' href='task.php?id=$task_id'>${task_info['task-summary']}</a>
