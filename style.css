@@ -168,3 +168,114 @@ a.object-ref:hover {
     border-top-right-radius: 0.75em;
     border: 1px solid #e6e6e4;
 }
+
+.object-header {
+    padding: 0.2em 0.4em;
+    border-top-left-radius: 0.4em;
+}
+
+.project-header {
+/*    background-image: -moz-linear-gradient(top,
+        rgba(212, 185, 121, 1.00),
+        rgba(212, 185, 121, .00));
+    background-image: -o-linear-gradient(top,
+        rgba(212, 185, 121, 1.00),
+        rgba(212, 185, 121, .00));*/
+    background-image: -webkit-gradient(
+        linear, 0% 0%, 0% 100%,
+        from(rgba(245, 220, 162, 1.00)),
+        to(rgba(245, 220, 162, .00)));
+/*    background-image: linear-gradient(top,
+        rgba(212, 185, 121, 1.00),
+        rgba(212, 185, 121, .00));*/
+}
+
+.project-header.object-open {
+    background-color: #fcfcfc;
+}
+
+.object-list {
+    padding: 0.5em 0 0.5em 1em;
+    font-size: 85%;
+}
+
+/* border radius should match object-header */
+.object-element {
+    background-color: #fafaf7;
+    margin-bottom: 0.5em;
+    border-top-left-radius: 0.4em;
+    border: 1px solid #ddd;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+}
+
+.object-closed {
+    background-color: #E6E6E3;
+    color: #B0B0AE;
+    text-decoration: line-through;    
+}
+
+.task-header {
+/*    background-image: -moz-linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));
+    background-image: -o-linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));*/
+    background-image: -webkit-gradient(
+        linear, 0% 0%, 0% 100%,
+        from(rgba(232, 240, 248, 1.00)),
+        to(rgba(232, 240, 248, 0.00)));
+/*    background-image: linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));*/
+}
+
+.task-header.object-scheduled {
+    background-color: rgb(232, 240, 248);
+}
+
+.task-header.object-unscheduled {
+    background-image: none;
+    background-color: rgb(242, 231, 242);
+}
+
+.timebox-header {
+/*    background-image: -moz-linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));
+    background-image: -o-linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));*/
+    background-image: -webkit-gradient(
+        linear, 0% 0%, 0% 100%,
+        from(rgba(234, 245, 223, 1.00)),
+        to(rgba(234, 245, 223, 0.00)));
+/*    background-image: linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));*/
+}
+
+.timebox-header.object-unscheduled {
+    
+}
+
+.user-header {
+/*    background-image: -moz-linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));
+    background-image: -o-linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));*/
+    background-image: -webkit-gradient(
+        linear, 0% 0%, 0% 100%,
+        from(rgba(255, 255, 232, 1.00)),
+        to(rgba(255, 255, 232, 0.00)));
+/*    background-image: linear-gradient(top,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, .85));*/
+}
+
+.header-controls {
+    float: right;
+}

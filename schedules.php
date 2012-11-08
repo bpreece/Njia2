@@ -53,6 +53,7 @@ function prepare_page_data() {
 
     $user_id = get_session_user_id();
     $timebox_query = "SELECT X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` , 
+        ( X.`timebox_end_date` < DATE( NOW() ) ) as `timebox_expired` , 
         P.`project_id` , P.`project_name` , P.`project_status` , 
         T.`task_id` , T.`task_summary` , T.`task_status` , 
         U.`user_id` , U.`login_name` 
@@ -94,6 +95,7 @@ function prepare_page_data() {
                 'timebox-id' => $timebox_id, 
                 'timebox-name' => $result['timebox_name'], 
                 'timebox-end-date' => $result['timebox_end_date'], 
+                'timebox-expired' => $result['timebox_expired'],
                 'project-id' => $result['project_id'], 
                 'project-name' => $result['project_name'], 
                 'project-status' => $result['project_status'], 
@@ -152,9 +154,13 @@ function show_content() {
             <div id='schedules-list'>";
     foreach ($timeboxes as $timebox_id => $timebox) {
         $project_id = $timebox['project-id'];
+        $timebox_css = 'timebox-header object-header';
+        if ($timebox['timebox-expired']) {
+            $timebox_css .= ' object-unscheduled';
+        }
         echo "
                 <div id='timebox-$timebox_id' class='timebox'>
-                    <div class='timebox-info'>
+                    <div class='$timebox_css'>
                         <div class='timebox-details'>
                             <div class='timebox-end-date'>
                                 <a class='object-ref' href='timebox.php?id=$timebox_id'>${timebox['timebox-end-date']}</a>
@@ -164,18 +170,18 @@ function show_content() {
                         <div class='timebox-name'>
                             <a class='object-ref' href='timebox.php?id=$timebox_id'>${timebox['timebox-name']}</a>
                         </div>
-                        <div class='project-info ${timebox['project-status']}'>
+                        <div class='project-info object-${timebox['project-status']}'>
                             <div class='project-id'>$project_id</div>
                             <div class='project-name'>
                                 <a class='object-ref' href='project.php?id=$project_id'>${timebox['project-name']}</a>
                             </div>
                         </div> <!-- /project-info -->
                     </div> <!-- /timebox-info -->
-                    <div class='task-list'>";
+                    <div class='task-list object-list'>";
         foreach ($timebox['task-list'] as $task_id => $task) {
             echo "
-                        <div id='task-$task_id' class='task'>
-                            <div class='task-info task-${task['task-status']}'>
+                        <div id='task-$task_id' class='task object-element'>
+                            <div class='task-header object-header object-${task['task-status']}'>
                                 <div class='task-details'>
                                      <div class='task-user'>
                                          <a class='object-ref' href='user.php?id=${task['user-id']}'>${task['user-name']}</a>

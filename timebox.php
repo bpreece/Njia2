@@ -146,7 +146,9 @@ function show_content()
     }
     
     echo "                
-        <h3>Timebox $timebox_id</h3>
+        <div class='timebox-header object-header'>
+            <h3>Timebox $timebox_id</h3>
+        </div>
         <form id='timebox-form' class='main-form' method='post'>
             <input type='hidden' name='timebox-id' value='$timebox_id'>
             
@@ -183,7 +185,7 @@ function show_content()
         foreach ($timebox['task_list'] as $task_id => $task) {
             echo "
                 <div id='task-$task_id' class='task'>
-                    <div class='task-info task-${task['task_status']}'>
+                    <div class='task-header object-header object-${task['task_status']}'>
                         <div class='task-details'>";
             if ($task['task_status'] != 'open') {
                 echo "

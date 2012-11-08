@@ -325,7 +325,9 @@ function show_content()
     
     $query_id = $query_user['user_id'];
     echo "
-        <h3>User $query_id &mdash; ${query_user['user_name']}</h3>
+        <div class='user-header object-header'>
+            <h3>User $query_id</h3>
+        </div>
         <form id='user-form' class='main-form' method='post'>
             <input type='hidden' name='user-id' value='$query_id'>
 
@@ -376,13 +378,13 @@ function show_content()
         <div class='project-list'>";
     foreach ($query_user['owned-project-list'] as $project_id => $project) {
         echo "
-                <div id='project-$project_id' class='project'>";
+                <div id='project-$project_id' class='project object-element'>";
         if ($project['project_status'] != 'open') {
             echo "
                     <div class='project-details'>${project['project_status']}</div>";
         }
         echo "
-                    <div class='project-info project-${project['project_status']}'>
+                    <div class='project-header object-header object-${project['project_status']}'>
                         <div class='project-id'>$project_id</div>
                         <div class='project-name'>
                             <a class='object-ref' href='project.php?id=$project_id'>${project['project_name']}</a>
@@ -415,13 +417,13 @@ function show_content()
         <div class='project-list'>";
     foreach ($query_user['project-member-list'] as $project_id => $project) {
         echo "
-                <div id='project-$project_id' class='project'>";
+                <div id='project-$project_id' class='project object-element'>";
         if ($project['project_status'] != 'open') {
             echo "
                     <div class='project-details'>${project['project_status']}</div>";
         }
         echo "
-                    <div class='project-info project-${project['project_status']}'>
+                    <div class='project-header object-header object-${project['project_status']}'>
                         <div class='project-id'>$project_id</div>
                         <div class='project-name'>
                             <a class='object-ref' href='project.php?id=$project_id'>${project['project_name']}</a>

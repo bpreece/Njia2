@@ -349,7 +349,9 @@ function show_content()
     
     $task_id = $task['task_id'];
     echo "
-        <h3>Task $task_id</h3>
+        <div class='task-header object-header'>
+            <h3>Task $task_id</h3>
+        </div>
         <form id='task-form' class='main-form' method='post'>
             <input type='hidden' name='task-id' value='$task_id'>
             <input type='hidden' name='project-id' value='${task['project_id']}'>                
@@ -436,11 +438,11 @@ function show_content()
             <div id='tasks-header'>
                 <h4>Subtasks</h4>
             </div>
-            <div id='task-$task_id-subtask-list' class='task-list'>";
+            <div id='task-$task_id-subtask-list' class='task-list object-list'>";
         foreach ($task['subtask_list'] as $subtask_id => $subtask) {
             echo "
-                <div id='task-$subtask_id' class='task'>
-                    <div class='task-info task-${subtask['task_status']}'>
+                <div id='task-$subtask_id' class='task object-element'>
+                    <div class='task-header object-header object-${subtask['task_status']}'>
                         <div class='task-details'>";
             if ($subtask['task_status'] != 'open') {
                 echo "

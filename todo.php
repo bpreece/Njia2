@@ -239,7 +239,7 @@ function show_content()
         foreach($project['timebox-list'] as $timebox_id => &$timebox) {
             echo "
             <div id='project-$project_id' class='project'>
-                <div class='project-info'>
+                <div class='project-header object-header'>
                     <div class='project-id'>$project_id</div>
                     <div class='project-name'>
                         <a class='object-ref' href='project.php?id=$project_id'>{$project['project-name']}</a>

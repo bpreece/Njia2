@@ -1,40 +1,13 @@
 
-.project-info {
-    padding: 2px 4px;
-    background-color: #fcfcff;
-/*    background-image: -moz-linear-gradient(top,
-        rgba(255, 255, 255, 0),
-        rgba(255, 255, 255, .85));
-    background-image: -o-linear-gradient(top,
-        rgba(255, 255, 255, 0),
-        rgba(255, 255, 255, .85));*/
-    background-image: -webkit-gradient(
-        linear, 0% 0%, 0% 100%,
-        from(rgba(245, 220, 162, 1.00)),
-        to(rgba(245, 220, 162, 0.00)));
-/*    background-image: linear-gradient(top,
-        rgba(255, 255, 255, 0),
-        rgba(255, 255, 255, .85));*/
-}
-
-.project-info.project-closed {
-    background-color: #e6e6e3;
-    color: #b0b0ae;
-    text-decoration: line-through;
-}
-
 .project-id,
 .task-id {
     display: none;
 }
 
-.project-name {
-}
-
 .project,
 .task {
     margin-bottom: 0.5em;
-    border-top-left-radius: 4px;
+    border-top-left-radius: 0.4em;
     border: 1px solid #ddd;
     border-right: none;
     border-bottom: 1px solid #ddd;
@@ -46,40 +19,7 @@
 }
 
 .task {
-    margin: 0.5em 0;;
-}
-
-.task-info {
-    padding: 2px 4px;
-    background-color: #eaf1f7;
-    font-size: 85%;
-}
-
-.task-info.parent-task {
-    background-color: #fcfcff;
-/*    background-image: -moz-linear-gradient(top,
-        rgba(255, 255, 255, 0),
-        rgba(255, 255, 255, .85));
-    background-image: -o-linear-gradient(top,
-        rgba(255, 255, 255, 0),
-        rgba(255, 255, 255, .85));*/
-    background-image: -webkit-gradient(
-        linear, 0% 0%, 0% 100%,
-        from(rgba(232, 240, 248, 1.00)),
-        to(rgba(232, 240, 248, 0.00)));
-/*    background-image: linear-gradient(top,
-        rgba(255, 255, 255, 0),
-        rgba(255, 255, 255, .85));*/
-}
-
-.task-info.unscheduled-task {
-    background-color: #f3eaf3;
-}
-
-.task-info.task-closed {
-    background-color: #e6e6e3;
-    color: #b0b0ae;
-    text-decoration: line-through;
+    margin: 0.5em 0;
 }
 
 .task-details {

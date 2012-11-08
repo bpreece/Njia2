@@ -16,24 +16,6 @@
     background-color: #fcfcfc;
 }
 
-.project-info {
-    padding: 2px 4px;
-    border-top-left-radius: 4px;
-/*    background-image: -moz-linear-gradient(top,
-        rgba(212, 185, 121, 1.00),
-        rgba(212, 185, 121, .00));
-    background-image: -o-linear-gradient(top,
-        rgba(212, 185, 121, 1.00),
-        rgba(212, 185, 121, .00));*/
-    background-image: -webkit-gradient(
-        linear, 0% 0%, 0% 100%,
-        from(rgba(245, 220, 162, 1.00)),
-        to(rgba(245, 220, 162, .00)));
-/*    background-image: linear-gradient(top,
-        rgba(212, 185, 121, 1.00),
-        rgba(212, 185, 121, .00));*/
-}
-
 .project-name {
     font-size: 115%;
 }

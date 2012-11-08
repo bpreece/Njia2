@@ -197,19 +197,19 @@ function show_sidebar() {
 
 function show_tasks_list($tasks_list) {
     global $tasks;
-    echo "
-        <div class='task-list'>";
         foreach ($tasks_list as $task_id) {
             $task = $tasks[$task_id];
-            $task_info_css = "task-${task['task-status']}";
-            if (count($task['subtask-list']) > 0) {
-                $task_info_css .= " parent-task";
-            } else if (! isset($task['timebox-id']) || $task['timebox-id'] == 0) {
-                $task_info_css .= " unscheduled-task";
+            $task_header_css = "task-header object-header object-${task['task-status']}";
+            if (count($task['subtask-list']) == 0 && $task['task-status'] != 'closed') { 
+                if (! $task['timebox-id']) {
+                    $task_header_css .= " object-unscheduled";
+                } else {
+                    $task_header_css .= " object-scheduled";
+                }
             }
             echo "
             <div id='task-$task_id' class='task'>
-                <div class='task-info $task_info_css'>
+                <div class='task-header $task_header_css'>
                     <div class='task-details'>
                         <div class='task-user'>
                             <a class='object-ref' href='user.php?id=${task['user-id']}'>${task['user-name']}</a>
@@ -224,13 +224,15 @@ function show_tasks_list($tasks_list) {
                     </div>
                 </div> <!-- /task-info -->";
             if (count($task['subtask-list']) > 0) {
+                echo "
+                <div class='task-list'>";
                 show_tasks_list($task['subtask-list']);
+                echo "
+                </div>";
             }
             echo "
             </div> <!-- /task-$task_id -->";
         }
-        echo "
-        </div> <!-- /task-list -->";
 }
 
 function show_content() 
@@ -250,14 +252,18 @@ function show_content()
     foreach ($projects as $project_id => &$project) {
         echo "
                 <div id='project-$project_id' class='project'>
-                    <div class='project-info project-${project['project-status']}'>
+                    <div class='project-header object-header object-${project['project-status']}'>
                         <div class='project-id'>$project_id</div>
                         <div class='project-name'>
                             <a class='object-ref' href='project.php?id=$project_id'>${project['project-name']}</a>
                         </div>
                     </div> <!-- /project-info -->";
         if (count($project['task-list']) > 0) {
+            echo "
+                    <div class='task-list object-list'>";
             show_tasks_list($project['task-list']);
+            echo "
+                    </div>";
         }
         echo "
                 </div> <!-- /project$project_id -->";

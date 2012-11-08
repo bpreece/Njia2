@@ -388,7 +388,9 @@ function show_content()
     }
     
     echo "
-        <h3>Project $project_id</h3>
+        <div class='project-header object-header'>
+            <h3>Project $project_id</h3>
+        </div>
         <form id='project-form' class='main-form' method='post'>
             <input type='hidden' name='project-id' value='$project_id'>
                 
@@ -420,7 +422,7 @@ function show_content()
 
     echo "
         <div id='tasks-header'>
-            <div class='header-controls' style='float:right'>
+            <div class='header-controls'>
                 <form method='GET'>
                     <input type='hidden' name='id' value='$project_id' />";
     if ($past_timeboxes_date) {
@@ -434,11 +436,11 @@ function show_content()
             </div>
             <h4>Tasks</h4>
         </div>
-        <div class='task-list'>";
+        <div class='task-list object-list'>";
     foreach ($project['task_list'] as $task_id => $task) {
         echo "
-            <div id='task-$task_id' class='task'>
-                <div class='task-info task-${task['task_status']}'>
+            <div id='task-$task_id' class='task object-element'>
+                <div class='task-header object-header object-${task['task_status']}'>
                     <div class='task-details'>";
         if ($task['task_status'] != 'open') {
             echo "
@@ -458,8 +460,8 @@ function show_content()
         </div> <!-- /task-list -->";
 
     echo "
-        <div id='tasks-header'>
-            <div class='header-controls' style='float:right'>
+        <div id='timeboxes-header'>
+            <div class='header-controls'>
                 <form method='GET'>
                     <input type='hidden' name='id' value='$project_id' />";
     if ($show_closed_tasks) {
@@ -474,12 +476,12 @@ function show_content()
             </div>
             <h4>Timeboxes</h4>
         </div>
-        <div class='timebox-list'>";
+        <div class='timebox-list object-list'>";
     foreach ($project['timebox_list'] as $timebox_id => $timebox) {
         echo "
-            <div id='timebox-$timebox_id' class='timebox'>
+            <div id='timebox-$timebox_id' class='timebox object-element'>
                 <div class='timebox-details'>${timebox['timebox_end_date']}</div>
-                <div class='timebox-info'>
+                <div class='timebox-header object-header'>
                     <div class='timebox-id'>$timebox_id</div>
                     <div class='timebox-name'>
                         <a class='object-ref' href='timebox.php?id=$timebox_id'>${timebox['timebox_name']}</a>
@@ -492,11 +494,11 @@ function show_content()
     
     echo "
         <h4>People</h4>
-        <div class='user-list'>";
+        <div class='user-list object-list'>";
     foreach ($project['user_list'] as $user_id => $user_name) {
         echo "
-            <div id='user-$user_id' class='user'>
-                <div class='user-info'>
+            <div id='user-$user_id' class='user object-element'>
+                <div class='user-header object-header'>
                     <div class='user-id'>$user_id</div>";
         $project_owner = $project['project_owner'];
         if ($project_owner == get_session_user_id() && $project_owner != $user_id) {
