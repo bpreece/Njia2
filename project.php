@@ -388,9 +388,7 @@ function show_content()
     }
     
     echo "
-        <div class='project-header object-header'>
-            <h3>Project $project_id</h3>
-        </div>
+        <h3>Project $project_id</h3>
         <form id='project-form' class='main-form' method='post'>
             <input type='hidden' name='project-id' value='$project_id'>
                 

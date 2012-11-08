@@ -325,9 +325,7 @@ function show_content()
     
     $query_id = $query_user['user_id'];
     echo "
-        <div class='user-header object-header'>
-            <h3>User $query_id</h3>
-        </div>
+        <h3>User $query_id</h3>
         <form id='user-form' class='main-form' method='post'>
             <input type='hidden' name='user-id' value='$query_id'>
 

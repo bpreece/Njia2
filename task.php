@@ -349,9 +349,7 @@ function show_content()
     
     $task_id = $task['task_id'];
     echo "
-        <div class='task-header object-header'>
-            <h3>Task $task_id</h3>
-        </div>
+        <h3>Task $task_id</h3>
         <form id='task-form' class='main-form' method='post'>
             <input type='hidden' name='task-id' value='$task_id'>
             <input type='hidden' name='project-id' value='${task['project_id']}'>                

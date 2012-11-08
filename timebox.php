@@ -146,9 +146,7 @@ function show_content()
     }
     
     echo "                
-        <div class='timebox-header object-header'>
-            <h3>Timebox $timebox_id</h3>
-        </div>
+        <h3>Timebox $timebox_id</h3>
         <form id='timebox-form' class='main-form' method='post'>
             <input type='hidden' name='timebox-id' value='$timebox_id'>
             

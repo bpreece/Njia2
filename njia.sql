@@ -138,7 +138,7 @@ CREATE TABLE `user_table` (
 INSERT INTO `user_table` (
   `login_name`, `password_salt`, `password`, `user_permissions`
 ) VALUES (
-  'root', MD5( NOW() ), MD5( CONCAT( MD5( NOW() ) ), 'password' ), 'admin'
+  'root', MD5( NOW() ), MD5( CONCAT( MD5( NOW() ), 'password' ) ), 'admin'
 );
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
