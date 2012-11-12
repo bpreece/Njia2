@@ -25,7 +25,7 @@ function process_form_data() {
 function process_login() {
     global $login_name, $cookie;
     
-    if (!$_POST['name_field'] || !$_POST['password-field']) {
+    if (!$_POST['name-field'] || !$_POST['password-field']) {
         set_user_message("Missing login name or password", "failure");
         return;
     }
@@ -35,7 +35,7 @@ function process_login() {
         return;
     }
 
-    $login_name = mysqli_real_escape_string($connection, $_POST['name_field']);
+    $login_name = mysqli_real_escape_string($connection, $_POST['name-field']);
     $password = mysqli_real_escape_string($connection, $_POST['password-field']);
 
     $query = "SELECT `user_id`, `login_name`
@@ -114,8 +114,8 @@ function show_main_login_form() {
     echo "
                 <div id='login-main'>
                     <form id='login_form' name='login_form' method='POST'>
-                        <label for='name_field'>Sign-on name:</label>
-                        <input type='text' name='name_field' value='$login_name'></input>
+                        <label for='name-field'>Sign-on name:</label>
+                        <input type='text' name='name-field' value='$login_name'></input>
                         <label for='password-field'>Password:</label>
                         <input type='password' name='password-field'></input>";
     if ($new_login) {
