@@ -1,4 +1,9 @@
 <?php
+/*
+ * NOTE: the form field 'name_field' is deliberately named with an underbar, 
+ * not a hyphen, so that set_focus() can be called on it.
+ */
+
 include_once('common.inc');
 
 global $new_login, $login_name;
@@ -24,8 +29,8 @@ function process_form_data() {
 
 function process_login() {
     global $login_name, $cookie;
-    
-    if (!$_POST['name-field'] || !$_POST['password-field']) {
+
+    if (!$_POST['name_field'] || !$_POST['password-field']) {
         set_user_message("Missing login name or password", "failure");
         return;
     }
@@ -35,10 +40,10 @@ function process_login() {
         return;
     }
 
-    $login_name = mysqli_real_escape_string($connection, $_POST['name-field']);
+    $login_name = mysqli_real_escape_string($connection, $_POST['name_field']);
     $password = mysqli_real_escape_string($connection, $_POST['password-field']);
 
-    $query = "SELECT `user_id`, `login_name`
+    $query = "SELECT `user_id`, `login_name` 
                 FROM `user_table` 
                 WHERE `login_name` = '$login_name' AND 
                     `password` = MD5( CONCAT( `password_salt`, '$password' ) ) AND 
@@ -49,7 +54,7 @@ function process_login() {
         return;
     }
     $result = mysqli_fetch_array($results);
-    if (! $result) {
+    if (!$result) {
         set_user_message("Login name not found, or password doesn't match.", "warning");
         return;
     }
@@ -60,25 +65,25 @@ function process_login() {
 
 function process_new_login() {
     global $login_name, $cookie;
-    
+
     if (!($connection = connect_to_database())) {
         set_user_message("Failed accessing database", "failure");
         return;
     }
-    
-    $login_name = mysqli_real_escape_string($connection, $_POST['name-field']);
+
+    $login_name = mysqli_real_escape_string($connection, $_POST['name_field']);
     $password = mysqli_real_escape_string($connection, $_POST['password-field']);
 
-    if (!$_POST['name-field'] || !$_POST['password-field']) {
+    if (!$_POST['name_field'] || !$_POST['password-field']) {
         set_user_message("You must provide a login name and password", "warning");
         return;
     }
-    
+
     if (!$_POST['repeat-password-field'] || $_POST['repeat-password-field'] != $_POST['password-field']) {
         set_user_message("The passwords do not match.", "warning");
         return;
     }
-    
+
     $user_query = "INSERT INTO `user_table` (
             `login_name` , `password_salt` 
         ) VALUES (
@@ -90,12 +95,12 @@ function process_new_login() {
         return;
     }
     $user_id = mysqli_insert_id($connection);
-    
+
     $password_query = "UPDATE `user_table`
         SET `password` = MD5( CONCAT( `password_salt`, '$password' ) )
         WHERE `user_id` = '$user_id'";
     $password_results = mysqli_query($connection, $password_query);
-    if (! $password_results) {
+    if (!$password_results) {
         set_user_message(mysqli_error($connection), "failure");
         return;
     }
@@ -114,8 +119,8 @@ function show_main_login_form() {
     echo "
                 <div id='login-main'>
                     <form id='login_form' name='login_form' method='POST'>
-                        <label for='name-field'>Sign-on name:</label>
-                        <input type='text' name='name-field' value='$login_name'></input>
+                        <label for='name_field'>Sign-on name:</label>
+                        <input type='text' name='name_field' value='$login_name'></input>
                         <label for='password-field'>Password:</label>
                         <input type='password' name='password-field'></input>";
     if ($new_login) {
@@ -145,7 +150,6 @@ function show_main_login_form() {
     echo "
                 </div>";
 }
-
 ?>
 
 <?php process_query_string(); ?>
@@ -176,7 +180,7 @@ function show_main_login_form() {
                 <div id="main-menu">
                 </div> <!-- /main-menu -->
             </div> <!-- /header -->
-            <?php show_user_messages(); ?>
+<?php show_user_messages(); ?>
             <div id="content">
                 <!--
                                 <div id="login-controls">
@@ -206,11 +210,11 @@ function show_main_login_form() {
                 -->
                 <h1>Sign on</h1>
 
-                <?php show_main_login_form(); ?>
+<?php show_main_login_form(); ?>
 
             </div> <!-- /content -->
             <div id="footer">
-                <?php show_footer(); ?>
+<?php show_footer(); ?>
             </div>
         </div> <!-- /page -->
     </body>

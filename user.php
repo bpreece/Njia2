@@ -7,6 +7,7 @@ global $show_closed_member_projects;
 global $show_closed_owned_projects;
 global $work_log_start_date;
 global $work_log_end_date;
+global $account_closed;
 
 function get_stylesheets() {
     $stylesheets = array('user.css');
@@ -57,8 +58,8 @@ function process_form_data() {
         process_user_form();
     } else if (isset($_POST['close-account-button'])) {
         process_close_account();
-    } else if (isset($_POST['new-account-button'])) {
-        process_new_account();
+    } else if (isset($_POST['reopen-account-button'])) {
+        process_reopen_account();
     }
 }
 
@@ -108,6 +109,30 @@ function process_user_form() {
     set_user_message("The changes have been applied", 'success');
 }
 
+function process_reopen_account() {
+    $connection = connect_to_database_session();
+    if (!$connection) {
+        return;
+    }
+
+    $user_id = mysqli_real_escape_string($connection, $_POST['user-id']);
+    if (!is_admin_session()) {
+        header('Location: user.php');
+        return;
+    }
+    
+    $query = "UPDATE `user_table` 
+        SET `account_closed_date` = NULL
+        WHERE `user_id` = '$user_id'";
+    $result = mysqli_query($connection, $query);
+    if (! $result) {
+        set_user_message(mysqli_errno($connection), 'failure');
+        return;
+    }
+    
+    set_user_message('This account has been re-opened', 'success');
+}
+
 function process_close_account() {
     $connection = connect_to_database_session();
     if (!$connection) {
@@ -129,57 +154,39 @@ function process_close_account() {
         return;
     }
     
-    header("Location: login.php");
-}
-
-function process_new_account() {
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return;
-    }
-    
-    if (!is_admin_session()) {
-        header('Location: user.php');
-        return;
-    }
-    
-    $login_name = mysqli_real_escape_string($connection, $_POST['login-name']);
-    $password = mysqli_real_escape_string($connection, $_POST['login-password']);
-    $password_salt = md5($login_name . date('Y-m-d'));
-    $query = "INSERT INTO `user_table` 
-        ( `login_name` , `password` , `password_salt` )
-        VALUES 
-        ( '$login_name' , MD5(CONCAT('$password_salt','$password')) , '$password_salt')";
-    $result = mysqli_query($connection, $query);
-    if (! $result) {
-        $error = mysqli_error($connection);
-        if (substr($error, 0, 15) == 'Duplicate entry') {
-            set_user_message("The name '$login_name' is already used.  Please select another.", 'warning');
-        } else {
-            set_user_message($error, 'failure');
-        }
-        return;
+    if (! is_admin_session()) {
+        header("Location: login.php");
     }
 }
 
 function prepare_page_data() {
-    global $query_user, $user_id;
+    global $query_user, $user_id, $account_closed;
     
     $connection = connect_to_database_session();
     if (!$connection) {
         return;
     }
 
-    // fetch the user information only if we share a common project
+    // if we're not admin, then fetch the user information only if we share 
+    // a common project
+    
     $session_user_id = get_session_user_id();
     $user_id = mysqli_real_escape_string($connection, $user_id);
-    $user_query = "SELECT U.`user_id` , U.`login_name` AS  `user_name` 
-        FROM  `project_table` AS P
-        INNER JOIN  `access_table` AS A1 ON P.`project_id` = A1.`project_id` 
-        INNER JOIN  `access_table` AS A2 ON P.`project_id` = A2.`project_id` 
-        INNER JOIN  `user_table` AS U ON A1.`user_id` = U.`user_id` 
-        WHERE A1.`user_id` =  '$user_id'
-            AND A2.`user_id` =  '$session_user_id'";
+    if (is_admin_session()) {
+        $user_query = "SELECT U.`user_id` , U.`login_name` AS  `user_name` , 
+                U.`account_closed_date` 
+            FROM `user_table` AS U
+            WHERE `user_id` = '$user_id'";
+    } else {
+        $user_query = "SELECT U.`user_id` , U.`login_name` AS  `user_name` , 
+                U.`account_closed_date` 
+            FROM  `project_table` AS P
+            INNER JOIN  `access_table` AS A1 ON P.`project_id` = A1.`project_id` 
+            INNER JOIN  `access_table` AS A2 ON P.`project_id` = A2.`project_id` 
+            INNER JOIN  `user_table` AS U ON A1.`user_id` = U.`user_id` 
+            WHERE A1.`user_id` =  '$user_id'
+                AND A2.`user_id` =  '$session_user_id'";
+    }
     $user_result = mysqli_query($connection, $user_query);
     if (! $user_result) {
         set_user_message(mysqli_error($connection), 'failure');
@@ -188,6 +195,10 @@ function prepare_page_data() {
     if ( ($query_user = mysqli_fetch_array($user_result)) == NULL) {
         set_user_message("User $user_id was not found", 'warning');
         return;
+    }
+    if (isset($query_user['account_closed_date'])) {
+        $account_closed = TRUE;
+        set_user_message('This account has been closed', 'warning');
     }
 
     global $show_closed_member_projects;
@@ -280,12 +291,13 @@ function prepare_page_data() {
 }
 
 function show_sidebar() {
-    global $query_user;
+    global $query_user, $account_closed;
+    
     if (! $query_user) {
         return;
     }
 
-    if ($query_user == get_session_user_id()) {
+    if (! $account_closed && ($query_user == get_session_user_id() || is_admin_session())) {
         echo "
         <div class='sidebar-block'>
             <form id='close-account-form' method='post'>
@@ -293,23 +305,17 @@ function show_sidebar() {
                 <input type='submit' name='close-account-button' value='Close this account'></input>
             </form>
         </div>";
-    }        
-    if (is_admin_session()) {
+    }
+    
+    if ($account_closed && is_admin_session()) {
         echo "
         <div class='sidebar-block'>
-            <form id='new-account-form' method='post'>
-                <div id='login-name'>
-                    <label for='login-name'>Login name:</label>
-                    <input style='width:100%' type='text' name='login-name'></input>
-                </div>
-                <div id='login-password'>
-                    <label for='login-password'>Login password:</label>
-                    <input style='width:100%' type='password' name='login-password'></input>
-                </div>
-                <input type='submit' name='new-account-button' value='Create new account'></input>
+            <form id='close-account-form' method='post'>
+                <input type='hidden' name='user-id' value='${query_user['user_id']}'>
+                <input type='submit' name='reopen-account-button' value='Re-open this account'></input>
             </form>
         </div>";
-    }
+    }        
 }
 
 function show_content() 

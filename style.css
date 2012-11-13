@@ -169,6 +169,18 @@ a.object-ref:hover {
     border: 1px solid #e6e6e4;
 }
 
+.date {
+    display: inline-block;
+    width: 7.5em;
+    margin: 0 0.5em;
+}
+
+.date-time {
+    display: inline-block;
+    width: 10em;
+    margin: 0 0.5em;
+}
+
 .object-header {
     padding: 0.2em 0.4em;
     border-top-left-radius: 0.4em;
