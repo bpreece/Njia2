@@ -48,7 +48,7 @@ function show_main_menu() {
 }
 
 function show_footer() {
-    echo "<div id='copyright'>&copy; Copyright 2012, Ben Preece</div>";
+    echo "<div id='copyright'>Njia &copy; Copyright 2012, Ben Preece</div>";
 }
 
 function connect_to_database() 

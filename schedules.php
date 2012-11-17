@@ -1,11 +1,12 @@
 <?php
 
-include_once('common.inc');
+include_once 'common.inc';
+include_once 'timebox/schedule_list_options_form.php';
 
 global $show_closed_tasks;
-global $past_timeboxes_date;
+global $timebox_end_date;
 $show_closed_tasks = '';
-$past_timeboxes_date = '';
+$timebox_end_date = '';
 
 function get_stylesheets() {
     $stylesheets = array('schedules.css');
@@ -18,39 +19,33 @@ function get_page_class() {
 
 global $timeboxes, $tasks;
 
-/*
 function process_query_string() {
-
-}
- */
-
-function process_form_data() {
-    if (isset($_POST['apply-list-options-button'])) {
-        process_apply_list_options();
-    }
-}
-
-function process_apply_list_options() {
     global $show_closed_tasks;
-    global $past_timeboxes_date;
+    global $timebox_end_date;
     
-    if (isset($_POST['closed-tasks-option'])) {
-        $show_closed_tasks = "checked";
+    if (isset($_GET['tx'])) {
+        $show_closed_tasks = TRUE;
     }
-    if ($_POST['past-timeboxes-date']) {
-        $past_timeboxes_date = $_POST['past-timeboxes-date'];
+    
+    if (isset($_GET['xx'])) {
+        $timebox_end_date = $_GET['xx'];
     }
 }
+
+/*
+function process_form_data() {
+}
+*/
 
 function prepare_page_data() {
+    global $show_closed_tasks;
+    global $timebox_end_date;
+
     $connection = connect_to_database_session();
     if (!$connection) {
         return null;
     }
     
-    global $show_closed_tasks;
-    global $past_timeboxes_date;
-
     $user_id = get_session_user_id();
     $timebox_query = "SELECT X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` , 
         ( X.`timebox_end_date` < DATE( NOW() ) ) as `timebox_expired` , 
@@ -68,9 +63,9 @@ function prepare_page_data() {
         $timebox_query .= "
             AND T.`task_status` <> 'closed'";
     }
-    if ($past_timeboxes_date) {
+    if ($timebox_end_date) {
         $timebox_query .= "
-            AND X.`timebox_end_date` >= '$past_timeboxes_date'";
+            AND X.`timebox_end_date` >= '$timebox_end_date'";
     } else {
         $timebox_query .= "
             AND X.`timebox_end_date` >= NOW()";
@@ -116,27 +111,14 @@ function prepare_page_data() {
 }
 
 function show_sidebar() {
-    global $timeboxes;
     global $show_closed_tasks;
-    global $past_timeboxes_date;
+    global $timebox_end_date;
+    
     echo "
-        <div class='sidebar-block'>
-            <form id='list-options-form' method='post'>
-                <div id='list-options'>
-                    <div class='group'>
-                        <input type='checkbox' name='closed-tasks-option' value='show-closed-tasks' $show_closed_tasks /> Show closed tasks
-                    </div>
-                    <div class='group'>
-                        <label for='past-timeboxes-date'>Show timeboxes after:</label></br>
-                        <input style='width:100%' type='text' name='past-timeboxes-date' value='$past_timeboxes_date' />
-                    </div> <!-- /group -->
-                </div>
-                <input type='submit' name='apply-list-options-button' value='Apply these options'></input>
-            </form>
+        <div class='sidebar-block'>";
+    show_schedule_list_options_form($show_closed_tasks, $timebox_end_date);
+    echo "
         </div>";
-    if (! $timeboxes) {
-        return;
-    }
 }
 
 function show_content() {

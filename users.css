@@ -1,0 +1,19 @@
+/* 
+    Document   : users
+    Created on : Nov 8, 2012, 5:03:09 PM
+    Author     : benpreece
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+.user-id {
+    display: none
+}
+
+.user-details {
+    float: right;
+}
+
+.user-creation-date,
+.account-closed-date {
+}

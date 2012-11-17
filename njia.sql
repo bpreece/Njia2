@@ -20,6 +20,9 @@ SET time_zone = "+00:00";
 -- Database: `njia`
 --
 
+CREATE DATABASE njia_test;
+USE njia_test;
+
 -- --------------------------------------------------------
 
 --
@@ -138,8 +141,14 @@ CREATE TABLE `user_table` (
 INSERT INTO `user_table` (
   `login_name`, `password_salt`, `password`, `user_permissions`
 ) VALUES (
-  'root', MD5( NOW() ), MD5( CONCAT( MD5( NOW() ), 'password' ) ), 'admin'
+  'admin', MD5( NOW() ), MD5( CONCAT( MD5( NOW() ), 'password' ) ), 'admin'
 );
+
+--
+-- Create the database access user and grant permissions
+--
+
+GRANT ALL PRIVILEGES ON njia_test.* TO 'njia'@'localhost' IDENTIFIED BY 'njia';
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
