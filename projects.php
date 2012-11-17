@@ -1,6 +1,8 @@
 <?php
 
-include_once('common.inc');
+include_once 'common.inc';
+include_once 'project/new_project_form.php';
+include_once 'project/project_list_options_form.php';
 
 global $show_closed_tasks;
 global $show_closed_projects;
@@ -20,64 +22,24 @@ function get_page_class() {
 
 global $projects, $tasks;
 
-/*
 function process_query_string() {
-
-}
- */
-
-function process_form_data() {
-    if (isset($_POST['apply-list-options-button'])) {
-        process_apply_list_options();
-    } else if (isset($_POST['add-project-button'])) {
-        process_add_project_form();
-    }
-}
-
-function process_apply_list_options() {
     global $show_closed_tasks;
     global $show_closed_projects;
     global $show_empty_projects;
 
-    if (isset($_POST['closed-tasks-option'])) {
-        $show_closed_tasks = "checked";
+    if (isset($_GET['tx'])) {
+        $show_closed_tasks = TRUE;
     }
-    if (isset($_POST['closed-projects-option'])) {
-        $show_closed_projects = "checked";
+    if (isset($_GET['px'])) {
+        $show_closed_projects = TRUE;
     }
-    if (isset($_POST['empty-projects-option'])) {
-        $show_empty_projects = "checked";
+    if (isset($_GET['pe'])) {
+        $show_empty_projects = TRUE;
     }
 }
 
-function process_add_project_form() {
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return null;
-    }
-    
-    $user_id = get_session_user_id();
-
-    $project_name = mysqli_real_escape_string($connection, $_POST['project-name']);
-
-    $project_query = "INSERT INTO `project_table` 
-            ( `project_name` , `project_owner` ) VALUES ( '$project_name' , '$user_id' )";
-    $project_results = mysqli_query($connection, $project_query);
-    if (! $project_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return;
-    }
-    $project_id = mysqli_insert_id($connection);
-    
-    $access_query = "INSERT INTO `access_table` 
-            ( `user_id` , `project_id` ) VALUES ( '$user_id' , '$project_id' )";
-    $access_results = mysqli_query($connection, $access_query);
-    if (! $access_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return;
-    }
-    
-    header ("Location: project.php?id=$project_id");
+function process_form_data() {
+    process_new_project_form();
 }
 
 function prepare_page_data() {
@@ -162,35 +124,19 @@ function prepare_page_data() {
 }
     
 function show_sidebar() {
-    global $projects;
     global $show_closed_tasks;
     global $show_closed_projects;
     global $show_empty_projects;
-
-    if (! $projects) {
-        return;
-    }
     
     echo "
-        <div class='sidebar-block'>
-            <form id='list-options-form' method='post'>
-                <div id='list-options' class='group'>
-                    <input type='checkbox' name='closed-tasks-option' value='show-closed-tasks' $show_closed_tasks> Show closed tasks</br>
-                    <input type='checkbox' name='closed-projects-option' value='show-closed-projects' $show_closed_projects> Show closed projects</br>
-                    <input type='checkbox' name='empty-projects-option' value='show-empty-projects' $show_empty_projects> Show empty projects</br>
-                </div>
-                <input type='submit' name='apply-list-options-button' value='Apply these options'></input>
-            </form>
+        <div class='sidebar-block'>";
+    show_project_list_options_form($show_closed_tasks, $show_closed_projects, $show_empty_projects);
+    echo "
         </div>";
     echo "
-        <div class='sidebar-block'>
-            <form id='add-project-form' method='post'>
-                <div id='subtask-summary' class='group'>
-                    <label for='project-name'>Project name:</label>
-                    <input style='width:100%' type='text' name='project-name'></input>
-                </div>
-                <input type='submit' name='add-project-button' value='Create a new project'></input>
-            </form>
+        <div class='sidebar-block'>";
+    show_new_project_form();
+    echo "
         </div>";
 
 }

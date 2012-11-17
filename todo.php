@@ -1,6 +1,9 @@
 <?php
 
-include_once('common.inc');
+include_once 'common.inc';
+include_once 'project/new_project_form.php';
+include_once 'task/close_task_form.php';
+include_once 'todo/todo_list_form.php';
 
 function get_stylesheets() {
     $stylesheets = array('todo.css');
@@ -14,8 +17,8 @@ function get_page_class() {
 global $projects, $user, $user_id, $user_list;
 
 function process_query_string() {
-    global $projects, $user_id;
-    $user_id = NULL;
+    global $user_id;
+
     if (isset($_GET['id'])) {
         $user_id = $_GET['id'];
     } else {
@@ -24,60 +27,8 @@ function process_query_string() {
 }
 
 function process_form_data() {
-    if (isset($_POST['show-todo-button'])) {
-        header("Location: todo.php?id=${_POST['user-id']}");
-    } else if (isset($_POST['add-project-button'])) {
-        process_add_project_form();
-    } else if (isset($_POST['close-task-button'])) {
-        process_close_task();
-    }
-}
-
-function process_add_project_form() {
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return null;
-    }
-    
-    $user_id = get_session_user_id();
-
-    $project_name = mysqli_real_escape_string($connection, $_POST['project-name']);
-
-    $project_query = "INSERT INTO `project_table` 
-            ( `project_name` , `project_owner` ) VALUES ( '$project_name' , '$user_id' )";
-    $project_results = mysqli_query($connection, $project_query);
-    if (! $project_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return;
-    }
-    $project_id = mysqli_insert_id($connection);
-    
-    $access_query = "INSERT INTO `access_table` 
-            ( `user_id` , `project_id` ) VALUES ( '$user_id' , '$project_id' )";
-    $access_results = mysqli_query($connection, $access_query);
-    if (! $access_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return;
-    }
-    
-    header ("Location: project.php?id=$project_id");
-}
-
-function process_close_task() {
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return null;
-    }
-
-    $task_id = mysqli_real_escape_string($connection, $_POST['task-id']);
-    $query = "UPDATE `task_table` 
-        SET `task_status` = 'closed' 
-        WHERE `task_id` = '$task_id'";
-    $results = mysqli_query($connection, $query);
-    if (! $results) {
-        set_user_message(mysqli_error($connection), "warning");
-        return null;
-    }    
+    process_new_project_form()
+    || process_close_task_form();
 }
 
 function prepare_page_data() {
@@ -185,35 +136,18 @@ function query_user($connection, $user_id) {
 }
 
 function show_sidebar() {
-    global $user, $user_list;
-    if (! $user) {
-        return;
-    }
+    global $user_id, $user_list;
+    
     echo "
-        <div class='sidebar-block'>
-            <form id='show-todo-form' method='post'>
-                <div id='user-id-field' class='group'>
-                    <label for='user-id'>Show to-do list for:</label>
-                    <select name='user-id' style='width:100%'>";
-            foreach ($user_list as $todo_user_id => $login_name) {
-                $selected = ($user['user_id'] == $todo_user_id) ? "selected='selected'" : "";
-                echo "
-                        <option value='$todo_user_id' $selected>$login_name</option>";
-            }
-            echo "
-                    </select>
-                </div>
-                <input type='submit' name='show-todo-button' value='Show to-do list'></input>
-            </form>
-        </div>
-        <div class='sidebar-block'>
-            <form id='add-project-form' method='post'>
-                <div id='subtask-summary' class='group'>
-                    <label for='project-name'>Project name:</label>
-                    <input style='width:100%' type='text' name='project-name'></input>
-                </div>
-                <input type='submit' name='add-project-button' value='Create a new project'></input>
-            </form>
+        <div class='sidebar-block'>";
+    show_todo_list_form($user_list, $user_id);
+    echo "
+        </div>";
+    
+    echo "
+        <div class='sidebar-block'>";
+    show_new_project_form();
+    echo "
         </div>";
 }
 
@@ -258,11 +192,9 @@ function show_content()
             foreach ($timebox['task-list'] as $task_id => &$task) {
                 echo "        
                     <div id='task-$task_id' class='task'>
-                        <div style='float:right'>
-                            <form id='close-task-$task_id' method='post'>
-                                <input type='hidden' name='task-id' value='$task_id'></input>
-                                <input type='submit' class='close-button' name='close-task-button' title='Close this task' value=''></input>
-                            </form>
+                        <div style='float:right'>";
+                show_close_task_form($task_id, FALSE);
+                echo "
                         </div>
                         <div class='task-id'>$task_id</div>
                         <div class='task-summary'>

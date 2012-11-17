@@ -1,7 +1,10 @@
 <?php
 
 
-include_once('common.inc');
+include_once 'common.inc';
+include_once 'user/user_form.php';
+include_once 'user/close_account_form.php';
+include_once 'user/reopen_account_form.php';
 
 global $show_closed_member_projects;
 global $show_closed_owned_projects;
@@ -54,109 +57,9 @@ function process_query_string() {
 }
 
 function process_form_data() {
-    if (isset($_POST['update-button'])) {
-        process_user_form();
-    } else if (isset($_POST['close-account-button'])) {
-        process_close_account();
-    } else if (isset($_POST['reopen-account-button'])) {
-        process_reopen_account();
-    }
-}
-
-function process_user_form() {
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return;
-    }
-    
-    $user_id = get_session_user_id();
-    if ($user_id != $_POST['user-id']) {
-        header ("Location: user.php");
-        return;
-    }
-    
-    if (isset($_POST['new-password']) && $_POST['new-password'] != $_POST['repeat-password']) {
-        set_user_message("The new passwords do not match.  Please try again.", 'warning');
-        return;
-    }
-
-    $login_name = mysqli_real_escape_string($connection, $_POST['login-name']);
-    $old_password = mysqli_real_escape_string($connection, $_POST['old-password']);
-    
-    if (isset($_POST['new-password'])) {
-        $new_password = mysqli_real_escape_string($connection, $_POST['new-password']);
-        $query = "UPDATE `user_table` SET 
-            `login_name` = '$login_name' , 
-            `password` =  MD5(CONCAT(`password_salt`,'$new_password'))
-            WHERE `user_id` = '$user_id' AND 
-                `password` = MD5(CONCAT(`password_salt`,'$old_password')) ";
-    } else {
-        $query = "UPDATE `user_table` SET 
-            `login_name` = '$login_name' 
-            WHERE `user_id` = '$user_id' AND 
-                `password` = MD5(CONCAT(`password_salt`,'$old_password')) ";
-    }
-    $result = mysqli_query($connection, $query);
-    if (! $result) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return;
-    }
-    if (mysqli_affected_rows($connection) == 0) {
-        set_user_message("The changes could not be applied.  Please check your password and try again.", 'warning');
-        return;
-    }
-    
-    set_user_message("The changes have been applied", 'success');
-}
-
-function process_reopen_account() {
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return;
-    }
-
-    $user_id = mysqli_real_escape_string($connection, $_POST['user-id']);
-    if (!is_admin_session()) {
-        header('Location: user.php');
-        return;
-    }
-    
-    $query = "UPDATE `user_table` 
-        SET `account_closed_date` = NULL
-        WHERE `user_id` = '$user_id'";
-    $result = mysqli_query($connection, $query);
-    if (! $result) {
-        set_user_message(mysqli_errno($connection), 'failure');
-        return;
-    }
-    
-    set_user_message('This account has been re-opened', 'success');
-}
-
-function process_close_account() {
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return;
-    }
-
-    $user_id = mysqli_real_escape_string($connection, $_POST['user-id']);
-    if (!is_admin_session() && $user_id != get_session_user_id()) {
-        header('Location: user.php');
-        return;
-    }
-    
-    $query = "UPDATE `user_table`
-        SET `account_closed_date` = NOW()
-        WHERE `user_id` = '$user_id'";
-    $result = mysqli_query($connection, $query);
-    if (! $result) {
-        set_user_message(mysqli_errno($connection), 'failure');
-        return;
-    }
-    
-    if (! is_admin_session()) {
-        header("Location: login.php");
-    }
+    process_user_form()
+    || process_close_account_form()
+    || process_reopen_account_form();
 }
 
 function prepare_page_data() {
@@ -291,30 +194,22 @@ function prepare_page_data() {
 }
 
 function show_sidebar() {
-    global $query_user, $account_closed;
+    global $user_id, $account_closed;
     
-    if (! $query_user) {
-        return;
-    }
-
-    if (! $account_closed && ($query_user == get_session_user_id() || is_admin_session())) {
+    if (! $account_closed && $user_id != 1 && ($user_id == get_session_user_id() || is_admin_session())) {
         echo "
-        <div class='sidebar-block'>
-            <form id='close-account-form' method='post'>
-                <input type='hidden' name='user-id' value='${query_user['user_id']}'>
-                <input type='submit' name='close-account-button' value='Close this account'></input>
-            </form>
-        </div>";
+            <div class='sidebar-block'>";
+        show_close_account_form($user_id);
+        echo "
+            </div>";
     }
     
     if ($account_closed && is_admin_session()) {
         echo "
-        <div class='sidebar-block'>
-            <form id='close-account-form' method='post'>
-                <input type='hidden' name='user-id' value='${query_user['user_id']}'>
-                <input type='submit' name='reopen-account-button' value='Re-open this account'></input>
-            </form>
-        </div>";
+            <div class='sidebar-block'>";
+        show_reopen_account_form($user_id);
+        echo "
+            </div>";
     }        
 }
 
@@ -331,35 +226,9 @@ function show_content()
     
     $query_id = $query_user['user_id'];
     echo "
-        <h3>User $query_id</h3>
-        <form id='user-form' class='main-form' method='post'>
-            <input type='hidden' name='user-id' value='$query_id'>
+        <h3>User $query_id</h3>";
 
-            <div id='login-name'>
-                <label for='login-name'>Login name:</label>
-                <input style='width:15em' type='text' name='login-name' value='${query_user['user_name']}'></input>
-            </div>
-
-            <div id='old-password'>
-                <label for='old-password'>Old password:</label>
-                <input style='width:15em' type='password' name='old-password'></input>
-            </div>
-
-            <div id='new-password'>
-                <label for='new-password'>New password:</label>
-                <input style='width:15em' type='password' name='new-password'></input>
-            </div>
-
-            <div id='repeat-password'>
-                <label for='repeat-password'>Repeat password:</label>
-                <input style='width:15em' type='password' name='repeat-password'></input>
-            </div>
-                
-            <div id='form-controls'>
-                <input type='submit' name='update-button' value='Update'></input>
-            </div> <!-- /form-controls -->
-
-        </form>";
+    show_user_form($query_id, $query_user['user_name']);
     
     echo "
         <div id='owned-projects-header'>

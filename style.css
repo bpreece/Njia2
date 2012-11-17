@@ -124,7 +124,7 @@ a.object-ref:hover {
 }
 
 .user-message.warning {
-    background-color: #ffdfbd;
+    background-color: #ffe7bd;
     color: #a53b00;
     border: 1px solid #fad1bb;
 }
@@ -249,7 +249,7 @@ a.object-ref:hover {
 
 .task-header.object-unscheduled {
     background-image: none;
-    background-color: rgb(242, 231, 242);
+    background-color: rgb(247, 233, 247);
 }
 
 .timebox-header {

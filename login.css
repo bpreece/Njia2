@@ -16,12 +16,11 @@
 }
 
 #login-main {
-    margin: 0 240px;
     padding-bottom: 1em;
 }
 
 #login_form {
-    width: 30em;
+    margin: 0 5em;
     padding: .5em 1em;
     background-color: #fafaf7;
     border: 1px solid #ebebe8;
@@ -37,7 +36,7 @@
         font-size: 135%;
         padding: 10px 15px;
         margin-bottom: 10px;
-        width: 100%;
+        width: 15em;
 }
 
 #login_form input[type=text]:focus,

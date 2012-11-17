@@ -1,6 +1,11 @@
 <?php
 
-include_once('common.inc');
+include_once 'common.inc';
+include_once 'task/new_task_form.php';
+include_once 'task/close_task_form.php';
+include_once 'task/reopen_task_form.php';
+include_once 'log/new_log_form.php';
+include_once 'task/task_form.php';
 
 function get_stylesheets() {
     $stylesheets = array('task.css');
@@ -33,50 +38,11 @@ function process_query_string() {
 }
 
 function process_form_data() {
-    if (isset($_POST['update-button'])) {
-        process_task_form();
-    } else if (isset($_POST['add-subtask-button'])) {
-        process_add_subtask_form();
-    } else if (isset($_POST['close-task-button'])) {
-        process_close_task_form();
-    } else if (isset($_POST['reopen-task-button'])) {
-        process_reopen_task_form();
-    } else if (isset($_POST['add-task-log-button'])) {
-        process_add_task_log();
-    }
-}
-
-function process_task_form() {
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return null;
-    }
-
-    $task_id = mysqli_real_escape_string($connection, $_POST['task-id']);
-    $task_summary = mysqli_real_escape_string($connection, $_POST['task-summary']);
-    $task_discussion = mysqli_real_escape_string($connection, $_POST['task-discussion']);
-
-    $query = "UPDATE `task_table` SET ";
-    if (isset($_POST['task-user'])) {
-        $user = mysqli_real_escape_string($connection, $_POST['task-user']);
-        $query .= "`user_id`='$user', ";
-    }
-    if (isset($_POST['task-timebox'])) {
-        $timebox = mysqli_real_escape_string($connection, $_POST['task-timebox']);
-        $query .= "`timebox_id`='$timebox', ";
-    }
-    $query .= "`task_discussion`='$task_discussion', 
-        `task_summary`='$task_summary' ,
-        `task_modified_date` = CURRENT_TIMESTAMP() 
-        WHERE `task_id` = '$task_id'";
-
-    $results = mysqli_query($connection, $query);
-    if (! $results) {
-        set_user_message(mysqli_error($connection), "warning");
-        return null;
-    }
-
-    set_user_message("The changes have been applied", 'success');
+        process_task_form()
+        || process_new_task_form()
+        || process_close_task_form()
+        || process_reopen_task_form()
+        || process_new_log_form();
 }
 
 function process_add_subtask_form() {
@@ -112,65 +78,6 @@ function process_add_subtask_form() {
     }
 
     header("Location:task.php?id=$new_task_id");
-}
-
-function process_close_task_form() {
-    update_task_status('closed');
-}
-
-function process_reopen_task_form() {
-    update_task_status('open');
-}
-
-function update_task_status($status) {
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return null;
-    }
-
-    $task_id = mysqli_real_escape_string($connection, $_POST['task-id']);
-    $query = "UPDATE `task_table` 
-        SET `task_status` = '$status' 
-        WHERE `task_id` = '$task_id'";
-    $results = mysqli_query($connection, $query);
-    if (! $results) {
-        set_user_message(mysqli_error($connection), "warning");
-        return null;
-    }    
-    
-    header("Location:task.php?id=$task_id");
-}
-
-function process_add_task_log() {
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return null;
-    }
-
-    $user_id = get_session_user_id();
-    $task_id = mysqli_real_escape_string($connection, $_POST['task-id']);
-    $description = mysqli_real_escape_string($connection, $_POST['description']);
-    $work_hours = mysqli_real_escape_string($connection, $_POST['work-hours']);
-    $query = "INSERT INTO `log_table` (
-            `user_id` , `task_id` , `description` ";
-    if ($_POST['work-hours']) {
-        $query .=  ", `work_hours` ";
-    }
-    $query .= "
-        ) VALUES (
-            '$user_id' , '$task_id' , '$description' ";
-    if ($_POST['work-hours']) {
-        $query .=  ", '$work_hours' ";
-    }
-    $query .= "
-        )";
-    $results = mysqli_query($connection, $query);
-    if (! $results) {
-        set_user_message(mysqli_error($connection), "warning");
-        return null;
-    }    
-    
-    set_user_message("The log entry has been created.", 'success');
 }
 
 function prepare_page_data() {
@@ -269,7 +176,6 @@ function prepare_page_data() {
         FROM `log_table` AS L
         LEFT JOIN `user_table` AS U ON U.`user_id` = L.`user_id` 
         WHERE L.`task_id` = '$task_id'
-            AND DATE( L.`log_time` ) >= DATE_SUB( DATE( NOW() ), INTERVAL 6 DAY)
         ORDER BY L.`log_id` DESC";
     $log_result = mysqli_query($connection, $log_query);
     $task['log-list'] = array();
@@ -284,56 +190,33 @@ function prepare_page_data() {
 }
 
 function show_sidebar() {
-    global $task;
-    if (! $task) {
-        return;
-    }
+    global $task_id, $task;
+
     if ($task['task_status'] == 'closed') {
         if ($task['parent_task_status'] != 'closed') {
             echo "
-        <div class='sidebar-block'>
-            <form id='close-task-form' method='post'>
-                <input type='hidden' name='task-id' value='${task['task_id']}'>
-                <input type='submit' name='reopen-task-button' value='Reopen this task'></input>
-            </form>
-        </div>";
+            <div class='sidebar-block'>";
+            show_reopen_task_form($task_id);
+            echo "
+            </div>";
         }
     } else {
         echo "
-        <div class='sidebar-block'>
-            <form id='add-subtask-form' method='post'>
-                <input type='hidden' name='parent-task-id' value='${task['task_id']}'>
-                <input type='hidden' name='project-id' value='${task['project_id']}'>
-                <div id='subtask-summary'>
-                    <label for='subtask-summary'>Subtask Summary:</label>
-                    <input style='width:100%' type='text' name='subtask-summary'></input>
-                </div>
-                <input type='submit' name='add-subtask-button' value='Add Subtask'></input>
-            </form>
+        <div class='sidebar-block'>";
+        show_new_task_form($task['project_id'], $task_id);
+        echo "
         </div>";
         echo "
-        <div class='sidebar-block'>
-            <form id='add-task-log-form' method='post'>
-                <input type='hidden' name='task-id' value='${task['task_id']}' />
-                <div id='log-description'>
-                    <label for='description'>Description:</label>
-                    <textarea style='width:100%' rows='10' name='description'></textarea>
-                </div>
-                <div id='work-hours'>
-                    <label for='work-hours'>Hours worked:</label>
-                    <input type='text' size='5' name='work-hours'></input>
-                </div>
-                <input type='submit' name='add-task-log-button' value='Add log entry'></input>
-            </form>
+        <div class='sidebar-block'>";
+        show_new_log_form($task_id);
+        echo "
         </div>";
         if ($task['can-close']) {
             echo "
-        <div class='sidebar-block'>
-            <form id='close-task-form' method='post'>
-                <input type='hidden' name='task-id' value='${task['task_id']}'>
-                <input type='submit' name='close-task-button' value='Close this task'></input>
-            </form>
-        </div>";
+            <div class='sidebar-block'>";
+            show_close_task_form($task_id);
+            echo "
+            </div>";
         }
     }
 }
@@ -349,86 +232,9 @@ function show_content()
     
     $task_id = $task['task_id'];
     echo "
-        <h3>Task $task_id</h3>
-        <form id='task-form' class='main-form' method='post'>
-            <input type='hidden' name='task-id' value='$task_id'>
-            <input type='hidden' name='project-id' value='${task['project_id']}'>                
-            
-            <div id='project_name'>
-                <label>Project:</label>
-                <a class='object-ref' href='project.php?id=${task['project_id']}'>${task['project_name']}</a>
-            </div>";
-            
-    if (isset($task['parent_task_summary'])) {
-        echo "
-            <div id='parent-task'>
-                <label>Parent task:</label>
-                <a class='object-ref' href='task.php?id=${task['parent_task_id']}'>${task['parent_task_summary']}</a>
-            </div>";
-    }
-
+        <h3>Task $task_id</h3>";
+    show_task_form($task_id, $task);
     echo "
-            <div id='task-summary'>
-                <label for='task-summary'>Summary:</label>
-                <input style='width:50%' type='text' name='task-summary' value='${task['task_summary']}'></input>
-            </div>
-            
-            <div id='task-discussion'>
-                <label for='task-discussion'>Discussion:</label>
-                <textarea name='task-discussion' rows='10' style='width:50%'>${task['task_discussion']}</textarea>
-            </div>";
-
-    if (! array_key_exists('subtask_list', $task)) {
-        if (array_key_exists('users_list', $task)) {
-            echo "
-            <div id='task-user'>
-                <label for='task-user'>Assigned to:</label>
-                <select name='task-user'>
-                    <option value=''></option>";
-            foreach ($task['users_list'] as $user) {
-                $selected = ($task['user_id'] == $user['user_id']) ? "selected='selected'" : "";
-                echo "
-                    <option value='${user['user_id']}' $selected>${user['login_name']}</option>";
-            }
-            echo "
-                </select>
-            </div>";
-        }
-
-        if (array_key_exists('timebox_list', $task)) {
-            echo "
-            <div id='task-timebox'>
-                <label for='task-timebox'>Timebox:</label>
-                <select name='task-timebox'>
-                    <option value=''></option>";
-            foreach ($task['timebox_list'] as $timebox) {
-                $selected = ($task['timebox_id'] == $timebox['timebox_id']) ? "selected='selected'" : "";
-                echo "
-                    <option value='${timebox['timebox_id']}' $selected>
-                        ${timebox['timebox_name']} (${timebox['timebox_end_date']})
-                    </option>";
-            }
-            echo "
-                </select>
-            </div>";
-        }
-    }
-            
-    echo "
-            <div id='task-created-date'>
-                <label>Created:</label>
-                ${task['task_created_date']}
-            </div>
-            
-            <div id='task-modified-date'>
-                <label>Modified:</label>
-                ${task['task_modified_date']}
-            </div>
-                
-            <div id='form-controls'>
-                <input type='submit' name='update-button' value='Update'></input>
-            </div> <!-- /form-controls -->
-        </form>
         ";
 
     if (array_key_exists('subtask_list', $task)) {
