@@ -39,18 +39,19 @@ function process_new_task_form()
     
     $task_query = "INSERT INTO `task_table` (
             `task_summary` , `project_id` , `task_created_date` , ";
-    if ($parent_task_id) {
-        echo "`parent_task_id`, ";
+    if (isset($parent_task_id)) {
+        $task_query .= "`parent_task_id`, ";
     }
-    echo "`user_id` 
+    $task_query .= "`user_id` 
         ) VALUES ( 
             '$task_summary' , '$project_id' , CURRENT_TIMESTAMP() , ";
     if ($parent_task_id) {
-        echo "'$parent_task_id', ";
+        $task_query .= "'$parent_task_id', ";
     }
-    echo "
+    $task_query .= "
             ( SELECT `project_owner` FROM `project_table` WHERE `project_id` = '$project_id' )
         )";
+    set_user_message($task_query, 'debug');
 
     $task_results = mysqli_query($connection, $task_query);
     if (! $task_results) {
