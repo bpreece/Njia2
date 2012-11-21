@@ -92,12 +92,10 @@ function prepare_page_data() {
     }
     $task_query .= "
         ORDER BY T.`task_id`";
-    set_user_message($task_query, 'debug');
 
     $task_result = mysqli_query($connection, $task_query);
     $project['task_list'] = array();
     while ($task = mysqli_fetch_array($task_result)) {
-        set_user_message(var_export($task_result, TRUE), 'debug');
         $project['task_list'][$task['task_id']] = $task;
         if ($task['task_status'] != 'closed') {
             $project['can-close'] = FALSE;
