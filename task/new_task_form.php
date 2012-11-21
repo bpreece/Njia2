@@ -51,7 +51,6 @@ function process_new_task_form()
     $task_query .= "
             ( SELECT `project_owner` FROM `project_table` WHERE `project_id` = '$project_id' )
         )";
-    set_user_message($task_query, 'debug');
 
     $task_results = mysqli_query($connection, $task_query);
     if (! $task_results) {
