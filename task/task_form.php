@@ -86,7 +86,7 @@ function show_task_form($task_id, $task)
 
 function process_task_form()
 {
-    if (! isset($_POST['task-form-buttoln'])) {
+    if (! isset($_POST['task-form-button'])) {
         return FALSE;
     }
     
