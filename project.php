@@ -9,6 +9,7 @@ include_once 'project/add_user_to_project_form.php';
 include_once 'project/remove_user_from_project_form.php';
 include_once 'project/project_options_form.php';
 include_once 'project/project_form.php';
+include_once 'project/query_projects.php';
 
 global $project_id, $project;
 global $show_closed_tasks;
@@ -50,90 +51,15 @@ function process_form_data() {
 
 function prepare_page_data() {
     global $project_id, $project;
+    global $show_closed_tasks, $timebox_end_date;
     
     $connection = connect_to_database_session();
     if (!$connection) {
         return null;
     }
 
-    $session_id = get_session_id();
     $user_id = get_session_user_id();
-    $sql_project_id = mysqli_real_escape_string($connection, $project_id);
-    $project_query = "SELECT P.* , 
-            O.`user_id` AS `owner_id` , O.`login_name` AS `owner_name` 
-        FROM `access_table` AS A 
-        INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
-        INNER JOIN `user_table` AS O ON P.`project_owner` = O.`user_id`
-        WHERE P.`project_id` = '$sql_project_id' AND A.`user_id` = $user_id";
-    $project_result = mysqli_query($connection, $project_query);
-    if (! $project_result) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return null;
-    }    
-    $project = mysqli_fetch_array($project_result);
-    if (! $project) {
-        set_user_message("Project $project_id is not a valid project", 'warning');
-        return;
-    }
-    if ($project['project_status'] == 'closed') {
-        set_user_message('This project has been closed', 'warning');
-    } else {
-        $project['can-close'] = TRUE;
-    }
-    $project_id = $project['project_id'];
-    
-    global $show_closed_tasks;
-    $task_query = "SELECT T.`task_id` , T.`task_summary` , `task_status` ,  `timebox_id` 
-        FROM `task_table` AS T
-        WHERE T.`project_id` = '$sql_project_id' AND T.`parent_task_id` IS NULL";
-    if (! $show_closed_tasks) {
-        $task_query .= "
-            AND T.`task_status` <> 'closed' ";
-    }
-    $task_query .= "
-        ORDER BY T.`task_id`";
-
-    $task_result = mysqli_query($connection, $task_query);
-    $project['task_list'] = array();
-    while ($task = mysqli_fetch_array($task_result)) {
-        $project['task_list'][$task['task_id']] = $task;
-        if ($task['task_status'] != 'closed') {
-            $project['can-close'] = FALSE;
-        }
-    }
-    
-    global $timebox_end_date;
-    $timebox_query = "SELECT X.* FROM `timebox_table` AS X
-        WHERE X.`project_id` = '$sql_project_id'";
-    if ($timebox_end_date) {
-        $timebox_query .= "
-            AND X.`timebox_end_date` >= '$timebox_end_date'";
-    } else {
-        $timebox_query .= "
-            AND X.`timebox_end_date` >= NOW()";
-    }
-    $timebox_query .= "
-        ORDER BY X.`timebox_end_date`";
-
-    $project['timebox_list'] = array();
-    
-    $timebox_result = mysqli_query($connection, $timebox_query);
-    while ($timebox = mysqli_fetch_array($timebox_result)) {
-        $project['timebox_list'][$timebox['timebox_id']] = $timebox;
-    }
-    
-    $user_query = "SELECT U.`user_id` , U.`login_name` 
-        FROM `access_table` AS A
-        INNER JOIN `user_table` AS U ON A.`user_id` = U.`user_id`
-        WHERE A.`project_id` = '$sql_project_id'
-        ORDER BY U.`login_name`";
-    $user_result = mysqli_query($connection, $user_query);
-    $project['user_list'] = array();
-    while ($user = mysqli_fetch_array($user_result)) {
-        $project['user_list'][$user['user_id']] = $user['login_name'];
-    }
-    
-    return $project;
+    $project = query_project($connection, $project_id, $user_id, $show_closed_tasks, $timebox_end_date);
 }
 
 function get_stylesheets() {
