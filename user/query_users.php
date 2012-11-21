@@ -1,6 +1,7 @@
 <?php
 
-function query_user($connection, $user_id) {
+function query_user($connection, $user_id) 
+                {
     $user_query = "SELECT U.`user_id` , U.`login_name` , U.`user_creation_date` , U.`account_closed_date` 
                 FROM `user_table` AS U 
                 WHERE U.`user_id` = '$user_id'";
@@ -15,6 +16,31 @@ function query_user($connection, $user_id) {
     } else {
         return mysqli_fetch_array($user_result);
     }
+}
+
+function query_users($connection, $show_closed_accounts, $starting_index, $max_row_count) 
+{
+    $users_query = "SELECT U.`user_id` , U. `login_name`, U.`user_permissions` , 
+        U.`user_creation_date` , U.`account_closed_date`
+        FROM `user_table` AS U ";
+    if (! $show_closed_accounts) {
+        $users_query .= "
+            WHERE U.`account_closed_date` IS NULL ";
+    }
+    $users_query .= "
+        LIMIT $starting_index , $max_row_count";
+
+    $users_list = array();
+    $users_result = mysqli_query($connection, $users_query);
+    if (! $users_result) {
+        set_user_message(mysqli_error($connection), 'failure');
+    } else {
+        while ($user = mysqli_fetch_array($users_result)) {
+            $users_list[$user['user_id']] = $user;
+        }
+    }
+    
+    return $users_list;
 }
 
 function query_user_tasks($connection, $user_id)

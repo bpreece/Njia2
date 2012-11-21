@@ -4,7 +4,7 @@ include_once 'common.inc';
 include_once 'project/new_project_form.php';
 include_once 'task/close_task_form.php';
 include_once 'todo/todo_list_form.php';
-include_once 'user/query_user.php';
+include_once 'user/query_users.php';
 
 function get_stylesheets() {
     $stylesheets = array('todo.css');

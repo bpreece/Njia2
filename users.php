@@ -6,9 +6,12 @@
 include_once 'common.inc';
 include_once 'login/login_form.php';
 include_once 'user/user_list_options_form.php';
+include_once 'user/query_users.php';
 
 global $show_closed_accounts, $starting_index, $max_row_count;
 global $users_list;
+$starting_index = 0;
+$max_row_count = 30;
 
 /**
  * OPTIONAL.  The page template automatically includes the default templates
@@ -55,6 +58,15 @@ function process_query_string() {
     if (isset($_GET['xa'])) {
         $show_closed_accounts = TRUE;
     }
+    
+    if (isset($_GET['s'])) {
+        $starting_index = $_GET['s'];
+    }
+
+    if (isset($_GET['n'])) {
+        $max_row_count = $_GET['n'];
+    }
+    
 }
 
 /**
@@ -69,8 +81,6 @@ function process_form_data() {
  * OPTIONAL.
  */
 function prepare_page_data() {
-    global $show_closed_accounts, $starting_index, $max_row_count;
-    global $users_list;
     $connection = connect_to_database_session();
     if (!$connection) {
         return null;
@@ -79,33 +89,10 @@ function prepare_page_data() {
     if (! is_admin_session()) {
         header("Location: user.php");
     }
-    
-    if (! $starting_index) {
-        $starting_index = 0;
-    }
-    if (! $max_row_count) {
-        $max_row_count = 30;
-    }
-    
-    $users_query = "SELECT U.`user_id` , U. `login_name`, U.`user_permissions` , 
-        U.`user_creation_date` , U.`account_closed_date`
-        FROM `user_table` AS U ";
-    if (! $show_closed_accounts) {
-        $users_query .= "
-            WHERE U.`account_closed_date` IS NULL ";
-    }
-    $users_query .= "
-        LIMIT $starting_index , $max_row_count";
 
-    $users_result = mysqli_query($connection, $users_query);
-    if (! $users_result) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return;
-    }
-    $users_list = array();
-    while ($user = mysqli_fetch_array($users_result)) {
-        $users_list[$user['user_id']] = $user;
-    }
+    global $show_closed_accounts, $starting_index, $max_row_count;
+    global $users_list;
+    $users_list = query_users($connection, $show_closed_accounts, $starting_index, $max_row_count);
 }
 
 /**
