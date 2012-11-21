@@ -112,6 +112,8 @@ function prepare_page_data() {
         return;
     }
     $task = mysqli_fetch_array($task_result);
+    $task['task_summary'] = htmlspecialchars($task['task_summary'], ENT_QUOTES);
+    $task['task_discussion'] = htmlspecialchars($task['task_discussion'], ENT_QUOTES);
     if ($task['task_status'] == 'closed') {
         set_user_message('This task has been closed', 'warning');
     } else {
