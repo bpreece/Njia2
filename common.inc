@@ -123,13 +123,13 @@ function validate_user($connection)
     $user_results = mysqli_query($connection, $user_query);
     if (! $user_results) {
         set_user_message(mysqli_error($connection), "warning");
-        return;
+        return FALSE;
     }
-    $num_rows = mysqli_num_rows($user_results);
-    if ($num_rows == 0) {
-        return;
-    }
+
     $session_user = mysqli_fetch_array($user_results);
+    if (! $session_user) {
+        return FALSE;
+    }
     
     $expire_query = "UPDATE `session_table` 
         SET `session_expiration_date` = DATE_ADD(NOW(), INTERVAL 1 HOUR)

@@ -92,10 +92,12 @@ function prepare_page_data() {
     }
     $task_query .= "
         ORDER BY T.`task_id`";
-    
+    set_user_message($task_query, 'debug');
+
     $task_result = mysqli_query($connection, $task_query);
     $project['task_list'] = array();
     while ($task = mysqli_fetch_array($task_result)) {
+        set_user_message(var_export($task_result, TRUE), 'debug');
         $project['task_list'][$task['task_id']] = $task;
         if ($task['task_status'] != 'closed') {
             $project['can-close'] = FALSE;
@@ -114,13 +116,12 @@ function prepare_page_data() {
     }
     $timebox_query .= "
         ORDER BY X.`timebox_end_date`";
+
+    $project['timebox_list'] = array();
     
     $timebox_result = mysqli_query($connection, $timebox_query);
-    $project['timebox_list'] = array();
-    if (mysqli_num_rows($timebox_result) > 0) {
-        while ($timebox = mysqli_fetch_array($timebox_result)) {
-            $project['timebox_list'][$timebox['timebox_id']] = $timebox;
-        }
+    while ($timebox = mysqli_fetch_array($timebox_result)) {
+        $project['timebox_list'][$timebox['timebox_id']] = $timebox;
     }
     
     $user_query = "SELECT U.`user_id` , U.`login_name` 
@@ -130,10 +131,8 @@ function prepare_page_data() {
         ORDER BY U.`login_name`";
     $user_result = mysqli_query($connection, $user_query);
     $project['user_list'] = array();
-    if (mysqli_num_rows($user_result) > 0) {
-        while ($user = mysqli_fetch_array($user_result)) {
-            $project['user_list'][$user['user_id']] = $user['login_name'];
-        }
+    while ($user = mysqli_fetch_array($user_result)) {
+        $project['user_list'][$user['user_id']] = $user['login_name'];
     }
     
     return $project;

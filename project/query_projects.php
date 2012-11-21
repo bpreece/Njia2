@@ -30,43 +30,42 @@ function query_projects($connection, $show_empty_projects, $show_closed_projects
     }
     $projects_query .= "
         ORDER BY P.`project_id` , T.`task_id`";
-    
-    $projects_result = mysqli_query($connection, $projects_query);
-    if (! $projects_result) {
-        set_user_message("There are no results to display", 'warning');
-        return null;
-    }
 
     $projects = array();
     $tasks = array();
     
-    while ($result = mysqli_fetch_array($projects_result)) {
-        $project_id = $result['project_id'];
-        if (!array_key_exists($project_id, $projects)) {
-            $projects[$project_id] = array(
-                'project-id' => $result['project_id'],
-                'project-name' => $result['project_name'],
-                'project-status' => $result['project_status'],
-                'task-list' => array()
-            );
-        }
-        $task_id = $result['task_id'];
-        if ($task_id) {
-            $tasks[$task_id] = array(
-                'task-id' => $task_id, 
-                'task-summary' => $result['task_summary'], 
-                'timebox-id' => $result['timebox_id'], 
-                'timebox-name' => $result['timebox_name'], 
-                'timebox-end-date' => $result['timebox_end_date'], 
-                'task-status' => $result['task_status'],  
-                'user-id' => $result['user_id'], 
-                'user-name' => $result['login_name'], 
-                'subtask-list' => array()
-            );
-            if ($result['parent_task_id']) {
-                $tasks[$result['parent_task_id']]['subtask-list'][$task_id] = &$tasks[$task_id];
-            } else {
-                $projects[$result['project_id']]['task-list'][$task_id] = &$tasks[$task_id];
+    $projects_result = mysqli_query($connection, $projects_query);
+    if (! $projects_result) {
+        set_user_message(mysqli_error($connection), 'failure');
+    } else {    
+        while ($result = mysqli_fetch_array($projects_result)) {
+            $project_id = $result['project_id'];
+            if (!array_key_exists($project_id, $projects)) {
+                $projects[$project_id] = array(
+                    'project-id' => $result['project_id'],
+                    'project-name' => $result['project_name'],
+                    'project-status' => $result['project_status'],
+                    'task-list' => array()
+                );
+            }
+            $task_id = $result['task_id'];
+            if ($task_id) {
+                $tasks[$task_id] = array(
+                    'task-id' => $task_id, 
+                    'task-summary' => $result['task_summary'], 
+                    'timebox-id' => $result['timebox_id'], 
+                    'timebox-name' => $result['timebox_name'], 
+                    'timebox-end-date' => $result['timebox_end_date'], 
+                    'task-status' => $result['task_status'],  
+                    'user-id' => $result['user_id'], 
+                    'user-name' => $result['login_name'], 
+                    'subtask-list' => array()
+                );
+                if ($result['parent_task_id']) {
+                    $tasks[$result['parent_task_id']]['subtask-list'][$task_id] = &$tasks[$task_id];
+                } else {
+                    $projects[$result['project_id']]['task-list'][$task_id] = &$tasks[$task_id];
+                }
             }
         }
     }

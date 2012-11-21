@@ -1,21 +1,17 @@
 <?php
 
 function query_user($connection, $user_id) 
-                {
+{
     $user_query = "SELECT U.`user_id` , U.`login_name` , U.`user_creation_date` , U.`account_closed_date` 
                 FROM `user_table` AS U 
                 WHERE U.`user_id` = '$user_id'";
     $user_result = mysqli_query($connection, $user_query);
     if (! $user_result) {
         set_user_message(mysqli_error($connection), 'failure');
-        return FALSE;
+        return NULL;
     }
-    $num_users = mysqli_num_rows($user_result);
-    if ($num_users == 0) {
-        return FALSE;
-    } else {
-        return mysqli_fetch_array($user_result);
-    }
+
+    return mysqli_fetch_array($user_result);
 }
 
 function query_users($connection, $show_closed_accounts, $starting_index, $max_row_count) 
