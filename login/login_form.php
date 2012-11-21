@@ -1,5 +1,7 @@
 <?php
 
+include_once 'common.inc';
+
 global $login_form_name_field;
 
 /**

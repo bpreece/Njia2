@@ -50,7 +50,8 @@ function show_sidebar() {
         echo "
         <div class='sidebar-block'>
             <form method='GET'>
-                <input type='submit' name='new' value='Create an account'></input>
+                <input type='hidden' name='new' />
+                <input type='submit' value='Create an account'></input>
             </form>
         </div>";
     }

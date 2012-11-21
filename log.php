@@ -3,16 +3,17 @@
 include_once 'common.inc';
 include_once 'data.inc';
 include_once 'log/log_list_form.php';
+include_once 'log/query_log.php';
 
-global $user_id, $user_list, $log_date_list, $timebox_end_date, $end_date, $total_work_hours;
-$timebox_end_date = '';
+global $user_id, $user_list, $log_date_list, $start_date, $end_date, $total_work_hours;
+$start_date = '';
 $end_date = '';
 
 /*
  * Process query string from the URL
  */
 function process_query_string() {
-    global $user_id, $timebox_end_date, $end_date;
+    global $user_id, $start_date, $end_date;
 
     if (isset($_GET['u'])) {
         $user_id = $_GET['u'];
@@ -25,7 +26,7 @@ function process_query_string() {
     }
     
     if (isset($_GET['s'])) {
-        $timebox_end_date = $_GET['s'];
+        $start_date = $_GET['s'];
     }
 }
 
@@ -42,7 +43,7 @@ function process_form_data() {
  * Fetch page contents from the database
  */
 function prepare_page_data() {
-    global $user_id, $user_list, $log_date_list, $timebox_end_date, $end_date, $total_work_hours;
+    global $user_id, $user_list, $log_date_list, $start_date, $end_date, $total_work_hours;
     
     $connection = connect_to_database_session();
     if (! $connection) {
@@ -55,7 +56,7 @@ function prepare_page_data() {
         $user_id = $session_user_id;
     }
     
-    calculate_range_dates($connection);
+    calculate_range_dates($connection, $start_date, $end_date);
 
     /*
      * Fetch list of users with common projects and verify that this user is
@@ -68,106 +69,7 @@ function prepare_page_data() {
         $user_id = $session_user_id;
     }
     
-    $log_query = "SELECT L.`log_id` , L.`description` , L.`work_hours` , 
-        DATE( L.`log_time` ) AS `log_date` , 
-        T.`task_id` , T.`task_summary` 
-        FROM `log_table` AS L
-        INNER JOIN `task_table` AS T ON L.`task_id` = T.`task_id` 
-        INNER JOIN  `user_table` AS U ON L.`user_id` = U.`user_id` 
-        WHERE L.`user_id` = '$user_id' ";
-    if ($end_date) {
-        $log_query .= "
-            AND DATE( L.`log_time` ) <= '$end_date' ";
-    } else {
-        $log_query .= "
-            AND DATE( L.'log_time` ) <= DATE( NOW() ) ";
-    }
-    if ($timebox_end_date) {
-        $log_query .= "
-            AND DATE( L.`log_time` ) >= '$timebox_end_date' ";
-    } else {
-        if ($end_date) {
-            $log_query .= "
-                AND DATE( L.`log_time` ) >= DATE( DATE_SUB( '$end_date' , INTERVAL 13 DAY ) ) ";
-        } else {
-            $log_query .= "
-                AND DATE( L.`log_time` ) >= DATE( DATE_SUB( NOW() , INTERVAL 13 DAY ) ) ";
-        }
-    }
-    $log_query .= "
-        ORDER BY  L.`log_time` ASC , T.`task_id` ";
-
-    // sort the log results by date first, then task, and log entry
-    $log_results = mysqli_query($connection, $log_query);
-    $total_work_hours = 0;
-    if (! $log_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return;
-    } else {
-        $log_date_list = array();
-        while ($log = mysqli_fetch_array($log_results)) {
-            $date = $log['log_date'];
-            $log_id = $log['log_id'];
-            $task_id = $log['task_id'];
-            $work_hours = $log['work_hours'];
-            $total_work_hours += $work_hours;
-            if (!array_key_exists($date, $log_date_list)) {
-                $log_date_list[$date] = array();
-                $log_date_list[$date]['work-hours'] = 0;
-                $log_date_list[$date]['task-list'] = array();
-            }
-
-            $log_date_list[$date]['work-hours'] += $work_hours;
-            if (!array_key_exists($task_id, $log_date_list[$date]['task-list'])) {
-                $log_date_list[$date]['task-list'][$task_id] = array();
-                $log_date_list[$date]['task-list'][$task_id]['work-hours'] = 0;
-                $log_date_list[$date]['task-list'][$task_id]['task-summary'] = $log['task_summary'];
-                $log_date_list[$date]['task-list'][$task_id]['log-list'] = array();
-            }
-            $log_date_list[$date]['task-list'][$task_id]['work-hours'] += $work_hours;
-            $log_date_list[$date]['task-list'][$task_id]['log-list'][$log_id] = array(
-                'work-hours'=> $log['work_hours'], 
-                'description' => $log['description'],
-            );
-        }
-    }
-}
-
-/**
- * Use the database to get start and end dates
- * Sets: $start_date, $end_date
- */
-function calculate_range_dates($connection) {
-    global $timebox_end_date, $end_date;
-    
-    $date_query = "SELECT ";
-    if ($end_date) {
-        $date_query .= "'$end_date' AS `end_date` ";
-    } else {
-        $date_query .= "DATE( NOW() ) AS `end_date` ";
-    }
-    if ($timebox_end_date) {
-        $date_query .= " , 
-            '$timebox_end_date' AS `start_date` ";
-    } else {
-        if ($end_date) {
-            $date_query .= " , 
-                DATE( DATE_SUB( '$end_date', INTERVAL 13 DAY ) ) AS `start_date` ";
-        } else {
-            $date_query .= " , 
-                DATE( DATE_SUB( NOW(), INTERVAL 13 DAY ) ) AS `start_date` ";
-        }
-    }
-    $date_results = mysqli_query($connection, $date_query);
-    if (! $date_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return FALSE;
-    } else {
-        $date_result = mysqli_fetch_array($date_results);
-        $timebox_end_date = $date_result['start_date'];
-        $end_date = $date_result['end_date'];
-        return TRUE;
-    }
+    $log_date_list = query_user_log($connection, $user_id, $start_date, $end_date, $total_work_hours);
 }
 
 function get_stylesheets() {
@@ -185,17 +87,17 @@ function get_page_class() {
 }
 
 function show_sidebar() {
-    global $user_id, $user_list, $timebox_end_date, $end_date;
+    global $user_id, $user_list, $start_date, $end_date;
 
     echo "
         <div class='sidebar-block'>";
-    show_log_list_form($user_list, $user_id, $timebox_end_date, $end_date);
+    show_log_list_form($user_list, $user_id, $start_date, $end_date);
     echo "
         </div>";
 }
 
 function show_content() {
-    global $user_id, $user_list, $log_date_list, $timebox_end_date, $end_date, $total_work_hours;
+    global $user_id, $user_list, $log_date_list, $start_date, $end_date, $total_work_hours;
     
     if (! $log_date_list) {
         return;
@@ -205,7 +107,7 @@ function show_content() {
     echo "
         <h3><a class='object-ref' href='user.php?id=$user_id'>$user_name</a></h3>
         <div class='work-log-details'>Total hours: $total_work_hours</div>
-        <div class='work-log-dates'>$timebox_end_date &mdash; $end_date</div>
+        <div class='work-log-dates'>$start_date &mdash; $end_date</div>
         <div class='work-log-list'>";
     
     foreach ($log_date_list as $date => $date_info) {

@@ -75,7 +75,7 @@ if (function_exists('get_page_class')) {
     $page_class = get_page_class();
 }
 
-$user = get_session_user();
+$session_user = get_session_user();
     
 ?>
 

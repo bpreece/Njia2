@@ -3,6 +3,7 @@
 include_once 'common.inc';
 include_once 'project/new_project_form.php';
 include_once 'project/project_list_options_form.php';
+include_once 'project/query_projects.php';
 
 global $show_closed_tasks;
 global $show_closed_projects;

@@ -185,4 +185,39 @@ function connect_to_database_session()
     return $connection;
 }
 
+/**
+ * Use the database to get start and end dates
+ * Sets: $start_date, $end_date
+ */
+function calculate_range_dates($connection, &$start_date, &$end_date) {
+    $date_query = "SELECT ";
+    if ($end_date) {
+        $date_query .= "'$end_date' AS `end_date` ";
+    } else {
+        $date_query .= "DATE( NOW() ) AS `end_date` ";
+    }
+    if ($start_date) {
+        $date_query .= " , 
+            '$start_date' AS `start_date` ";
+    } else {
+        if ($end_date) {
+            $date_query .= " , 
+                DATE( DATE_SUB( '$end_date', INTERVAL 13 DAY ) ) AS `start_date` ";
+        } else {
+            $date_query .= " , 
+                DATE( DATE_SUB( NOW(), INTERVAL 13 DAY ) ) AS `start_date` ";
+        }
+    }
+    $date_results = mysqli_query($connection, $date_query);
+    if (! $date_results) {
+        set_user_message(mysqli_error($connection), 'failure');
+        return FALSE;
+    } else {
+        $date_result = mysqli_fetch_array($date_results);
+        $start_date = $date_result['start_date'];
+        $end_date = $date_result['end_date'];
+        return TRUE;
+    }
+}
+
 ?>
