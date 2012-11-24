@@ -19,10 +19,9 @@ function get_page_id() {
     return 'login-page';
 }
 
-/*
 function get_page_class() {
+    return 'no-header';
 }
- */
 
 function process_query_string() {
     global $new_login;

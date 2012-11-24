@@ -98,7 +98,7 @@ $session_user = get_session_user();
     <body <?php if (isset($page_id)) echo "id='$page_id'"; ?> <?php echo "class='$page_class'"; ?> >
         <div id="logo-and-title">
             <div id="logo">
-                <a href='njia.html'><img src="<?php echo get_logo_image(); ?>" /></a>
+                <a href='index.php'><img src="<?php echo get_logo_image(); ?>" /></a>
             </div>
             <!--
             <div id="title"><?php echo get_global_title(); ?></div>

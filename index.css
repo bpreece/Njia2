@@ -1,0 +1,25 @@
+/* 
+    Document   : index
+    Created on : Nov 23, 2012, 3:50:20 PM
+    Author     : benpreece
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+#table-of-contents {
+    margin: 0;
+    padding: 0;
+}
+
+#table-of-contents li {
+    list-style: none;
+}
+
+#table-of-contents li a {
+    text-decoration: none;
+    color: inherit;
+}
+
+#table-of-contents li a:hover {
+    text-decoration: underline;
+}

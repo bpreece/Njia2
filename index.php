@@ -1,39 +1,48 @@
-
 <?php
 
-include_once('common.inc');
+include_once 'common.inc';
+
+function get_stylesheets() {
+    return array('index.css');
+}
+
+function get_page_id() {
+    return 'front-page';
+}
+
+function get_page_class() {
+    return 'no-header';
+}
+
+/*
+function process_query_string() {
+}
+ */
+
+/*
+function process_form_data() {
+}
+ */
 
 function show_sidebar() {
+    echo "
+        <div class='sidebar-block'>
+            <form method='GET' action='login.php'>
+                <input type='submit' value='Log in to Njia'></input>
+            </form>
+        </div>";
     echo "<div class='sidebar-block'>
             <h3>Sidebar block</h3>
-            <p>
-                Video adhuc duas esse sententias, unam D. Silani, qui 
-                censet eos, qui haec delere conati sunt, morte esse 
-                multandos, alteram C. Caesaris, qui mortis poenam removet, 
-                ceterorum suppliciorum omnes acerbitates amplectitur. 
-            </p>
-            <p>
-                Uterque et pro sua dignitate et pro rerum magnitudine in 
-                summa severitate versatur. Alter eos, qui nos omnes 
-                vita privare conati sunt, qui delere imperium, qui 
-                populi Romani nomen exstinguere, punctum temporis frui 
-                vita et hoc communi spiritu non putat oportere, atque 
-                hoc genus poenae saepe in improbos cives in hac re 
-                publica esse usurpatum recordatur. 
-            </p>
-        </div>
-        <div class='sidebar-block'>
-            <h3>Sidebar block</h3>
-            <p>
-                Alter intellegit mortem ab dis immortalibus non esse 
-                supplicii causa constitutam, sed aut necessitatem 
-                naturae aut laborum ac miseriarum quietem. 
-            </p>
+            <ul id='table-of-contents'>
+                <li><a href='index.php'>Home page</a></li>
+                <li><a href='site-design.php'>Site design</a></li>
+                <li><a href='test-cases.php'>Test cases</a></li>
+            </ul>
         </div>";
 }
 
 function show_content() {
-    echo "<h1>Page title</h1>
+    echo "<h1>Njia 2</h1>
                 <h2>Section title</h2>
                 <p>
                     Quam ob rem sive hoc statueritis, dederitis mihi comitem ad 

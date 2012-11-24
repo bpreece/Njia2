@@ -20,8 +20,12 @@ html {
     margin: 0 34px;  /* width of logo, plus 7px */
 }
 
-#header {
-    
+.no-header #header {
+    display: none;
+}
+
+.no-header #content {
+    padding-top: 48px;
 }
 
 #logo-and-title {
