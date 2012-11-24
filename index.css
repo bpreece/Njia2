@@ -13,11 +13,14 @@
 
 #table-of-contents li {
     list-style: none;
+    font-size: 115%;
+    font-weight: bold;
+    padding: 0.5em 0;
 }
 
 #table-of-contents li a {
     text-decoration: none;
-    color: inherit;
+    color: #BA8200;
 }
 
 #table-of-contents li a:hover {

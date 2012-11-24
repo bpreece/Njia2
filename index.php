@@ -32,11 +32,10 @@ function show_sidebar() {
             </form>
         </div>";
     echo "<div class='sidebar-block'>
-            <h3>Sidebar block</h3>
-            <ul id='table-of-contents'>
-                <li><a href='index.php'>Home page</a></li>
-                <li><a href='site-design.php'>Site design</a></li>
-                <li><a href='test-cases.php'>Test cases</a></li>
+            <ul class='menu'>
+                <li>HOME PAGE</li>
+                <li><a href='site-design.php'>SITE DESIGN</a></li>
+                <li><a href='test-cases.php'>TEST CASES</a></li>
             </ul>
         </div>";
 }

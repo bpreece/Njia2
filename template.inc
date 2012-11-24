@@ -106,39 +106,36 @@ $session_user = get_session_user();
         </div> <!-- /logo-and-title -->
         <div id="page">
             <div id="header">
-                
-                <div id="main-menu">
-                    <ul class='main-menu'>
-                        <?php if ($page_class == 'todo-page') : ?>
-                            <li class='selected'>TO-DO</li>
+                <ul class='menu'>
+                    <?php if ($page_class == 'todo-page') : ?>
+                        <li class='selected'>TO-DO</li>
+                    <?php else: ?>
+                        <li><a href='todo.php'>TO-DO</a></li>
+                    <?php endif; ?>
+                    <?php if ($page_class == 'log-page') : ?>
+                        <li class='selected'>LOG</li>
+                    <?php else: ?>
+                        <li><a href='log.php'>LOG</a></li>
+                    <?php endif; ?>
+                    <?php if ($page_class == 'projects-page') : ?>
+                        <li class='selected'>PROJECTS</li>
+                    <?php else: ?>
+                        <li><a href='projects.php'>PROJECTS</a></li>
+                    <?php endif; ?>
+                    <?php if ($page_class == 'schedules-page') : ?>
+                        <li class='selected'>SCHEDULES</li>
+                    <?php else: ?>
+                        <li><a href='schedules.php'>SCHEDULES</a></li>
+                    <?php endif; ?>
+                    <?php if(is_admin_session()) : ?>
+                        <?php if ($page_class == 'users-page') : ?>
+                            <li class='selected'>USERS</li>
                         <?php else: ?>
-                            <li><a href='todo.php'>TO-DO</a></li>
+                            <li><a href='users.php'>USERS</a></li>
                         <?php endif; ?>
-                        <?php if ($page_class == 'log-page') : ?>
-                            <li class='selected'>LOG</li>
-                        <?php else: ?>
-                            <li><a href='log.php'>LOG</a></li>
-                        <?php endif; ?>
-                        <?php if ($page_class == 'projects-page') : ?>
-                            <li class='selected'>PROJECTS</li>
-                        <?php else: ?>
-                            <li><a href='projects.php'>PROJECTS</a></li>
-                        <?php endif; ?>
-                        <?php if ($page_class == 'schedules-page') : ?>
-                            <li class='selected'>SCHEDULES</li>
-                        <?php else: ?>
-                            <li><a href='schedules.php'>SCHEDULES</a></li>
-                        <?php endif; ?>
-                        <?php if(is_admin_session()) : ?>
-                            <?php if ($page_class == 'users-page') : ?>
-                                <li class='selected'>USERS</li>
-                            <?php else: ?>
-                                <li><a href='users.php'>USERS</a></li>
-                            <?php endif; ?>
-                        <?php endif; ?>
-                            <li><a style='font-variant: small-caps; font-size: 85%' href='logout.php'>Log out</a></li>
-                    </ul>
-                </div> <!-- /main-menu -->
+                    <?php endif; ?>
+                        <li><a style='font-variant: small-caps; font-size: 85%' href='logout.php'>Log out</a></li>
+                </ul> <!-- /menu -->
             </div> <!-- /header -->
             
             <div id="content">

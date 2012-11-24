@@ -80,28 +80,39 @@ a.object-ref:hover {
     font-size: 300%;
 }
 
-#main-menu ul {
-    padding: 0;
+ul.menu {
+    padding-left: 0;
     margin: 0;
 }
 
-#main-menu li {
+.menu li {
+    list-style-type: none;
+    color: #448b25;
+    font-size: 125%;
+    font-weight: bold;
+}
+
+#header .menu li {
     display: inline-block;
     list-style-type: none;
     padding: 0.25em 1.75em;
-    text-align: center;
     font-size: 125%;
-    font-weight: bold;
-    color: #5A5956;
+    text-align: center;
 }
 
-#main-menu li a,
-#main-menu li a:visited {
+.sidebar-block .menu li {
+    list-style-type: none;
+    font-size: 115%;
+    margin: 0.75em 0;
+}
+
+.menu li a,
+.menu li a:visited {
     color: #ba8200;
     text-decoration: none;
 }
 
-#main-menu li a:hover {
+.menu li a:hover {
     color: #f5ab00;
     text-decoration: underline;
 }

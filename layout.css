@@ -37,11 +37,8 @@ html {
     float: left;
 }
 
-#main-menu {
+#header .menu {
     text-align: center;
-}
-
-#content {
 }
 
 #main {
