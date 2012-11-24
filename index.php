@@ -33,7 +33,7 @@ function show_sidebar() {
         </div>";
     echo "<div class='sidebar-block'>
             <ul class='menu'>
-                <li>HOME PAGE</li>
+                <li>NJIA 2</li>
                 <li><a href='site-design.php'>SITE DESIGN</a></li>
                 <li><a href='test-cases.php'>TEST CASES</a></li>
             </ul>

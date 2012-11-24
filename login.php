@@ -29,6 +29,10 @@ function process_query_string() {
     if (isset($_GET['new'])) {
         $new_login = TRUE;
     }
+    
+    if (isset($_GET['x'])) {
+        set_user_message('You must log in to view these pages.', 'warning');
+    }
 }
 
 function process_form_data() {

@@ -167,7 +167,7 @@ function connect_to_database_session()
 {
     $session = get_session_id_cookie();
     if (!$session) {
-        set_user_message("You must <a href='login.php'>log in</a> to view this page", 'warning');
+        header('Location: login.php?x');
         return;
     }
 
@@ -178,7 +178,7 @@ function connect_to_database_session()
     }
     
     if (! validate_user($connection)) {
-        set_user_message("You must <a href='login.php'>log in</a> to view this page", 'warning');
+        header('Location: login.php?x');
         return;
     }
     
