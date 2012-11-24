@@ -5,6 +5,7 @@ include_once 'common.inc';
 include_once 'user/user_form.php';
 include_once 'user/close_account_form.php';
 include_once 'user/reopen_account_form.php';
+include_once 'user/query_users.php';
 
 global $show_closed_member_projects;
 global $show_closed_owned_projects;
@@ -70,32 +71,7 @@ function prepare_page_data() {
         return;
     }
 
-    // if we're not admin, then fetch the user information only if we share 
-    // a common project
-    
-    $session_user_id = get_session_user_id();
-    $user_id = mysqli_real_escape_string($connection, $user_id);
-    if (is_admin_session()) {
-        $user_query = "SELECT U.`user_id` , U.`login_name` AS  `user_name` , 
-                U.`account_closed_date` 
-            FROM `user_table` AS U
-            WHERE `user_id` = '$user_id'";
-    } else {
-        $user_query = "SELECT U.`user_id` , U.`login_name` AS  `user_name` , 
-                U.`account_closed_date` 
-            FROM  `project_table` AS P
-            INNER JOIN  `access_table` AS A1 ON P.`project_id` = A1.`project_id` 
-            INNER JOIN  `access_table` AS A2 ON P.`project_id` = A2.`project_id` 
-            INNER JOIN  `user_table` AS U ON A1.`user_id` = U.`user_id` 
-            WHERE A1.`user_id` =  '$user_id'
-                AND A2.`user_id` =  '$session_user_id'";
-    }
-    $user_result = mysqli_query($connection, $user_query);
-    if (! $user_result) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return;
-    }
-    if ( ($query_user = mysqli_fetch_array($user_result)) == NULL) {
+    if ( ($query_user = query_user($connection, $user_id)) == NULL) {
         set_user_message("User $user_id was not found", 'warning');
         return;
     }
@@ -109,86 +85,15 @@ function prepare_page_data() {
     
     // projects which are owned by $user_id, and which are accessible to
     // get_session_user_id();
-    $query_user['owned-project-list'] = array();
-    $owner_query = "SELECT P.`project_id` , P.`project_name` , P.`project_status` 
-        FROM `access_table` AS A 
-        INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
-        WHERE P.`project_owner` = '$user_id' AND A.`user_id` = '$session_user_id' ";
-    if (! $show_closed_owned_projects) {
-        $owner_query .= "
-            AND P.`project_status` <> 'closed'";
-    }
-    $owner_query .= "
-        ORDER BY P.`project_id`";
-    $owner_results = mysqli_query($connection, $owner_query);
-    if (! $owner_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-    } else {
-        while ($project = mysqli_fetch_array($owner_results)) {
-            $query_user['owned-project-list'][$project['project_id']] = $project;
-        }
-    }
+    $query_user['owned-project-list'] = query_user_owned_projects($connection, $user_id, $show_closed_owned_projects);
     
     // projects which are accessible to both $user_id and get_session_user_id();
-    $query_user['project-member-list'] = array();
-    $member_query = "SELECT P.`project_id` , P.`project_name` , P.`project_status` 
-        FROM `access_table` AS A 
-        INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
-        WHERE P.`project_owner` <> '$user_id' AND A.`user_id` = '$user_id' ";
-    if (! $show_closed_member_projects) {
-        $member_query .= "
-            AND P.`project_status` <> 'closed'";
-    }
-    $member_query .= "
-        ORDER BY P.`project_id`";
-    $member_results = mysqli_query($connection, $member_query);
-    if (! $member_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-    } else {
-        while ($project = mysqli_fetch_array($member_results)) {
-            $query_user['project-member-list'][$project['project_id']] = $project;
-        }
-    }
+    $query_user['project-member-list'] = query_user_member_functions($connection, $user_id, $show_closed_member_projects);
     
     global $work_log_start_date;
     global $work_log_end_date;
     
-    $log_query = "SELECT P.`project_id` , P.`project_name` , 
-            T.`task_id` , T.`task_summary` , 
-            L.`log_id` , L.`description` , L.`work_hours` , L.`log_time` 
-        FROM `access_table` AS A 
-        INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
-        INNER JOIN `task_table` AS T ON P.`project_id` = T.`project_id` 
-        INNER JOIN `log_table` AS L ON L.`task_id` = T.`task_id` 
-        WHERE A.`user_id`= '$session_user_id' 
-            AND L.`user_id` = $user_id ";
-    if ($work_log_end_date) {
-        $log_query .= "
-            AND DATE( L.`log_time` ) <= '$work_log_end_date' ";
-    }
-    if ($work_log_start_date) {
-        $log_query .= "
-            AND DATE( L.`log_time` ) >= '$work_log_start_date' ";
-    } else {
-        if ($work_log_end_date) {
-            $log_query .= "
-            AND DATE( L.`log_time` ) >= DATE_SUB( '$work_log_end_date', INTERVAL 13 DAY ) ";
-        } else {
-            $log_query .= "
-            AND DATE( L.`log_time` ) >= DATE_SUB( DATE( NOW() ), INTERVAL 13 DAY ) ";
-        }
-    }
-    $log_query .= "
-        ORDER BY P.`project_id` , T.`task_id` , L.`log_time` ";
-    $log_results = mysqli_query($connection, $log_query);
-    $query_user['log-list'] = array();
-    if (! $log_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-    } else {
-        while ($log = mysqli_fetch_array($log_results)) {
-            $query_user['log-list'][$log['log_id']] = $log;
-        }
-    }
+    $query_user['log-list'] = query_user_work_log($connection, $user_id, $work_log_start_date, $work_log_end_date);
     
     return $query_user;
 }

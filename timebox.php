@@ -3,6 +3,7 @@
 include_once 'common.inc';
 include_once 'timebox/timebox_list_options_form.php';
 include_once 'timebox/timebox_form.php';
+include_once 'timebox/query_timeboxes.php';
 
 global $timebox_id, $timebox;
 global $show_closed_tasks;
@@ -47,41 +48,10 @@ function prepare_page_data() {
         return null;
     }
 
-    $session_id = get_session_id();
-    $timebox_query = "SELECT X.* , P.`project_name` 
-                FROM `session_table` AS S
-                INNER JOIN `access_table` AS A ON S.`user_id` = A.`user_id` 
-                INNER JOIN `timebox_table` AS X ON A.`project_id` = X.`project_id` 
-                INNER JOIN `project_table` AS P ON X.`project_id` = P.`project_id`
-                WHERE S.`session_id` = '$session_id' and X.`timebox_id` = '$timebox_id'";
-    
-    $timebox_result = mysqli_query($connection, $timebox_query);
-    if (! $timebox_result) {
-        set_user_message(mysqli_error($connection), "warning");
-        return;
-    } else if (mysqli_num_rows($timebox_result) == 0) {
-        set_user_message("Timebox ID $timebox_id not recognized", 'warning');
-        return;
-    }
-    $timebox = mysqli_fetch_array($timebox_result);
+    $timebox = query_user_timeboxes($connection, $timebox_id);
     
     global $show_closed_tasks;
-    $task_query = "SELECT T.`task_id` , T.`task_summary` , T.`task_status` 
-                FROM `task_table` AS T
-                WHERE T.`timebox_id` = '$timebox_id' ";
-    if (! $show_closed_tasks) {
-        $task_query .= "
-                    AND T.`task_status` <> 'closed' ";
-    }
-    $task_result = mysqli_query($connection, $task_query);
-    $timebox['task_list'] = array();
-    if (! $task_result) {
-        set_user_message(mysqli_error($connection), "warning");
-    } else {
-        while ($task = mysqli_fetch_array($task_result)) {
-            $timebox['task_list'][$task['task_id']] = $task;
-        }
-    }
+    $timebox['task_list'] = query_timebox_tasks($connection, $timebox_id, $show_closed_tasks);
 
     return $timebox;
 }

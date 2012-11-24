@@ -41,7 +41,7 @@ function prepare_page_data() {
     if (! $user_id) {
         $user_id = get_session_user_id();
     }
-    $user = query_user($connection, $user_id);
+    $user = query_user_vitals($connection, $user_id);
     $session_id = get_session_id();
     $projects = query_user_tasks($connection, $user_id);
     $user_list = query_known_users($connection, $user_id);

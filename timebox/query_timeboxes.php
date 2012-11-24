@@ -63,4 +63,46 @@ function query_timeboxes($connection, $show_closed_tasks, $timebox_end_date)
     return $timeboxes;
 }
 
+function query_user_timeboxes($connection, $timebox_id)
+{
+    $session_id = get_session_id();
+    $timebox_query = "SELECT X.* , P.`project_name` 
+                FROM `session_table` AS S
+                INNER JOIN `access_table` AS A ON S.`user_id` = A.`user_id` 
+                INNER JOIN `timebox_table` AS X ON A.`project_id` = X.`project_id` 
+                INNER JOIN `project_table` AS P ON X.`project_id` = P.`project_id`
+                WHERE S.`session_id` = '$session_id' and X.`timebox_id` = '$timebox_id'";
+    
+    $timebox_result = mysqli_query($connection, $timebox_query);
+    if (! $timebox_result) {
+        set_user_message(mysqli_error($connection), "warning");
+        return NULL;
+    }
+    
+    return mysqli_fetch_array($timebox_result);
+}
+
+function query_timebox_tasks($connection, $timebox_id, $show_closed_tasks)
+{
+    $task_query = "SELECT T.`task_id` , T.`task_summary` , T.`task_status` 
+                FROM `task_table` AS T
+                WHERE T.`timebox_id` = '$timebox_id' ";
+    if (! $show_closed_tasks) {
+        $task_query .= "
+                    AND T.`task_status` <> 'closed' ";
+    }
+    $task_result = mysqli_query($connection, $task_query);
+    
+    $tasks_list = array();
+    if (! $task_result) {
+        set_user_message(mysqli_error($connection), "warning");
+    } else {
+        while ($task = mysqli_fetch_array($task_result)) {
+            $tasks_list[$task['task_id']] = $task;
+        }
+    }
+    
+    return array();
+}
+
 ?>
