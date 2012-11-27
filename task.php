@@ -8,6 +8,7 @@ include_once 'log/new_log_form.php';
 include_once 'task/new_task_form.php';
 include_once 'task/task_form.php';
 include_once 'task/query_tasks.php';
+include_once 'task/task_options_form.php';
 include_once 'task/tasks_list.php';
 include_once 'project/query_projects.php';
 
@@ -32,12 +33,18 @@ function get_page_class() {
     return $page_class;
 }
 
-global $task, $task_id, $total_hours;
+global $task, $task_id, $total_hours, $show_closed_subtasks;
+$show_closed_subtasks = FALSE;
 
 function process_query_string() {
-    global $task_id, $task;
+    global $task_id, $task, $show_closed_subtasks;
+    
     if (isset($_GET['id'])) {
         $task_id = $_GET['id'];
+    }
+
+    if (isset($_GET['sx'])) {
+        $show_closed_subtasks = TRUE;
     }
 }
 
@@ -50,7 +57,7 @@ function process_form_data() {
 }
 
 function prepare_page_data() {
-    global $task_id, $task;
+    global $task_id, $task, $show_closed_subtasks;
 
     $connection = connect_to_database_session();
     if (!$connection) {
@@ -63,8 +70,7 @@ function prepare_page_data() {
     // if the task has subtasks, then we'll list them;  otherwise, this task
     // can be assigned, so we'll need a list of users and a list of timeboxes.
     
-    $open_tasks = FALSE;
-    $task['subtask-list'] = query_subtasks($connection, $task_id, $open_tasks);
+    $task['subtask-list'] = query_subtasks($connection, $task_id, $show_closed_subtasks);
     if (count($task['subtask-list']) == 0) {
         $task['users_list'] = query_project_users($connection, $project_id);
         $task['timebox_list'] = query_project_timeboxes($connection, $project_id, $task['timebox_end_date']);
@@ -109,7 +115,7 @@ function show_sidebar() {
 
 function show_content() 
 {    
-    global $task, $total_hours;
+    global $task, $total_hours, $show_closed_subtasks;
     
     if (!$task) {
         set_user_message("There was an error retrieving the task", 'warning');
@@ -124,6 +130,10 @@ function show_content()
     if (count($task['subtask-list']) > 0) {
         echo "
             <div id='tasks-header'>
+            <div class='header-controls'>";
+    show_task_options_form($task_id, $show_closed_subtasks);
+    echo "
+            </div>
                 <h4>Subtasks</h4>
             </div>
             <div id='task-$task_id-subtask-list' class='task-list object-list'>";

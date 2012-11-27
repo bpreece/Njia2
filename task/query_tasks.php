@@ -38,16 +38,20 @@ function query_task($connection, $task_id)
     return $task;
 }
 
-function query_subtasks($connection, $task_id, &$open_tasks)
+function query_subtasks($connection, $task_id, &$show_closed_tasks)
 {
-    $open_tasks = FALSE;
     $subtask_query = "SELECT T.`task_id` , T.`task_summary` , T.`task_status` , T.`parent_task_id` , 
             X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` , 
             U.`user_id` , U.`login_name` AS `user_name` 
         FROM `task_table` AS T 
         LEFT JOIN `timebox_table` AS X ON T.`timebox_id` = X.`timebox_id` 
         LEFT JOIN `user_table` AS U ON T.`user_id` = U.`user_id`
-        WHERE T.`parent_task_id` = '$task_id'
+        WHERE T.`parent_task_id` = '$task_id' ";
+    if (! $show_closed_tasks) {
+        $subtask_query .= "
+            AND T.`task_status` <> 'closed' ";
+    }
+    $subtask_query .= "
         ORDER BY T.`task_id`";
     $subtask_result = mysqli_query($connection, $subtask_query);
     
