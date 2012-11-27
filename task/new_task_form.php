@@ -63,4 +63,40 @@ function process_new_task_form()
     return TRUE;
 }
 
+function process_add_subtask_form() {
+    $connection = connect_to_database_session();
+    if (!$connection) {
+        return null;
+    }
+
+    $parent_task_id = mysqli_real_escape_string($connection, $_POST['parent-task-id']);
+    $project_id = mysqli_real_escape_string($connection, $_POST['project-id']);
+    $subtask_summary = mysqli_real_escape_string($connection, $_POST['subtask-summary']);
+    
+    $subtask_query = "INSERT INTO `task_table` 
+        ( `task_summary` , `project_id` , `parent_task_id` , `user_id` , 
+            `timebox_id` , `task_created_date` )
+        ( SELECT '$subtask_summary' , '$project_id' , '$parent_task_id' , 
+            `user_id` , `timebox_id` , CURRENT_TIMESTAMP()
+          FROM `task_table` WHERE `task_id` = '$parent_task_id' )";
+
+    $subtask_results = mysqli_query($connection, $subtask_query);
+    if (! $subtask_results) {
+        set_user_message(mysqli_error($connection), "warning");
+        return null;
+    }    
+    $new_task_id = mysqli_insert_id($connection);
+    
+    $parent_task_query = "UPDATE `task_table` SET 
+        `user_id` = NULL , `timebox_id` = NULL
+        WHERE `task_id` = '$parent_task_id'";
+    $parent_task_results = mysqli_query($connection, $parent_task_query);
+    if (! $parent_task_results) {
+        set_user_message(mysqli_error($connection), "warning");
+    }
+
+    header("Location:task.php?id=$new_task_id");
+}
+
+
 ?>

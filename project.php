@@ -2,6 +2,7 @@
 
 include_once 'common.inc';
 include_once 'task/new_task_form.php';
+include_once 'task/tasks_list.php';
 include_once 'timebox/new_timebox_form.php';
 include_once 'project/close_project_form.php';
 include_once 'project/reopen_project_form.php';
@@ -12,13 +13,14 @@ include_once 'project/project_form.php';
 include_once 'project/query_projects.php';
 
 global $project_id, $project;
-global $show_closed_tasks;
+global $show_closed_tasks, $show_subtasks;
 global $timebox_end_date;
 $show_closed_tasks = FALSE;
+$show_subtasks = FALSE;
 $timebox_end_date = '';
 
 function process_query_string() {
-    global $show_closed_tasks;
+    global $show_closed_tasks, $show_subtasks;
     global $timebox_end_date;
     global $project_id, $project;
     
@@ -30,6 +32,10 @@ function process_query_string() {
     
     if (isset($_GET['tx'])) {
         $show_closed_tasks = TRUE;
+    }
+    
+    if (isset($_GET['ts'])) {
+        $show_subtasks = TRUE;
     }
     
     if (isset($_GET['s'])) {
@@ -51,7 +57,7 @@ function process_form_data() {
 
 function prepare_page_data() {
     global $project_id, $project;
-    global $show_closed_tasks, $timebox_end_date;
+    global $show_closed_tasks, $show_subtasks, $timebox_end_date;
     
     $connection = connect_to_database_session();
     if (!$connection) {
@@ -59,7 +65,7 @@ function prepare_page_data() {
     }
 
     $user_id = get_session_user_id();
-    $project = query_project($connection, $project_id, $user_id, $show_closed_tasks, $timebox_end_date);
+    $project = query_project($connection, $project_id, $user_id, $show_closed_tasks, $show_subtasks, $timebox_end_date);
 }
 
 function get_stylesheets() {
@@ -129,7 +135,7 @@ function show_sidebar() {
 
 function show_content() 
 {
-    global $show_closed_tasks;
+    global $show_closed_tasks, $show_subtasks;
     global $timebox_end_date, $end_date;
     global $project_id, $project;
     
@@ -145,30 +151,17 @@ function show_content()
     echo "
         <div id='tasks-header'>
             <div class='header-controls'>";
-    show_project_options_form($project_id, 'closed-tasks', $show_closed_tasks, $timebox_end_date);
+    show_project_options_form($project_id, 'tasks', $show_closed_tasks, $show_subtasks, $timebox_end_date);
     echo "
             </div>
             <h4>Tasks</h4>
         </div>
         <div class='task-list object-list'>";
-    foreach ($project['task_list'] as $task_id => $task) {
+    if (count($project['task-list']) == 0) {
         echo "
-            <div id='task-$task_id' class='task object-element'>
-                <div class='task-header object-header object-${task['task_status']}'>
-                    <div class='task-details'>";
-        if ($task['task_status'] != 'open') {
-            echo "
-                        ${task['task_status']}";
-        }
-        echo "
-                    </div> <!-- /task-details -->
-                    <div class='task-id'>$task_id</div>
-                    <div class='task-summary'>
-                        <a class='object-ref' href='task.php?id=$task_id'>${task['task_summary']}</a>
-                    </div> <!-- /task-summary -->";
-        echo "
-                </div> <!-- /task-info -->
-            </div> <!-- /task-$task_id -->";
+            <div>There are no tasks to display.</div>";
+    } else {
+        show_tasks_list($project['task-list']);
     }
     echo "
         </div> <!-- /task-list -->";
@@ -176,13 +169,13 @@ function show_content()
     echo "
         <div id='timeboxes-header'>
             <div class='header-controls'>";
-    show_project_options_form($project_id, 'timeboxes', $show_closed_tasks, $timebox_end_date);
+    show_project_options_form($project_id, 'timeboxes', $show_closed_tasks, $show_subtasks, $timebox_end_date);
     echo "
             </div>
             <h4>Timeboxes</h4>
         </div>
         <div class='timebox-list object-list'>";
-    foreach ($project['timebox_list'] as $timebox_id => $timebox) {
+    foreach ($project['timebox-list'] as $timebox_id => $timebox) {
         echo "
             <div id='timebox-$timebox_id' class='timebox object-element'>
                 <div class='timebox-details'>${timebox['timebox_end_date']}</div>
@@ -200,7 +193,7 @@ function show_content()
     echo "
         <h4>People</h4>
         <div class='user-list object-list'>";
-    foreach ($project['user_list'] as $user_id => $user_name) {
+    foreach ($project['user-list'] as $user_id => $user) {
         echo "
             <div id='user-$user_id' class='user object-element'>
                 <div class='user-header object-header'>
@@ -215,7 +208,7 @@ function show_content()
         }
         echo "
                     <div class='user-name'>
-                        <a class='object-ref' href='user.php?id=$user_id'>$user_name</a>
+                        <a class='object-ref' href='user.php?id=$user_id'>${user['user_name']}</a>
                     </div> <!-- /user-name -->
                 </div> <!-- /user-info -->
             </div> <!-- /user-$user_id -->";

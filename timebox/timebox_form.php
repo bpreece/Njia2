@@ -17,7 +17,7 @@ function show_timebox_form($timebox_id, $timebox)
             </div>
             
             <div id='timebox-discussion'>
-                <label for='timebox-discussion'>Discussion:</label>
+                <label for='timebox-discussion' style='vertical-align:top'>Discussion:</label>
                 <textarea name='timebox-discussion' rows='10' style='width:50%'>${timebox['timebox_discussion']}</textarea>
             </div>
 

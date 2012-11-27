@@ -32,24 +32,6 @@
     font-size: 75%;
 }
 
-.task-list {
-    padding: 0.5em 0 0.5em 1em;
-    background-color: #fcfcfc;
-}
-
-.task {
-    margin: 0.5em 0;;
-}
-
-.task-id {
+.task-list .task-timebox {
     display: none;
-}
-
-.task-details {
-    float:right;
-}
-
-.task-user {
-    display: inline-block;
-    width: 3em;
 }

@@ -27,44 +27,42 @@ function show_task_form($task_id, $task)
             </div>
             
             <div id='task-discussion'>
-                <label for='task-discussion'>Discussion:</label>
+                <label for='task-discussion' style='vertical-align:top'>Discussion:</label>
                 <textarea name='task-discussion' rows='10' style='width:50%'>${task['task_discussion']}</textarea>
             </div>";
 
-    if (! array_key_exists('subtask_list', $task)) {
-        if (array_key_exists('users_list', $task)) {
+    if (array_key_exists('users_list', $task)) {
+        echo "
+        <div id='task-user'>
+            <label for='task-user'>Assigned to:</label>
+            <select name='task-user'>
+                <option value=''></option>";
+        foreach ($task['users_list'] as $user) {
+            $selected = ($task['user_id'] == $user['user_id']) ? "selected='selected'" : "";
             echo "
-            <div id='task-user'>
-                <label for='task-user'>Assigned to:</label>
-                <select name='task-user'>
-                    <option value=''></option>";
-            foreach ($task['users_list'] as $user) {
-                $selected = ($task['user_id'] == $user['user_id']) ? "selected='selected'" : "";
-                echo "
-                    <option value='${user['user_id']}' $selected>${user['login_name']}</option>";
-            }
-            echo "
-                </select>
-            </div>";
+                <option value='${user['user_id']}' $selected>${user['login_name']}</option>";
         }
+        echo "
+            </select>
+        </div>";
+    }
 
-        if (array_key_exists('timebox_list', $task)) {
+    if (array_key_exists('timebox_list', $task)) {
+        echo "
+        <div id='task-timebox'>
+            <label for='task-timebox'>Timebox:</label>
+            <select name='task-timebox'>
+                <option value=''></option>";
+        foreach ($task['timebox_list'] as $timebox) {
+            $selected = ($task['timebox_id'] == $timebox['timebox_id']) ? "selected='selected'" : "";
             echo "
-            <div id='task-timebox'>
-                <label for='task-timebox'>Timebox:</label>
-                <select name='task-timebox'>
-                    <option value=''></option>";
-            foreach ($task['timebox_list'] as $timebox) {
-                $selected = ($task['timebox_id'] == $timebox['timebox_id']) ? "selected='selected'" : "";
-                echo "
-                    <option value='${timebox['timebox_id']}' $selected>
-                        ${timebox['timebox_name']} (${timebox['timebox_end_date']})
-                    </option>";
-            }
-            echo "
-                </select>
-            </div>";
+                <option value='${timebox['timebox_id']}' $selected>
+                    ${timebox['timebox_name']} (${timebox['timebox_end_date']})
+                </option>";
         }
+        echo "
+            </select>
+        </div>";
     }
             
     echo "

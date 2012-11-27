@@ -302,3 +302,40 @@ ul.menu {
 .header-controls {
     float: right;
 }
+
+.project-id,
+.task-id, 
+.user-id {
+    display: none;
+}
+
+.project,
+.task,
+.user {
+    margin-bottom: 0.5em;
+    border-top-left-radius: 0.4em;
+    border: 1px solid #ddd;
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    background-color: #fcfcfc;
+}
+
+.task-list {
+    background-color: #fcfcfc;
+    padding: 0.5em 0 0.5em 1em;
+}
+
+.task-details {
+    float:right;
+}
+
+.task-user {
+    display: inline-block;
+    width: 5em;
+}
+
+.task-status,
+.task-timebox {
+    display: inline-block;
+    width: 7.5em;
+}
