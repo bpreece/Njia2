@@ -280,7 +280,7 @@ ul.menu {
 }
 
 #schedules-list .timebox-header {
-    background-color: #fcfcfc;
+    background-color: #fafaf7;
 }
 
 .user-header {
@@ -310,6 +310,7 @@ ul.menu {
 }
 
 .project,
+.timebox, 
 .task,
 .user {
     margin-bottom: 0.5em;
@@ -317,11 +318,14 @@ ul.menu {
     border: 1px solid #ddd;
     border-right: none;
     border-bottom: 1px solid #ddd;
-    background-color: #fcfcfc;
+    background-color: #fafaf7;
 }
 
-.task-list {
-    background-color: #fcfcfc;
+.project-list, 
+.timebox-list,
+.task-list,
+.user-list {
+    /*background-color: #fafaf7;*/
     padding: 0.5em 0 0.5em 1em;
 }
 

@@ -31,29 +31,29 @@ function show_task_form($task_id, $task)
                 <textarea name='task-discussion' rows='10' style='width:50%'>${task['task_discussion']}</textarea>
             </div>";
 
-    if (array_key_exists('users_list', $task)) {
+    if (isset($task['users-list'])) {
         echo "
         <div id='task-user'>
             <label for='task-user'>Assigned to:</label>
             <select name='task-user'>
                 <option value=''></option>";
-        foreach ($task['users_list'] as $user) {
-            $selected = ($task['user_id'] == $user['user_id']) ? "selected='selected'" : "";
+        foreach ($task['users-list'] as $user_id => $user) {
+        $selected = ($task['user_id'] == $user['user_id']) ? "selected='selected'" : "";
             echo "
-                <option value='${user['user_id']}' $selected>${user['login_name']}</option>";
+                <option value='${user['user_id']}' $selected>${user['user_name']}</option>";
         }
         echo "
             </select>
         </div>";
     }
 
-    if (array_key_exists('timebox_list', $task)) {
+    if (isset($task['timebox-list'])) {
         echo "
         <div id='task-timebox'>
             <label for='task-timebox'>Timebox:</label>
             <select name='task-timebox'>
                 <option value=''></option>";
-        foreach ($task['timebox_list'] as $timebox) {
+        foreach ($task['timebox-list'] as $timebox_id => $timebox) {
             $selected = ($task['timebox_id'] == $timebox['timebox_id']) ? "selected='selected'" : "";
             echo "
                 <option value='${timebox['timebox_id']}' $selected>
@@ -66,20 +66,20 @@ function show_task_form($task_id, $task)
     }
             
     echo "
-            <div id='task-created-date'>
-                <label>Created:</label>
-                ${task['task_created_date']}
-            </div>
-            
-            <div id='task-modified-date'>
-                <label>Modified:</label>
-                ${task['task_modified_date']}
-            </div>
-                
-            <div id='form-controls'>
-                <input type='submit' name='task-form-button' value='Update'></input>
-            </div> <!-- /form-controls -->
-        </form>";
+        <div id='task-created-date'>
+            <label>Created:</label>
+            ${task['task_created_date']}
+        </div>
+
+        <div id='task-modified-date'>
+            <label>Modified:</label>
+            ${task['task_modified_date']}
+        </div>
+
+        <div id='form-controls'>
+            <input type='submit' name='task-form-button' value='Update'></input>
+        </div> <!-- /form-controls -->
+    </form>";
 }
 
 function process_task_form()

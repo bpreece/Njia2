@@ -72,8 +72,8 @@ function prepare_page_data() {
     
     $task['subtask-list'] = query_subtasks($connection, $task_id, $show_closed_subtasks);
     if (count($task['subtask-list']) == 0) {
-        $task['users_list'] = query_project_users($connection, $project_id);
-        $task['timebox_list'] = query_project_timeboxes($connection, $project_id, $task['timebox_end_date']);
+        $task['users-list'] = query_project_users($connection, $project_id);
+        $task['timebox-list'] = query_project_timeboxes($connection, $project_id, $task['timebox_end_date']);
     }
     
     global $total_hours;
