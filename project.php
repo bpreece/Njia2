@@ -65,7 +65,7 @@ function prepare_page_data() {
     }
 
     $user_id = get_session_user_id();
-    $project = query_project($connection, $project_id, $user_id, $show_closed_tasks, $show_subtasks, $timebox_end_date);
+    $project = query_project($project_id, $user_id, $show_closed_tasks, $show_subtasks);
 }
 
 function get_stylesheets() {

@@ -27,38 +27,30 @@ function process_new_project_form()
         return FALSE;
     }
 
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return TRUE;
-    }
-    
-    $session_user_id = get_session_user_id();
-    $project_name = mysqli_real_escape_string($connection, $_POST['project-name']);
+    if (connect_to_database_session()) {
+        $session_user_id = get_session_user_id();
+        $project_name = db_escape($_POST['project-name']);
 
-    $project_query = "INSERT INTO `project_table` (
-            `project_name` , `project_owner` 
-        ) VALUES ( 
-            '$project_name' , '$session_user_id' 
-        )";
-    $project_results = mysqli_query($connection, $project_query);
-    if (! $project_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return TRUE;
+        $project_query = "INSERT INTO `project_table` (
+                `project_name` , `project_owner` 
+            ) VALUES ( 
+                '$project_name' , '$session_user_id' 
+            )";
+        if (! db_execute($connection, $project_query)) {
+            return TRUE;
+        }
+        $new_project_id = db_last_index();
+
+        $access_query = "INSERT INTO `access_table` (
+                `user_id` , `project_id` 
+            ) VALUES ( 
+                '$session_user_id' , '$new_project_id' 
+            )";
+        if (db_execute($access_query)) {
+            header ("Location: project.php?id=$new_project_id");
+        }
     }
-    $new_project_id = mysqli_insert_id($connection);
-    
-    $access_query = "INSERT INTO `access_table` (
-            `user_id` , `project_id` 
-        ) VALUES ( 
-            '$session_user_id' , '$new_project_id' 
-        )";
-    $access_results = mysqli_query($connection, $access_query);
-    if (! $access_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return TRUE;
-    }
-    
-    header ("Location: project.php?id=$new_project_id");
+        
     return TRUE;
 }
 

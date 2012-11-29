@@ -27,33 +27,27 @@ function process_close_account_form()
         return FALSE;
     }
     
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return TRUE;
-    }
+    if (connect_to_database_session()) {
+        $user_id = db_escape($_POST['user-id']);
+        if ($user_id == 1) {
+            set_user_message("User account 1 cannot be closed", 'warning');
+            return TRUE;
+        }
 
-    $user_id = mysqli_real_escape_string($connection, $_POST['user-id']);
-    if ($user_id == 1) {
-        set_user_message("User account 1 cannot be closed", 'warning');
-        return TRUE;
-    }
-    
-    if (! is_admin_session() && $user_id != get_session_user_id()) {
-        header('Location: user.php');
-        return TRUE;
-    }
-    
-    $query = "UPDATE `user_table`
-        SET `account_closed_date` = NOW()
-        WHERE `user_id` = '$user_id'";
-    $result = mysqli_query($connection, $query);
-    if (! $result) {
-        set_user_message(mysqli_errno($connection), 'failure');
-        return TRUE;
-    }
-    
-    if ($user_id == get_session_user_id()) {
-        header("Location: login.php");
+        if (! is_admin_session() && $user_id != get_session_user_id()) {
+            header('Location: user.php');
+            return TRUE;
+        }
+
+        $query = "UPDATE `user_table`
+            SET `account_closed_date` = NOW()
+            WHERE `user_id` = '$user_id'";
+        
+        if (db_execute($query)) {
+            if ($user_id == get_session_user_id()) {
+                header("Location: login.php");
+            }
+        }
     }
     
     return TRUE;

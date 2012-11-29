@@ -64,16 +64,16 @@ function prepare_page_data() {
         return null;
     }
 
-    $task = query_task($connection, $task_id);
+    $task = query_task($task_id);
     $project_id = $task['project_id'];
 
     // if the task has subtasks, then we'll list them;  otherwise, this task
     // can be assigned, so we'll need a list of users and a list of timeboxes.
     
-    $task['subtask-list'] = query_subtasks($connection, $task_id, $show_closed_subtasks);
+    $task['subtask-list'] = query_subtasks($task_id, $show_closed_subtasks);
     if (count($task['subtask-list']) == 0) {
-        $task['users-list'] = query_project_users($connection, $project_id);
-        $task['timebox-list'] = query_project_timeboxes($connection, $project_id, $task['timebox_end_date']);
+        $task['users-list'] = query_project_users($project_id);
+        $task['timebox-list'] = query_project_timeboxes($project_id);
     }
     
     global $total_hours;

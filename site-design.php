@@ -1,5 +1,36 @@
 
 <?php 
+
+include_once 'common.inc';
+
+function get_stylesheets() {
+    return array('index.css', 'site-design.css');
+}
+
+function get_page_id() {
+    return 'site-design';
+}
+
+function get_page_class() {
+    return 'no-header';
+}
+
+function show_sidebar() {
+    echo "
+        <div class='sidebar-block'>
+            <form method='GET' action='login.php'>
+                <input type='submit' value='Log in to Njia'></input>
+            </form>
+        </div>";
+    echo "<div class='sidebar-block'>
+            <ul class='menu'>
+                <li><a href='index.php'>NJIA 2</a></li>
+                <li>SITE DESIGN</li>
+                <li><a href='test-cases.php'>TEST CASES</a></li>
+            </ul>
+        </div>";
+}
+
 function show_content() { 
     echo "
         <h2>Data Model</h2>
@@ -36,6 +67,10 @@ function show_content() {
         <div class='definition'>
             <div class='label'>task summary</div>
             <div class='data'>
+                Summarium breve huis laboris.  Quod ad summam bytes 255 continet,
+                aliter tamen non est circumscriptum. Exempli gratia, id idem 
+                esse alio labori potest. Animus tamen nomen esse unicum.  
+                Hoc summarium emendabile est.
                 A brief summary of this task.  This summary cannot be more than 
                 255 bytes, but otherwise it is not constrained - for example, it 
                 can potentially be duplicated in another task.  However, its 
@@ -120,7 +155,7 @@ function show_content() {
         <div class='definition'>
             <div class='label'>delete</div>
             <div class='data'>
-                A "deleted" task is not actually removed from the database table.  
+                A &quot;deleted&quot; task is not actually removed from the database table.  
                 Instead, the task status is set to 'closed'.
             </div>
         </div>
@@ -175,7 +210,7 @@ function show_content() {
         <div class='definition'>
             <div class='label'>delete</div>
             <div class='data'>
-                A "deleted" project is not actually removed from the database table.  Instead, the project status is set to 'closed'.
+                A &quot;deleted&quot; project is not actually removed from the database table.  Instead, the project status is set to 'closed'.
             </div>
         </div>
 
@@ -223,7 +258,7 @@ function show_content() {
         <div class='definition'>
             <div class='label'>delete</div>
             <div class='data'>
-                A "deleted" timebox is not actually removed from the database table.  Instead, the timebox end date can be set to NULL.
+                A &quot;deleted&quot; timebox is not actually removed from the database table.  Instead, the timebox end date can be set to NULL.
             </div>
         </div>
 
@@ -283,7 +318,7 @@ function show_content() {
         <div class='definition'>
             <div class='label'>delete</div>
             <div class='data'>
-                A "deleted" user is not actually removed from the database table.  Instead, the password is set to NULL.
+                A &quot;deleted&quot; user is not actually removed from the database table.  Instead, the password is set to NULL.
             </div>
         </div>
 
@@ -331,7 +366,7 @@ function show_content() {
         <div class='definition'>
             <div class='label'>delete</div>
             <div class='data'>
-                A "deleted" session is not actually removed from the database table.  Instead, the session expiration date can be set to '0000-00-00 00:00:00'.
+                A &quot;deleted&quot; session is not actually removed from the database table.  Instead, the session expiration date can be set to '0000-00-00 00:00:00'.
             </div>
         </div>
 
@@ -373,7 +408,7 @@ function show_content() {
         <div class='definition'>
             <div class='label'>delete</div>
             <div class='data'>
-                A "deleted" session is not actually removed from the database table.  Instead, the session expiration date can be set to 0000-00-00 00:00:00.
+                A &quot;deleted&quot; session is not actually removed from the database table.  Instead, the session expiration date can be set to 0000-00-00 00:00:00.
             </div>
         </div>
 
@@ -382,7 +417,9 @@ function show_content() {
         <h2>User Views</h2>
 
         <h3>To-do list</h3>
+        ";
+}
 
+include_once 'template.inc';
 
-    </body>
-</html>
+?>

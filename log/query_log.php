@@ -31,14 +31,11 @@ function query_user_log($connection, $user_id, $start_date, $end_date, &$total_w
     $log_query .= "
         ORDER BY  L.`log_time` ASC , T.`task_id` ";
 
-    $log_results = mysqli_query($connection, $log_query);
+    $log_results = db_fetch_array($log_query);
     $total_work_hours = 0;
     $log_date_list = array();
-    if (! $log_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return $log_date_list;
-     } else {
-        while ($log = mysqli_fetch_array($log_results)) {
+    if ($log_results) {
+        foreach($log_results as $log) {
             $date = $log['log_date'];
             $log_id = $log['log_id'];
             $task_id = $log['task_id'];

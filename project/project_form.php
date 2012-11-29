@@ -39,27 +39,22 @@ function process_project_form()
         return FALSE;
     }
     
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return TRUE;
+    if (connect_to_database_session()) {
+        $project_id = db_escape($_POST['project-id']);
+        $project_name = db_escape($_POST['project-name']);
+        $project_discussion = db_escape($_POST['project-discussion']);
+
+        $query = "UPDATE `project_table` SET
+                `project_name` = '$project_name' , 
+                `project_discussion` = '$project_discussion' 
+            WHERE `project_id` = '$project_id'";
+
+        if (db_execute($query)) {
+            set_user_message("The changes have been applied", 'success');
+        }
     }
 
-    $project_id = mysqli_real_escape_string($connection, $_POST['project-id']);
-    $project_name = mysqli_real_escape_string($connection, $_POST['project-name']);
-    $project_discussion = mysqli_real_escape_string($connection, $_POST['project-discussion']);
-    
-    $query = "UPDATE `project_table` SET
-            `project_name` = '$project_name' , 
-            `project_discussion` = '$project_discussion' 
-        WHERE `project_id` = '$project_id'";
 
-    $results = mysqli_query($connection, $query);
-    if (! $results) {
-        set_user_message(mysqli_error($connection), "warning");
-        return TRUE;
-    }
-
-    set_user_message("The changes have been applied", 'success');
     return TRUE;
 }
 

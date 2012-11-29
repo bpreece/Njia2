@@ -23,28 +23,22 @@ function process_new_timebox_form()
         return FALSE;
     }
     
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return TRUE;
+    if (connect_to_database_session()) {
+        $project_id = db_escape($_POST['project-id']);
+        $timebox_name = db_escape($_POST['timebox-name']);
+        $timebox_end_date = db_escape($_POST['timebox-end-date']);
+
+        $query = "INSERT INTO `timebox_table` (
+                `timebox_name` , `project_id` , `timebox_end_date` 
+            ) VALUES ( 
+                '$timebox_name' , '$project_id' , '$timebox_end_date')";
+
+        if (db_execute($query)) {
+            $new_timebox_id = db_last_index();
+            header("Location:timebox.php?id=$new_timebox_id");
+        }    
     }
-
-    $project_id = mysqli_real_escape_string($connection, $_POST['project-id']);
-    $timebox_name = mysqli_real_escape_string($connection, $_POST['timebox-name']);
-    $timebox_end_date = mysqli_real_escape_string($connection, $_POST['timebox-end-date']);
     
-    $query = "INSERT INTO `timebox_table` (
-        `timebox_name` , `project_id` , `timebox_end_date` 
-        ) VALUES ( 
-        '$timebox_name' , '$project_id' , '$timebox_end_date')";
-
-    $results = mysqli_query($connection, $query);
-    if (! $results) {
-        set_user_message(mysqli_error($connection), "warning");
-        return TRUE;
-    }    
-    $new_timebox_id = mysqli_insert_id($connection);
-    
-    header("Location:timebox.php?id=$new_timebox_id");
     return TRUE;
 }
 

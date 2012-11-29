@@ -17,22 +17,18 @@ function process_remove_user_from_project_form()
         return FALSE;
     }
     
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return TRUE;
+    if (connect_to_database_session()) {
+        $user_id = db_escape($_POST['user-id']);
+        $project_id = db_escape($_POST['project-id']);
+        
+        $query = "DELETE FROM `access_table` 
+            WHERE `project_id` = '$project_id' AND `user_id` = '$user_id'";
+
+        if (db_execute($query)) {
+            set_user_message("User ${_POST['user-name']} has been removed from project $project_id", 'success');
+        }
     }
 
-    $user_id = mysqli_real_escape_string($connection, $_POST['user-id']);
-    $project_id = mysqli_real_escape_string($connection, $_POST['project-id']);
-    $query = "DELETE FROM `access_table` 
-        WHERE `project_id` = '$project_id' AND `user_id` = '$user_id'";
-    $results = mysqli_query($connection, $query);
-    if (! $results) {
-        set_user_message(mysqli_error($connection), "warning");
-        return TRUE;
-    }    
-    
-    set_user_message("User ${_POST['user-name']} has been removed from project $project_id", 'success');
     return TRUE;
 }
 

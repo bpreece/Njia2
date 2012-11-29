@@ -1,0 +1,43 @@
+/* 
+    Document   : site-design
+    Created on : Nov 27, 2012, 5:01:24 PM
+    Author     : benpreece
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+
+h2 {
+}
+
+h3 {
+    margin-top: 2em;
+    border-bottom: 1px solid lightgray;
+}
+
+#header {
+    background: powderblue;
+}
+
+#header h2 {
+    background-color: inherit;
+}
+
+.title { 
+    text-align: center; 
+}
+
+.definition {
+    margin: 1em 0 1em 2em;
+}
+
+.label { 
+    font-weight: bold;
+    float: left; 
+    width: 12em; 
+    margin-right: -12em; 
+}
+
+.data { 
+    margin-left: 12em; 
+}

@@ -49,7 +49,7 @@ function prepare_page_data() {
     }
     
     global $timeboxes;
-    $timeboxes = query_timeboxes($connection, $show_closed_tasks, $timebox_end_date);
+    $timeboxes = query_timeboxes($show_closed_tasks, $timebox_end_date);
 }
 
 function show_sidebar() {

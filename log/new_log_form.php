@@ -23,35 +23,30 @@ function process_new_log_form()
         return FALSE;
     }
     
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return TRUE;
-    }
+    if (connect_to_database_session()) {
+        $user_id = get_session_user_id();
+        $task_id = db_escape($_POST['task-id']);
+        $description = db_escape($_POST['description']);
+        $work_hours = db_escape($_POST['work-hours']);
 
-    $user_id = get_session_user_id();
-    $task_id = mysqli_real_escape_string($connection, $_POST['task-id']);
-    $description = mysqli_real_escape_string($connection, $_POST['description']);
-    $work_hours = mysqli_real_escape_string($connection, $_POST['work-hours']);
-    $query = "INSERT INTO `log_table` (
-            `user_id` , `task_id` , `description` ";
-    if ($_POST['work-hours']) {
-        $query .=  ", `work_hours` ";
+        $query = "INSERT INTO `log_table` (
+                `user_id` , `task_id` , `description` ";
+        if ($_POST['work-hours']) {
+            $query .=  ", `work_hours` ";
+        }
+        $query .= "
+            ) VALUES (
+                '$user_id' , '$task_id' , '$description' ";
+        if ($_POST['work-hours']) {
+            $query .=  ", '$work_hours' ";
+        }
+        $query .= "
+            )";
+        
+        if (db_execute($query)) {
+            set_user_message("The log entry has been created.", 'success');
+        }
     }
-    $query .= "
-        ) VALUES (
-            '$user_id' , '$task_id' , '$description' ";
-    if ($_POST['work-hours']) {
-        $query .=  ", '$work_hours' ";
-    }
-    $query .= "
-        )";
-    $results = mysqli_query($connection, $query);
-    if (! $results) {
-        set_user_message(mysqli_error($connection), "warning");
-        return TRUE;
-    }    
-    
-    set_user_message("The log entry has been created.", 'success');
     return TRUE;
 }
 

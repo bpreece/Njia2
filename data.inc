@@ -10,7 +10,6 @@ include_once 'common.inc';
  */
 function fetch_user_list($connection) {
     $session_user_id = get_session_user_id();
-    $user_list = array();
 
     $user_query = "SELECT DISTINCT U.`user_id` , U.`login_name` 
         FROM  `access_table` AS A1
@@ -18,21 +17,14 @@ function fetch_user_list($connection) {
         INNER JOIN  `user_table` AS U ON A1.`user_id` = U.`user_id` 
         WHERE A2.`user_id` =  '$session_user_id'
         ORDER BY U.`login_name`";
-    
-    $user_result = mysqli_query($connection, $user_query);
-    if (! $user_result) {
-        set_user_message(mysqli_error($connection), 'failure');
-    } else {
-        while ($user = mysqli_fetch_array($user_result)) {
-            $user_list[$user['user_id']] = $user;
-        }
-    }
+    $user_list = db_fetch_list('user_id', $user_query);
     
     // in case the user doesn't have any projects, still return the session
     // user in the list
     if (!array_key_exists($session_user_id, $user_list)) {
         $user_list[$session_user_id] = get_session_user();
     }
+    
     return $user_list;
 }
 

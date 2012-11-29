@@ -14,24 +14,21 @@ function process_reopen_account_form()
         return FALSE;
     }
     
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return TRUE;
-    }
+    if (connect_to_database_session()) {
+        $user_id = db_escape($_POST['user-id']);
+        
+        if (!is_admin_session()) {
+            header('Location: user.php');
+            return TRUE;
+        }
 
-    $user_id = mysqli_real_escape_string($connection, $_POST['user-id']);
-    if (!is_admin_session()) {
-        header('Location: user.php');
-        return TRUE;
-    }
-    
-    $query = "UPDATE `user_table` 
-        SET `account_closed_date` = NULL
-        WHERE `user_id` = '$user_id'";
-    $result = mysqli_query($connection, $query);
-    if (! $result) {
-        set_user_message(mysqli_errno($connection), 'failure');
-        return TRUE;
+        $query = "UPDATE `user_table` 
+            SET `account_closed_date` = NULL
+            WHERE `user_id` = '$user_id'";
+        
+        if (db_execute($query)) {
+            set_user_message("This account has been re-opened.", 'debug');
+        }
     }
     
     return TRUE;

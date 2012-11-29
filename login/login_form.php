@@ -45,7 +45,7 @@ function process_login_form()
     global $login_form_name_field;
 
     if (! isset($_POST['login-button'])) {
-        return FALSE;  // we did not handled a login form
+        return FALSE;  // we did not handle a login form
     }
 
     if (!$_POST['name_field'] || !$_POST['password-field']) {
@@ -53,32 +53,22 @@ function process_login_form()
         return TRUE;  // we did handle a login form
     }
 
-    if (!($connection = connect_to_database())) {
-        set_user_message("Failed accessing database", "failure");
-        return TRUE;
-    }
+    if (connect_to_database()) {
+        $login_form_name_field = db_escape($_POST['name_field']);
+        $password = db_escape($_POST['password-field']);
 
-    $login_form_name_field = mysqli_real_escape_string($connection, $_POST['name_field']);
-    $password = mysqli_real_escape_string($connection, $_POST['password-field']);
+        $query = "SELECT `user_id`, `login_name` 
+            FROM `user_table` 
+            WHERE `login_name` = '$login_form_name_field' AND 
+                `password` = MD5( CONCAT( `password_salt`, '$password' ) ) AND 
+                `account_closed_date` IS NULL";
 
-    $query = "SELECT `user_id`, `login_name` 
-                FROM `user_table` 
-                WHERE `login_name` = '$login_form_name_field' AND 
-                    `password` = MD5( CONCAT( `password_salt`, '$password' ) ) AND 
-                    `account_closed_date` IS NULL";
-    $results = mysqli_query($connection, $query);
-    if (!$results) {
-        set_user_message(mysqli_error($connection), "failure");
-        return TRUE;
+        $user = db_fetch($query);
+        if ($user) {
+            $cookie = set_session_id($result['user_id'], $connection);
+            header("Location: todo.php");
+        }
     }
-    $result = mysqli_fetch_array($results);
-    if (!$result) {
-        set_user_message("Login name not found, or password doesn't match.", "warning");
-        return TRUE;
-    }
-
-    $cookie = set_session_id($result['user_id'], $connection);
-    header("Location: todo.php");
     
     return TRUE;
 }
@@ -96,14 +86,6 @@ function process_new_login_form()
     if (! isset($_POST['new-login-button'])) {
         return FALSE;
     }
-    
-    if (!($connection = connect_to_database())) {
-        set_user_message("Failed accessing database", "failure");
-        return TRUE;
-    }
-
-    $login_form_name_field = mysqli_real_escape_string($connection, $_POST['name_field']);
-    $password = mysqli_real_escape_string($connection, $_POST['password-field']);
 
     if (!$_POST['name_field'] || !$_POST['password-field']) {
         set_user_message("You must provide a login name and password", "warning");
@@ -114,30 +96,30 @@ function process_new_login_form()
         set_user_message("The passwords do not match.", "warning");
         return TRUE;
     }
+    
+    if (connect_to_database()) {
+        $login_form_name_field = db_escape($_POST['name_field']);
+        $password = db_escape($_POST['password-field']);
 
-    $user_query = "INSERT INTO `user_table` (
-            `login_name` , `password_salt` 
-        ) VALUES (
-            '$login_form_name_field' , MD5( CONCAT( '$login_form_name_field' , NOW() ) )
-        )";
-    $user_results = mysqli_query($connection, $user_query);
-    if (!$user_results) {
-        set_user_message(mysqli_error($connection), "failure");
-        return TRUE;
+        $user_query = "INSERT INTO `user_table` (
+                `login_name` , `password_salt` 
+            ) VALUES (
+                '$login_form_name_field' , MD5( CONCAT( '$login_form_name_field' , NOW() ) )
+            )";
+        
+        if (db_execute($query)) {
+            $user_id = db_last_index();
+
+            $password_query = "UPDATE `user_table`
+                SET `password` = MD5( CONCAT( `password_salt`, '$password' ) )
+                WHERE `user_id` = '$user_id'";
+            
+            if (db_execute($password_query)) {
+                $cookie = set_session_id($user_id, $connection);
+                header("Location: user.php?id=$user_id");
+            }
+        }
     }
-    $user_id = mysqli_insert_id($connection);
-
-    $password_query = "UPDATE `user_table`
-        SET `password` = MD5( CONCAT( `password_salt`, '$password' ) )
-        WHERE `user_id` = '$user_id'";
-    $password_results = mysqli_query($connection, $password_query);
-    if (!$password_results) {
-        set_user_message(mysqli_error($connection), "failure");
-        return TRUE;
-    }
-
-    $cookie = set_session_id($user_id, $connection);
-    header("Location: user.php?id=$user_id");
     
     return TRUE;
 }

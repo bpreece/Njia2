@@ -38,7 +38,7 @@ function show_task_form($task_id, $task)
             <select name='task-user'>
                 <option value=''></option>";
         foreach ($task['users-list'] as $user_id => $user) {
-        $selected = ($task['user_id'] == $user['user_id']) ? "selected='selected'" : "";
+            $selected = ($task['user_id'] == $user['user_id']) ? "selected='selected'" : "";
             echo "
                 <option value='${user['user_id']}' $selected>${user['user_name']}</option>";
         }
@@ -47,7 +47,7 @@ function show_task_form($task_id, $task)
         </div>";
     }
 
-    if (isset($task['timebox-list'])) {
+    if (isset($task['timebox-list']) && count($task['timebox-list']) > 0) {
         echo "
         <div id='task-timebox'>
             <label for='task-timebox'>Timebox:</label>
@@ -88,36 +88,30 @@ function process_task_form()
         return FALSE;
     }
     
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return TRUE;
-    }
+    if (connect_to_database_session()) {
+        $task_id = db_escape($_POST['task-id']);
+        $task_summary = db_escape($_POST['task-summary']);
+        $task_discussion = db_escape($_POST['task-discussion']);
 
-    $task_id = mysqli_real_escape_string($connection, $_POST['task-id']);
-    $task_summary = mysqli_real_escape_string($connection, $_POST['task-summary']);
-    $task_discussion = mysqli_real_escape_string($connection, $_POST['task-discussion']);
+        $query = "UPDATE `task_table` SET ";
+        if (isset($_POST['task-user'])) {
+            $user_id = db_escape($_POST['task-user']);
+            $query .= "`user_id`='$user_id', ";
+        }
+        if (isset($_POST['task-timebox'])) {
+            $timebox_id = db_escape($_POST['task-timebox']);
+            $query .= "`timebox_id`='$timebox_id', ";
+        }
+        $query .= "`task_discussion`='$task_discussion', 
+            `task_summary`='$task_summary' ,
+            `task_modified_date` = CURRENT_TIMESTAMP() 
+            WHERE `task_id` = '$task_id'";
 
-    $query = "UPDATE `task_table` SET ";
-    if (isset($_POST['task-user'])) {
-        $user = mysqli_real_escape_string($connection, $_POST['task-user']);
-        $query .= "`user_id`='$user', ";
+        if (db_execute($query)) {
+            set_user_message("The changes have been applied", 'success');
+        }
     }
-    if (isset($_POST['task-timebox'])) {
-        $timebox = mysqli_real_escape_string($connection, $_POST['task-timebox']);
-        $query .= "`timebox_id`='$timebox', ";
-    }
-    $query .= "`task_discussion`='$task_discussion', 
-        `task_summary`='$task_summary' ,
-        `task_modified_date` = CURRENT_TIMESTAMP() 
-        WHERE `task_id` = '$task_id'";
-
-    $results = mysqli_query($connection, $query);
-    if (! $results) {
-        set_user_message(mysqli_error($connection), "warning");
-        return TRUE;
-    }
-
-    set_user_message("The changes have been applied", 'success');
+    
     return TRUE;
 }
 

@@ -1,6 +1,6 @@
 <?php
 
-function query_timeboxes($connection, $show_closed_tasks, $timebox_end_date)
+function query_timeboxes($show_closed_tasks, $timebox_end_date)
 {
     $user_id = get_session_user_id();
     $timebox_query = "SELECT X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` , 
@@ -29,16 +29,9 @@ function query_timeboxes($connection, $show_closed_tasks, $timebox_end_date)
     $timebox_query .= "
         ORDER BY X.`timebox_end_date` , P.`project_id` , T.`task_id`";
 
-    $timeboxes = array();    
-    $timebox_result = mysqli_query($connection, $timebox_query);
-    if (! $timebox_result) {
-        set_user_message(mysqli_error($connection), 'failure');
-    } else {
-        while ($result = mysqli_fetch_array($timebox_result)) {
-            $timebox_id = $result['timebox_id'];
-            $timeboxes[$timebox_id] = $result;
-            $timeboxes[$timebox_id]['task-list'] = query_timebox_tasks($connection, $timebox_id, $show_closed_tasks, FALSE);
-        }
+    $timeboxes = db_fetch_list('timebox_id', $timebox_query);
+    foreach ($timeboxes as $timebox_id => $timebox) {
+        $timeboxes[$timebox_id]['task-list'] = query_timebox_tasks($timebox_id, $show_closed_tasks, FALSE);
     }
     
     return $timeboxes;
@@ -54,16 +47,10 @@ function query_user_timeboxes($connection, $timebox_id)
         INNER JOIN `project_table` AS P ON X.`project_id` = P.`project_id`
         WHERE S.`session_id` = '$session_id' and X.`timebox_id` = '$timebox_id'";
     
-    $timebox_result = mysqli_query($connection, $timebox_query);
-    if (! $timebox_result) {
-        set_user_message(mysqli_error($connection), "warning");
-        return NULL;
-    }
-    
-    return mysqli_fetch_array($timebox_result);
+    return db_fetch($timebox_query);
 }
 
-function query_timebox_tasks($connection, $timebox_id, $show_closed_tasks, $show_subtasks = TRUE)
+function query_timebox_tasks($timebox_id, $show_closed_tasks, $show_subtasks = TRUE)
 {
     $tasks_query = "SELECT T.`task_id` , T.`task_summary` , T.`task_status` , T.`parent_task_id` , 
             X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` , 
@@ -82,18 +69,8 @@ function query_timebox_tasks($connection, $timebox_id, $show_closed_tasks, $show
     }
     $tasks_query .= "
         ORDER BY T.`task_id` ";
-    $task_result = mysqli_query($connection, $tasks_query);
     
-    $tasks_list = array();
-    if (! $task_result) {
-        set_user_message(mysqli_error($connection), "warning");
-    } else {
-        while ($task = mysqli_fetch_array($task_result)) {
-            $tasks_list[$task['task_id']] = $task;
-        }
-    }
-    
-    return $tasks_list;
+    return db_fetch_list('task_id', $tasks_query);
 }
 
 ?>

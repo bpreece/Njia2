@@ -1,23 +1,19 @@
 <?php
 
-function query_user_vitals($connection, $user_id) 
+function query_user_vitals($user_id) 
 {
     $user_query = "SELECT U.`user_id` , U.`login_name` , U.`user_creation_date` , U.`account_closed_date` 
                 FROM `user_table` AS U 
                 WHERE U.`user_id` = '$user_id'";
-    $user_result = mysqli_query($connection, $user_query);
-    if (! $user_result) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return NULL;
-    }
-
-    return mysqli_fetch_array($user_result);
+    
+    return db_fetch($user_query);
 }
 
-function query_user($connection, $user_id) 
+function query_user($user_id) 
 {
     $session_user_id = get_session_user_id();
-    $user_id = mysqli_real_escape_string($connection, $user_id);
+    $user_id = db_escape($user_id);
+    
     if (is_admin_session()) {
         $user_query = "SELECT U.`user_id` , U.`login_name` AS  `user_name` , 
                 U.`account_closed_date` 
@@ -33,15 +29,11 @@ function query_user($connection, $user_id)
             WHERE A1.`user_id` =  '$user_id'
                 AND A2.`user_id` =  '$session_user_id'";
     }
-    $query_result = mysqli_query($connection, $user_query);
-    if (! $query_result) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return NULL;
-    }
-    return mysqli_fetch_array($query_result);
+    
+    return db_fetch($user_query);
 }
 
-function query_user_owned_projects($connection, $user_id, $show_closed_projects)
+function query_user_owned_projects($user_id, $show_closed_projects)
 {
     $session_user_id = get_session_user_id();
     $owner_query = "SELECT P.`project_id` , P.`project_name` , P.`project_status` 
@@ -55,19 +47,10 @@ function query_user_owned_projects($connection, $user_id, $show_closed_projects)
     $owner_query .= "
         ORDER BY P.`project_id`";
     
-    $projects_list = array();
-    $owner_results = mysqli_query($connection, $owner_query);
-    if (! $owner_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-    } else {
-        while ($project = mysqli_fetch_array($owner_results)) {
-            $projects_list[$project['project_id']] = $project;
-        }
-    }
-    return $projects_list;
+    return db_fetch_list('project_id', $owner_query);
 }
 
-function query_user_member_functions($connection, $user_id, $show_closed_projects)
+function query_user_member_functions($user_id, $show_closed_projects)
 {
     $member_query = "SELECT P.`project_id` , P.`project_name` , P.`project_status` 
         FROM `access_table` AS A 
@@ -77,23 +60,13 @@ function query_user_member_functions($connection, $user_id, $show_closed_project
         $member_query .= "
             AND P.`project_status` <> 'closed'";
     }
-    
-    $projects_list = array();
     $member_query .= "
         ORDER BY P.`project_id`";
-    $member_results = mysqli_query($connection, $member_query);
-    if (! $member_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-    } else {
-        while ($project = mysqli_fetch_array($member_results)) {
-            $projects_list[$project['project_id']] = $project;
-        }
-    }
-    
-    return $projects_list;
+
+    return db_fetch_list('project_id', $member_query);
 }
 
-function query_user_work_log($connection, $user_id, $work_log_start_date, $work_log_end_date)
+function query_user_work_log($user_id, $work_log_start_date, $work_log_end_date)
 {
     $session_user_id = get_session_user_id();
     $log_query = "SELECT P.`project_id` , P.`project_name` , 
@@ -124,20 +97,10 @@ function query_user_work_log($connection, $user_id, $work_log_start_date, $work_
     $log_query .= "
         ORDER BY P.`project_id` , T.`task_id` , L.`log_time` ";
     
-    $log_list = array();
-    $log_results = mysqli_query($connection, $log_query);
-    if (! $log_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-    } else {
-        while ($log = mysqli_fetch_array($log_results)) {
-            $log_list[$log['log_id']] = $log;
-        }
-    }
-    
-    return $log_list;
+    return db_fetch_list('log_id', $log_query);
 }
 
-function query_users($connection, $show_closed_accounts, $starting_index, $max_row_count) 
+function query_users($show_closed_accounts, $starting_index, $max_row_count) 
 {
     $users_query = "SELECT U.`user_id` , U. `login_name`, U.`user_permissions` , 
         U.`user_creation_date` , U.`account_closed_date`
@@ -149,20 +112,10 @@ function query_users($connection, $show_closed_accounts, $starting_index, $max_r
     $users_query .= "
         LIMIT $starting_index , $max_row_count";
 
-    $users_list = array();
-    $users_result = mysqli_query($connection, $users_query);
-    if (! $users_result) {
-        set_user_message(mysqli_error($connection), 'failure');
-    } else {
-        while ($user = mysqli_fetch_array($users_result)) {
-            $users_list[$user['user_id']] = $user;
-        }
-    }
-    
-    return $users_list;
+    return db_fetch_list('user_id', $users_query);
 }
 
-function query_user_tasks($connection, $user_id)
+function query_user_tasks($user_id)
 {
     $task_query = "SELECT P.`project_id` , P.`project_name` , 
                 T.`task_id` , T.`task_summary` , T.`parent_task_id` , 
@@ -176,13 +129,9 @@ function query_user_tasks($connection, $user_id)
                     T.`task_status` <> 'closed' AND X.`timebox_end_date` >= CURRENT_DATE()
                 ORDER BY X.`timebox_end_date` , P.`project_id` , T.`task_id`";
 
-    $task_results = mysqli_query($connection, $task_query);
+    $task_results = db_fetch_array($task_query);
     $projects = array();
-    if (! $task_results) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return $projects;
-    }
-    while ($result = mysqli_fetch_array($task_results)) {
+    foreach($task_results as $result) {
         $project_id = $result['project_id'];
         if (! array_key_exists($project_id, $projects)) {
             $projects[$project_id] = array(
@@ -215,7 +164,7 @@ function query_user_tasks($connection, $user_id)
     return $projects;
 }
 
-function query_known_users($connection, $user_id)
+function query_known_users($user_id)
 {
     $users_query = "SELECT DISTINCT U.`user_id` , U.`login_name` 
                 FROM  `access_table` AS A1 
@@ -224,14 +173,13 @@ function query_known_users($connection, $user_id)
                 INNER JOIN `user_table` as U ON A2.`user_id` = U.`user_id` 
                 WHERE A1.`user_id` = '$user_id'
                 ORDER BY U.`login_name`";
-    $users_result = mysqli_query($connection, $users_query);
+    
+    $results = db_fetch_array($users_query);
     $user_list = array();
-    if (! $users_result) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return $user_list;
-    }
-    while ($project_user = mysqli_fetch_array($users_result)) {
-        $user_list[$project_user['user_id']] = $project_user['login_name'];
+    if ($results) {
+        foreach ($results as $project_user) {
+            $user_list[$project_user['user_id']] = $project_user['login_name'];
+        }
     }
     return $user_list;
 }

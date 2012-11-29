@@ -40,14 +40,9 @@ function process_user_form()
         return FALSE;
     }
     
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return TRUE;
-    }
-    
     $user_id = get_session_user_id();
     if ($user_id != $_POST['user-id']) {
-        header ("Location: user.php");
+        header ("Location: user.php?id=$user_id");
         return TRUE;
     }
     
@@ -55,34 +50,30 @@ function process_user_form()
         set_user_message("The new passwords do not match.  Please try again.", 'warning');
         return TRUE;
     }
+    
+    if (connect_to_database_session()) {
+        $login_name = db_escape($_POST['login-name']);
+        $old_password = db_escape($_POST['old-password']);
 
-    $login_name = mysqli_real_escape_string($connection, $_POST['login-name']);
-    $old_password = mysqli_real_escape_string($connection, $_POST['old-password']);
-    
-    if (isset($_POST['new-password'])) {
-        $new_password = mysqli_real_escape_string($connection, $_POST['new-password']);
-        $query = "UPDATE `user_table` SET 
-            `login_name` = '$login_name' , 
-            `password` =  MD5(CONCAT(`password_salt`,'$new_password'))
-            WHERE `user_id` = '$user_id' AND 
-                `password` = MD5(CONCAT(`password_salt`,'$old_password')) ";
-    } else {
-        $query = "UPDATE `user_table` SET 
-            `login_name` = '$login_name' 
-            WHERE `user_id` = '$user_id' AND 
-                `password` = MD5(CONCAT(`password_salt`,'$old_password')) ";
-    }
-    $result = mysqli_query($connection, $query);
-    if (! $result) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return TRUE;
-    }
-    if (mysqli_affected_rows($connection) == 0) {
-        set_user_message("The changes could not be applied.  Please check your password and try again.", 'warning');
-        return TRUE;
+        if (isset($_POST['new-password'])) {
+            $new_password = db_escape($_POST['new-password']);
+            $query = "UPDATE `user_table` SET 
+                `login_name` = '$login_name' , 
+                `password` =  MD5(CONCAT(`password_salt`,'$new_password'))
+                WHERE `user_id` = '$user_id' AND 
+                    `password` = MD5(CONCAT(`password_salt`,'$old_password')) ";
+        } else {
+            $query = "UPDATE `user_table` SET 
+                `login_name` = '$login_name' 
+                WHERE `user_id` = '$user_id' AND 
+                    `password` = MD5(CONCAT(`password_salt`,'$old_password')) ";
+        }
+        
+        if (db_execute($query)) {
+            set_user_message("The changes have been applied", 'success');
+        }
     }
     
-    set_user_message("The changes have been applied", 'success');
     return TRUE;
 }
 

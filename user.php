@@ -71,7 +71,7 @@ function prepare_page_data() {
         return;
     }
 
-    if ( ($query_user = query_user($connection, $user_id)) == NULL) {
+    if ( ($query_user = query_user($user_id)) == NULL) {
         set_user_message("User $user_id was not found", 'warning');
         return;
     }
@@ -85,15 +85,15 @@ function prepare_page_data() {
     
     // projects which are owned by $user_id, and which are accessible to
     // get_session_user_id();
-    $query_user['owned-project-list'] = query_user_owned_projects($connection, $user_id, $show_closed_owned_projects);
+    $query_user['owned-project-list'] = query_user_owned_projects($user_id, $show_closed_owned_projects);
     
     // projects which are accessible to both $user_id and get_session_user_id();
-    $query_user['project-member-list'] = query_user_member_functions($connection, $user_id, $show_closed_member_projects);
+    $query_user['project-member-list'] = query_user_member_functions($user_id, $show_closed_member_projects);
     
     global $work_log_start_date;
     global $work_log_end_date;
     
-    $query_user['log-list'] = query_user_work_log($connection, $user_id, $work_log_start_date, $work_log_end_date);
+    $query_user['log-list'] = query_user_work_log($user_id, $work_log_start_date, $work_log_end_date);
     
     return $query_user;
 }

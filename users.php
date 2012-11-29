@@ -92,7 +92,7 @@ function prepare_page_data() {
 
     global $show_closed_accounts, $starting_index, $max_row_count;
     global $users_list;
-    $users_list = query_users($connection, $show_closed_accounts, $starting_index, $max_row_count);
+    $users_list = query_users($show_closed_accounts, $starting_index, $max_row_count);
 }
 
 /**

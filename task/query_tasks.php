@@ -1,9 +1,10 @@
 <?php
 
-function query_task($connection, $task_id)
+function query_task($task_id)
 {
     $session_id = get_session_id();
-    $task_id = mysqli_real_escape_string($connection, $task_id);
+    $task_id = db_escape($task_id);
+    
     $task_query = "SELECT T . * , P.`project_name` , 
                 X.`timebox_name` , X.`timebox_end_date` , 
                 PT.`task_summary` AS `parent_task_summary` , 
@@ -18,15 +19,7 @@ function query_task($connection, $task_id)
                 LEFT JOIN `user_table` AS U ON T.`user_id` = U.`user_id`
                 WHERE S.`session_id` = '$session_id' and T.`task_id` = '$task_id'";
     
-    $task_result = mysqli_query($connection, $task_query);
-    if (! $task_result) {
-        set_user_message(mysqli_error($connection), 'warning');
-        return;
-    } else if (mysqli_num_rows($task_result) == 0) {
-        set_user_message("Task ID $task_id is not recognized", 'warning');
-        return;
-    }
-    $task = mysqli_fetch_array($task_result);
+    $task = db_fetch($task_query);
     $task['task_summary'] = htmlspecialchars($task['task_summary'], ENT_QUOTES);
     $task['task_discussion'] = htmlspecialchars($task['task_discussion'], ENT_QUOTES);
     if ($task['task_status'] == 'closed') {
@@ -38,7 +31,7 @@ function query_task($connection, $task_id)
     return $task;
 }
 
-function query_subtasks($connection, $task_id, &$show_closed_tasks)
+function query_subtasks($task_id, &$show_closed_tasks)
 {
     $subtask_query = "SELECT T.`task_id` , T.`task_summary` , T.`task_status` , T.`parent_task_id` , 
             X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` , 
@@ -53,21 +46,8 @@ function query_subtasks($connection, $task_id, &$show_closed_tasks)
     }
     $subtask_query .= "
         ORDER BY T.`task_id`";
-    $subtask_result = mysqli_query($connection, $subtask_query);
     
-    $subtask_list = array();
-    if (! $subtask_result) {
-        set_user_message(mysqli_error($connection), 'warning');
-    } else if (mysqli_num_rows($subtask_result) > 0) { 
-        while ($subtask = mysqli_fetch_array($subtask_result)) {
-            $subtask_list[$subtask['task_id']] = $subtask;
-            if ($subtask['task_status'] != 'closed') {
-                $open_tasks = TRUE;
-            }
-        }
-    }
-    
-    return $subtask_list;
+    return db_fetch_list('task_id', $subtask_query);
 }
 
 function query_task_log($connection, $task_id, &$total_hours)
@@ -80,15 +60,16 @@ function query_task_log($connection, $task_id, &$total_hours)
         LEFT JOIN `user_table` AS U ON U.`user_id` = L.`user_id` 
         WHERE L.`task_id` = '$task_id'
         ORDER BY L.`log_id` DESC";
-    $log_result = mysqli_query($connection, $log_query);
-    if (! $log_result) {
-        set_user_message(mysqli_errno($connection), 'failure');
-    } else {
-        while ($log = mysqli_fetch_array($log_result)) {
+    
+    $results = db_fetch_array($log_query);
+    $log_list = array();
+    if ($results) {
+        foreach ($results as &$log) {
             $log_list[$log['log_id']] = $log;
             $total_hours += $log['work_hours'];
         }
     }
+    
     return $log_list;
 }
 

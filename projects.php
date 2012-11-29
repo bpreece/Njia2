@@ -47,7 +47,7 @@ function prepare_page_data() {
     global $projects;
     global $show_closed_tasks;
     global $show_closed_projects;
-    $projects = query_projects($connection, $show_closed_projects, $show_closed_tasks);
+    $projects = query_projects($show_closed_projects, $show_closed_tasks);
 }
     
 function show_sidebar() {

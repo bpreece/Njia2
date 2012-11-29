@@ -39,28 +39,21 @@ function process_timebox_form()
         return FALSE;
     }
 
-    global $timebox;
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return TRUE;
-    }
+    if (connect_to_database_session()) {
+        $timebox_id = db_escape($_POST['timebox-id']);
+        $timebox_name = db_escape($_POST['timebox-name']);
+        $timebox_end_date= db_escape($_POST['timebox-end-date']);
 
-    $timebox_id = mysqli_real_escape_string($connection, $_POST['timebox-id']);
-    $timebox_name = mysqli_real_escape_string($connection, $_POST['timebox-name']);
-    $timebox_end_date= mysqli_real_escape_string($connection, $_POST['timebox-end-date']);
-    
-    $query = "UPDATE `timebox_table` SET
-        `timebox_name` = '$timebox_name' , 
-        `timebox_end_date` = '$timebox_end_date' 
-        WHERE `timebox_id` = '$timebox_id'";
+        $query = "UPDATE `timebox_table` SET
+            `timebox_name` = '$timebox_name' , 
+            `timebox_end_date` = '$timebox_end_date' 
+            WHERE `timebox_id` = '$timebox_id'";
 
-    $results = mysqli_query($connection, $query);
-    if (! $results) {
-        set_user_message(mysqli_error($connection), "warning");
-        return TRUE;
+        if (db_execute($query)) {
+            set_user_message('The changes have been applied', 'success');
+        }
     }
     
-    set_user_message('The changes have been applied', 'success');
     return TRUE;
 }
 

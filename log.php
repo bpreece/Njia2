@@ -56,7 +56,7 @@ function prepare_page_data() {
         $user_id = $session_user_id;
     }
     
-    calculate_range_dates($connection, $start_date, $end_date);
+    db_calculate_range_dates($start_date, $end_date, $connection);
 
     /*
      * Fetch list of users with common projects and verify that this user is

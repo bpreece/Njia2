@@ -51,21 +51,139 @@ function show_footer() {
     echo "<div id='copyright'>Njia &copy; Copyright 2012, Ben Preece</div>";
 }
 
+global $_connection;
 function connect_to_database() 
 {
-    $connection = mysqli_connect("localhost", "njia", "njia");
-    if (! $connection) {
-        show_user_message(mysqli_error($connection), 'failure');
-        return;
+    global $_connection;
+    
+    $_connection = mysqli_connect("localhost", "njia", "njia");
+    if (! $_connection) {
+        set_user_message("Failed connecting to database", 'failure');
+        return FALSE;
     }
     
-    $database = mysqli_select_db($connection, 'njia');
+    $database = mysqli_select_db($_connection, 'njia');
     if (! $database) {
-        show_user_message(mysqli_error($connection), 'failure');
-        return;
+        show_user_message(mysqli_error($_connection), 'failure');
+        return FALSE;
     }
     
-    return $connection;
+    return $_connection;
+}
+
+function db_escape($string, $connection = NULL)
+{
+    global $_connection;
+    if ($connection == NULL) {
+        $connection = $_connection;
+    }
+    
+    return mysqli_real_escape_string($connection, $string);
+}
+
+/**
+ * 
+ * @global type $_connection
+ * @param type $query
+ * @param type $connection
+ * @return boolean
+ */
+function db_execute($query, $connection = NULL)
+{
+    global $_connection;
+    if ($connection == NULL) {
+        $connection = $_connection;
+    }
+
+    $results = mysqli_query($_connection, $query);
+    if (! $results) {
+        set_user_message(mysqli_error($_connection), "failure");
+        return FALSE;
+    } else {
+        return TRUE;
+    }
+}
+
+function db_last_index($connection = NULL)
+{
+    global $_connection;
+    if ($connection == NULL) {
+        $connection = $_connection;
+    }
+
+    return mysqli_insert_id($connection);
+}
+
+/**
+ * 
+ * @global type $_connection
+ * @param type $query
+ * @param type $connection
+ * @return mixed NULL if the database query fails, or if the database query
+ *               returns no result;  an array indexed by the database column
+ *               names if the database query returns a result.  If the query
+ *               returns more than one result, only the first is returned and
+ *               the other results are ignored.
+ */
+function db_fetch($query, $connection = NULL) 
+{
+    global $_connection;
+    if ($connection == NULL) {
+        $connection = $_connection;
+    }
+
+    $result = mysqli_query($_connection, $query);
+    if (! $query) {
+        set_user_message(mysqli_error($_connection), 'failure');
+        return NULL;
+    }
+    return mysqli_fetch_array($result);
+}
+
+/**
+ * 
+ * @global type $_connection
+ * @param type $index
+ * @param type $query
+ * @param type $connection
+ * @return array an empty array if the database query fails, or if
+ */
+function db_fetch_list($index, $query, $connection = NULL)
+{
+    global $_connection;
+    if ($connection == NULL) {
+        $connection = $_connection;
+    }
+
+    $result_list = array();
+    $result = mysqli_query($_connection, $query);
+    if (! $query) {
+        set_user_message(mysqli_error($_connection), 'failure');
+    } else {
+        while ($item = mysqli_fetch_array($result)) {
+            $result_list[$item[$index]] = $item;
+        }
+    }
+    return $result_list;
+}
+
+function db_fetch_array($query, $connection = NULL)
+{
+    global $_connection;
+    if ($connection == NULL) {
+        $connection = $_connection;
+    }
+
+    $result_list = array();
+    $result = mysqli_query($_connection, $query);
+    if (! $query) {
+        set_user_message(mysqli_error($_connection), 'failure');
+    } else {
+        while ($item = mysqli_fetch_array($result)) {
+            $result_list[] = $item;
+        }
+    }
+    return $result_list;
 }
 
 /*
@@ -96,12 +214,12 @@ function is_admin_session() {
 
 function get_session_id_cookie() 
 {
-    global $session_id, $session_user_id;
+    global $session_id;
     if (isset($_COOKIE['njia-session-id'])) {
         $session_id = $_COOKIE['njia-session-id'];
         return $session_id;
     } else {
-        return;
+        return FALSE;
     }
 }
 
@@ -111,8 +229,13 @@ function get_session_id_cookie()
  * @global type $session_user_id
  * @return type the user's record as an array
  */
-function validate_user($connection)
+function validate_user($connection = NULL)
 {
+    global $_connection;
+    if ($connection == NULL) {
+        $connection = $_connection;
+    }
+    
     global $session_id, $session_user;
     
     $user_query = "SELECT U.*
@@ -120,13 +243,7 @@ function validate_user($connection)
         INNER JOIN `user_table` AS U on U.`user_id` = S.`user_id`
         WHERE S.`session_id` = '$session_id' AND 
             S.`session_expiration_date` >= NOW()";
-    $user_results = mysqli_query($connection, $user_query);
-    if (! $user_results) {
-        set_user_message(mysqli_error($connection), "warning");
-        return FALSE;
-    }
-
-    $session_user = mysqli_fetch_array($user_results);
+    $session_user = db_fetch($user_query);
     if (! $session_user) {
         return FALSE;
     }
@@ -134,10 +251,8 @@ function validate_user($connection)
     $expire_query = "UPDATE `session_table` 
         SET `session_expiration_date` = DATE_ADD(NOW(), INTERVAL 1 HOUR)
         WHERE `session_id` = '$session_id'";
-    $expire_results = mysqli_query($connection, $expire_query);
-    if (! $expire_results) {
-        set_user_message(mysqli_error($connection), "warning");
-    }
+    db_execute($expire_query, $connection);
+    // ignore the results
 
     return TRUE;
 }
@@ -149,47 +264,64 @@ function validate_user($connection)
  * @param type $connection
  * @return string the value of the session cookie
  */
-function set_session_id($user_id, $connection) 
+function set_session_id($user_id, $connection = NULL) 
 {
-    $session_id = md5(microtime());
-    $query = "INSERT INTO `session_table` 
-        ( `session_id` , `user_id` , `session_expiration_date`  ) 
-        VALUES ( '$session_id' , '$user_id' , DATE_ADD(NOW(), INTERVAL 1 HOUR) )";
-    if (! mysqli_query($connection, $query)) {
-        set_user_message(mysqli_error($connection), 'failure');
-        return;
+    global $_connection;
+    if ($connection == NULL) {
+        $connection = $_connection;
     }
+
+    $session_id = md5(microtime());
+    $query = "INSERT INTO `session_table` (
+            `session_id` , `user_id` , `session_expiration_date` 
+        ) VALUES ( 
+            '$session_id' , '$user_id' , DATE_ADD( NOW(), INTERVAL 1 HOUR ) 
+        )";
+    if (! db_execute($query, $connection)) {
+        return FALSE;
+    }
+
     setcookie('njia-session-id', $session_id);
     return $session_id;
 }
 
+/**
+ * 
+ * @global type $_connection
+ * @return boolean
+ */
 function connect_to_database_session() 
 {
     $session = get_session_id_cookie();
     if (!$session) {
         header('Location: login.php?x');
-        return;
+        return FALSE;
     }
 
-    $connection = connect_to_database();
-    if (! $connection) {
-        set_user_message("Failed connecting to database", 'failure');
-        return;
+    if (! connect_to_database()) {
+        return FALSE;
     }
     
-    if (! validate_user($connection)) {
+    if (! validate_user()) {
         header('Location: login.php?x');
-        return;
+        return FALSE;
     }
     
-    return $connection;
+    global $_connection;
+    return $_connection;
 }
 
 /**
  * Use the database to get start and end dates
  * Sets: $start_date, $end_date
  */
-function calculate_range_dates($connection, &$start_date, &$end_date) {
+function db_calculate_range_dates(&$start_date, &$end_date, $connection = NULL) 
+{
+    global $_connection;
+    if ($connection == NULL) {
+        $connection = $_connection;
+    }
+
     $date_query = "SELECT ";
     if ($end_date) {
         $date_query .= "'$end_date' AS `end_date` ";
@@ -208,12 +340,10 @@ function calculate_range_dates($connection, &$start_date, &$end_date) {
                 DATE( DATE_SUB( NOW(), INTERVAL 13 DAY ) ) AS `start_date` ";
         }
     }
-    $date_results = mysqli_query($connection, $date_query);
-    if (! $date_results) {
-        set_user_message(mysqli_error($connection), 'failure');
+    $date_result = db_fetch($date_query, $connection);
+    if (! $date_result) {
         return FALSE;
     } else {
-        $date_result = mysqli_fetch_array($date_results);
         $start_date = $date_result['start_date'];
         $end_date = $date_result['end_date'];
         return TRUE;
