@@ -49,11 +49,10 @@ function process_login_form()
     }
 
     if (!$_POST['name_field'] || !$_POST['password-field']) {
-        set_user_message("Missing login name or password", "failure");
         return TRUE;  // we did handle a login form
     }
 
-    if (connect_to_database()) {
+    if (db_connect()) {
         $login_form_name_field = db_escape($_POST['name_field']);
         $password = db_escape($_POST['password-field']);
 
@@ -65,7 +64,7 @@ function process_login_form()
 
         $user = db_fetch($query);
         if ($user) {
-            $cookie = set_session_id($result['user_id']);
+            $cookie = set_session_id($user['user_id']);
             header("Location: todo.php");
         }
     }
@@ -97,7 +96,7 @@ function process_new_login_form()
         return TRUE;
     }
     
-    if (connect_to_database()) {
+    if (db_connect()) {
         $login_form_name_field = db_escape($_POST['name_field']);
         $password = db_escape($_POST['password-field']);
 

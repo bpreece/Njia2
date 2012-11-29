@@ -1,27 +1,7 @@
--- phpMyAdmin SQL Dump
--- version 3.4.10.1
--- http://www.phpmyadmin.net
---
--- Host: localhost:3306
--- Generation Time: Nov 06, 2012 at 10:27 AM
--- Server version: 5.5.21
--- PHP Version: 5.3.15
-
-SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
-SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
 
 --
 -- Database: `njia`
 --
-
-CREATE DATABASE njia_test;
-USE njia_test;
 
 -- --------------------------------------------------------
 
@@ -29,11 +9,21 @@ USE njia_test;
 -- Table structure for table `access_table`
 --
 
-CREATE TABLE `access_table` (
+CREATE TABLE IF NOT EXISTS `access_table` (
   `user_id` int(11) NOT NULL,
   `project_id` int(11) NOT NULL,
   `access_creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf16 COLLATE=utf16_unicode_ci;
+
+--
+-- Initializing data for table `access_table`
+--
+
+INSERT INTO `access_table` (
+    `user_id`, `project_id`, `access_creation_date`
+) VALUES (
+    1, 1, NOW()
+);
 
 -- --------------------------------------------------------
 
@@ -41,7 +31,7 @@ CREATE TABLE `access_table` (
 -- Table structure for table `log_table`
 --
 
-CREATE TABLE `log_table` (
+CREATE TABLE IF NOT EXISTS `log_table` (
   `log_id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `task_id` int(11) NOT NULL,
@@ -49,7 +39,7 @@ CREATE TABLE `log_table` (
   `log_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `description` text COLLATE utf16_unicode_ci,
   PRIMARY KEY (`log_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf16 COLLATE=utf16_unicode_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf16 COLLATE=utf16_unicode_ci AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -57,7 +47,7 @@ CREATE TABLE `log_table` (
 -- Table structure for table `project_table`
 --
 
-CREATE TABLE `project_table` (
+CREATE TABLE IF NOT EXISTS `project_table` (
   `project_id` int(11) NOT NULL AUTO_INCREMENT,
   `project_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `project_discussion` text COLLATE utf8_unicode_ci,
@@ -65,7 +55,17 @@ CREATE TABLE `project_table` (
   `project_owner` int(11) NOT NULL,
   `project_created_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`project_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+
+--
+-- Initializing data for table `project_table`
+--
+
+INSERT INTO `project_table` (
+    `project_name`, `project_discussion`, `project_status`, `project_owner`, `project_created_date`
+) VALUES (
+    'Njia administration', 'This is an ongoing project for tracking administration, maintenance, and support tasks for Njia.', 'open', 1, NOW()
+);
 
 -- --------------------------------------------------------
 
@@ -73,7 +73,7 @@ CREATE TABLE `project_table` (
 -- Table structure for table `session_table`
 --
 
-CREATE TABLE `session_table` (
+CREATE TABLE IF NOT EXISTS `session_table` (
   `session_id` varchar(32) COLLATE utf8_unicode_ci NOT NULL,
   `user_id` int(11) NOT NULL,
   `session_creation_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -87,7 +87,7 @@ CREATE TABLE `session_table` (
 -- Table structure for table `task_table`
 --
 
-CREATE TABLE `task_table` (
+CREATE TABLE IF NOT EXISTS `task_table` (
   `task_id` int(11) NOT NULL AUTO_INCREMENT,
   `project_id` int(11) DEFAULT NULL,
   `parent_task_id` int(11) DEFAULT NULL,
@@ -99,7 +99,17 @@ CREATE TABLE `task_table` (
   `task_created_date` timestamp NULL DEFAULT NULL,
   `task_modified_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`task_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf16 COLLATE=utf16_unicode_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf16 COLLATE=utf16_unicode_ci AUTO_INCREMENT=1 ;
+
+--
+-- Initializing data for table `task_table`
+--
+
+INSERT INTO `task_table` (
+    `project_id`, `task_summary`, `task_discussion`, `user_id`, `timebox_id`, `task_status`, `task_created_date`
+) VALUES (
+    1, 'Change admin password', 'Njia is installed with a default administrator name and password.  To protect access to the Njia system and database, these should be changed as soon as Njia is installed.', 1, 1, 'open', NOW()
+);
 
 -- --------------------------------------------------------
 
@@ -107,14 +117,24 @@ CREATE TABLE `task_table` (
 -- Table structure for table `timebox_table`
 --
 
-CREATE TABLE `timebox_table` (
+CREATE TABLE IF NOT EXISTS `timebox_table` (
   `timebox_id` int(11) NOT NULL AUTO_INCREMENT,
   `project_id` int(11) NOT NULL,
   `timebox_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `timebox_discussion` text CHARACTER SET utf8 COLLATE utf8_unicode_ci,
   `timebox_end_date` date NOT NULL,
   PRIMARY KEY (`timebox_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf16 COLLATE=utf16_unicode_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf16 COLLATE=utf16_unicode_ci AUTO_INCREMENT=1 ;
+
+--
+-- Initializing data for table `timebox_table`
+--
+
+INSERT INTO `timebox_table` (
+    `project_id`, `timebox_name`, `timebox_discussion`, `timebox_end_date`
+) VALUES (
+    1, 'Njia installation', 'This timebox is set up automatically when Njia is installed, with an end date one week after installation.  Use this timebox to track any remaining tasks related to the installation and setup of Njia.', DATE(DATE_ADD(NOW(), INTERVAL 7 DAY))
+);
 
 -- --------------------------------------------------------
 
@@ -122,7 +142,7 @@ CREATE TABLE `timebox_table` (
 -- Table structure for table `user_table`
 --
 
-CREATE TABLE `user_table` (
+CREATE TABLE IF NOT EXISTS `user_table` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT,
   `login_name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `password` varchar(32) COLLATE utf8_unicode_ci NOT NULL COMMENT 'MD5(CONCAT(`password_salt`, $password))',
@@ -132,24 +152,14 @@ CREATE TABLE `user_table` (
   `account_closed_date` timestamp NULL DEFAULT NULL COMMENT 'Set NULL for active accounts',
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `login_name` (`login_name`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 --
--- Enter the 'root' user into `user_table`
+-- Initializing data for table `user_table`
 --
 
 INSERT INTO `user_table` (
-  `login_name`, `password_salt`, `password`, `user_permissions`
+    `login_name`, `password`, `password_salt`, `user_permissions`, `user_creation_date`, `account_closed_date`
 ) VALUES (
-  'admin', MD5( NOW() ), MD5( CONCAT( MD5( NOW() ), 'password' ) ), 'admin'
+    'admin', MD5(CONCAT(`password_salt`, 'password')), '8533595bc24d29a06e1893d61b90b71b', 'admin', '2012-07-01 19:38:15', NULL
 );
-
---
--- Create the database access user and grant permissions
---
-
-GRANT ALL PRIVILEGES ON njia_test.* TO 'njia'@'localhost' IDENTIFIED BY 'njia';
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

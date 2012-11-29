@@ -27,7 +27,7 @@ function process_reopen_account_form()
             WHERE `user_id` = '$user_id'";
         
         if (db_execute($query)) {
-            set_user_message("This account has been re-opened.", 'debug');
+            set_user_message("This account has been re-opened.", 'success');
         }
     }
     

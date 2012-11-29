@@ -1,6 +1,15 @@
 
 <?php 
 
+global $mysqli;
+$mysqli = FALSE;
+
+global $db_host, $db_name, $db_user, $db_password;
+$db_host = 'localhost';
+$db_name = 'njia';
+$db_user = 'njia';
+$db_password = 'njia';
+
 // a user message type is expected to be one of "failure", "warning", "success",
 // or "info";  these styles are defined in style.css
 global $user_messages;
@@ -52,23 +61,48 @@ function show_footer() {
 }
 
 global $_connection;
-function connect_to_database() 
+
+function db_connect() 
 {
-    global $_connection;
+    global $mysqli, $_connection;
+    global $db_host, $db_name, $db_user, $db_password;
     
-    $_connection = mysqli_connect("localhost", "njia", "njia");
+    if ($mysqli) {
+        $_connection = mysqli_connect($db_host, $db_user, $db_password);
+    } else {
+        $_connection = mysql_connect($db_host, $db_user, $db_password);
+    }
     if (! $_connection) {
         set_user_message("Failed connecting to database", 'failure');
         return FALSE;
     }
     
-    $database = mysqli_select_db($_connection, 'njia');
+    if ($mysqli) {
+        $database = mysqli_select_db($_connection, $db_name);
+    } else {
+        $database = mysql_select_db($db_name, $_connection);
+    }
     if (! $database) {
-        show_user_message(mysqli_error($_connection), 'failure');
+        show_db_error();
         return FALSE;
     }
     
     return $_connection;
+}
+
+function show_db_error()
+{
+    global $_connection;
+    if ($connection == NULL) {
+        $connection = $_connection;
+    }
+    
+    global $mysqli;
+    if ($mysqli) {
+        show_user_message(mysqli_error($_connection), 'failure');
+    } else {
+        show_user_message(mysql_error($_connection), 'failure');
+    }
 }
 
 function db_escape($string, $connection = NULL)
@@ -78,7 +112,52 @@ function db_escape($string, $connection = NULL)
         $connection = $_connection;
     }
     
-    return mysqli_real_escape_string($connection, $string);
+    global $mysqli;
+    if ($mysqli) {
+        return mysqli_real_escape_string($connection, $string);
+    } else {
+        return mysql_real_escape_string($string, $connection);
+    }
+}
+
+function db_last_index($connection = NULL)
+{
+    global $_connection;
+    if ($connection == NULL) {
+        $connection = $_connection;
+    }
+
+    global $mysqli;
+    if ($mysqli) {
+        return mysqli_insert_id($connection);
+    } else {
+        return mysql_insert_id($connection);
+    }
+}
+
+function db_query($query, $connection = NULL)
+{
+    global $_connection;
+    if ($connection == NULL) {
+        $connection = $_connection;
+    }
+
+    global $mysqli;
+    if ($mysqli) {
+        return mysqli_query($_connection, $query);
+    } else {
+        return mysql_query($query, $_connection);
+    }
+}
+
+function db_result_to_array($result)
+{
+    global $mysqli;    
+    if ($mysqli) {
+        return mysqli_fetch_array($result);
+    } else {
+        return mysql_fetch_array($result);
+    }
 }
 
 /**
@@ -95,23 +174,13 @@ function db_execute($query, $connection = NULL)
         $connection = $_connection;
     }
 
-    $results = mysqli_query($_connection, $query);
+    $results = db_query($query);
     if (! $results) {
-        set_user_message(mysqli_error($_connection), "failure");
+        show_db_error();
         return FALSE;
     } else {
         return TRUE;
     }
-}
-
-function db_last_index($connection = NULL)
-{
-    global $_connection;
-    if ($connection == NULL) {
-        $connection = $_connection;
-    }
-
-    return mysqli_insert_id($connection);
 }
 
 /**
@@ -132,12 +201,13 @@ function db_fetch($query, $connection = NULL)
         $connection = $_connection;
     }
 
-    $result = mysqli_query($_connection, $query);
-    if (! $query) {
-        set_user_message(mysqli_error($_connection), 'failure');
+    $result = db_query($query);
+    if (! $result) {
+        show_db_error();
         return NULL;
     }
-    return mysqli_fetch_array($result);
+    
+    return db_result_to_array($result);
 }
 
 /**
@@ -155,18 +225,26 @@ function db_fetch_list($index, $query, $connection = NULL)
         $connection = $_connection;
     }
 
+    $result = db_query($query);
+    
     $result_list = array();
-    $result = mysqli_query($_connection, $query);
-    if (! $query) {
-        set_user_message(mysqli_error($_connection), 'failure');
+    if (! $result) {
+        show_db_error();
     } else {
-        while ($item = mysqli_fetch_array($result)) {
+        while ($item = db_result_to_array($result)) {
             $result_list[$item[$index]] = $item;
         }
     }
     return $result_list;
 }
 
+/**
+ * 
+ * @global type $_connection
+ * @param type $query
+ * @param type $connection
+ * @return type
+ */
 function db_fetch_array($query, $connection = NULL)
 {
     global $_connection;
@@ -174,12 +252,13 @@ function db_fetch_array($query, $connection = NULL)
         $connection = $_connection;
     }
 
+    $result = db_query($query);
+    
     $result_list = array();
-    $result = mysqli_query($_connection, $query);
-    if (! $query) {
-        set_user_message(mysqli_error($_connection), 'failure');
+    if (! $result) {
+        show_db_error();
     } else {
-        while ($item = mysqli_fetch_array($result)) {
+        while ($item = db_result_to_array($result)) {
             $result_list[] = $item;
         }
     }
@@ -298,7 +377,7 @@ function connect_to_database_session()
         return FALSE;
     }
 
-    if (! connect_to_database()) {
+    if (! db_connect()) {
         return FALSE;
     }
     
@@ -315,13 +394,8 @@ function connect_to_database_session()
  * Use the database to get start and end dates
  * Sets: $start_date, $end_date
  */
-function db_calculate_range_dates(&$start_date, &$end_date, $connection = NULL) 
+function db_calculate_range_dates(&$start_date, &$end_date) 
 {
-    global $_connection;
-    if ($connection == NULL) {
-        $connection = $_connection;
-    }
-
     $date_query = "SELECT ";
     if ($end_date) {
         $date_query .= "'$end_date' AS `end_date` ";
@@ -340,7 +414,7 @@ function db_calculate_range_dates(&$start_date, &$end_date, $connection = NULL)
                 DATE( DATE_SUB( NOW(), INTERVAL 13 DAY ) ) AS `start_date` ";
         }
     }
-    $date_result = db_fetch($date_query, $connection);
+    $date_result = db_fetch($date_query);
     if (! $date_result) {
         return FALSE;
     } else {
