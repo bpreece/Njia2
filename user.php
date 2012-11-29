@@ -66,36 +66,31 @@ function process_form_data() {
 function prepare_page_data() {
     global $query_user, $user_id, $account_closed;
     
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return;
-    }
+    if (connect_to_database_session()) {
+        if ( ($query_user = query_user($user_id)) == NULL) {
+            set_user_message("User $user_id was not found", 'warning');
+            return;
+        }
+        if (isset($query_user['account_closed_date'])) {
+            $account_closed = TRUE;
+            set_user_message('This account has been closed', 'warning');
+        }
 
-    if ( ($query_user = query_user($user_id)) == NULL) {
-        set_user_message("User $user_id was not found", 'warning');
-        return;
-    }
-    if (isset($query_user['account_closed_date'])) {
-        $account_closed = TRUE;
-        set_user_message('This account has been closed', 'warning');
-    }
+        global $show_closed_member_projects;
+        global $show_closed_owned_projects;
 
-    global $show_closed_member_projects;
-    global $show_closed_owned_projects;
-    
-    // projects which are owned by $user_id, and which are accessible to
-    // get_session_user_id();
-    $query_user['owned-project-list'] = query_user_owned_projects($user_id, $show_closed_owned_projects);
-    
-    // projects which are accessible to both $user_id and get_session_user_id();
-    $query_user['project-member-list'] = query_user_member_functions($user_id, $show_closed_member_projects);
-    
-    global $work_log_start_date;
-    global $work_log_end_date;
-    
-    $query_user['log-list'] = query_user_work_log($user_id, $work_log_start_date, $work_log_end_date);
-    
-    return $query_user;
+        // projects which are owned by $user_id, and which are accessible to
+        // get_session_user_id();
+        $query_user['owned-project-list'] = query_user_owned_projects($user_id, $show_closed_owned_projects);
+
+        // projects which are accessible to both $user_id and get_session_user_id();
+        $query_user['project-member-list'] = query_user_member_functions($user_id, $show_closed_member_projects);
+
+        global $work_log_start_date;
+        global $work_log_end_date;
+
+        $query_user['log-list'] = query_user_work_log($user_id, $work_log_start_date, $work_log_end_date);
+    }
 }
 
 function show_sidebar() {

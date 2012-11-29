@@ -65,7 +65,7 @@ function process_login_form()
 
         $user = db_fetch($query);
         if ($user) {
-            $cookie = set_session_id($result['user_id'], $connection);
+            $cookie = set_session_id($result['user_id']);
             header("Location: todo.php");
         }
     }
@@ -115,7 +115,7 @@ function process_new_login_form()
                 WHERE `user_id` = '$user_id'";
             
             if (db_execute($password_query)) {
-                $cookie = set_session_id($user_id, $connection);
+                $cookie = set_session_id($user_id);
                 header("Location: user.php?id=$user_id");
             }
         }

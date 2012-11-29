@@ -81,18 +81,15 @@ function process_form_data() {
  * OPTIONAL.
  */
 function prepare_page_data() {
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return null;
-    }
-    
-    if (! is_admin_session()) {
-        header("Location: user.php");
-    }
+    if (connect_to_database_session()) {
+        if (! is_admin_session()) {
+            header("Location: user.php");
+        }
 
-    global $show_closed_accounts, $starting_index, $max_row_count;
-    global $users_list;
-    $users_list = query_users($show_closed_accounts, $starting_index, $max_row_count);
+        global $show_closed_accounts, $starting_index, $max_row_count;
+        global $users_list;
+        $users_list = query_users($show_closed_accounts, $starting_index, $max_row_count);
+    }    
 }
 
 /**

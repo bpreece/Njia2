@@ -37,9 +37,10 @@ function query_timeboxes($show_closed_tasks, $timebox_end_date)
     return $timeboxes;
 }
 
-function query_user_timeboxes($connection, $timebox_id)
+function query_user_timeboxes($timebox_id)
 {
     $session_id = get_session_id();
+    
     $timebox_query = "SELECT X.* , P.`project_name` 
         FROM `session_table` AS S
         INNER JOIN `access_table` AS A ON S.`user_id` = A.`user_id` 

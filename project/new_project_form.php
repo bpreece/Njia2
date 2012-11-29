@@ -36,18 +36,19 @@ function process_new_project_form()
             ) VALUES ( 
                 '$project_name' , '$session_user_id' 
             )";
-        if (! db_execute($connection, $project_query)) {
-            return TRUE;
-        }
-        $new_project_id = db_last_index();
+        
+        if (db_execute($project_query)) {
+            $new_project_id = db_last_index();
 
-        $access_query = "INSERT INTO `access_table` (
-                `user_id` , `project_id` 
-            ) VALUES ( 
-                '$session_user_id' , '$new_project_id' 
-            )";
-        if (db_execute($access_query)) {
-            header ("Location: project.php?id=$new_project_id");
+            $access_query = "INSERT INTO `access_table` (
+                    `user_id` , `project_id` 
+                ) VALUES ( 
+                    '$session_user_id' , '$new_project_id' 
+                )";
+            
+            if (db_execute($access_query)) {
+                header ("Location: project.php?id=$new_project_id");
+            }
         }
     }
         

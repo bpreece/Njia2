@@ -33,20 +33,15 @@ function process_form_data() {
 function prepare_page_data() {
     global $projects, $user_id, $user, $user_list;
 
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return;
+    if (connect_to_database_session()) {
+        if (! $user_id) {
+            $user_id = get_session_user_id();
+        }
+        $user = query_user_vitals($user_id);
+        $session_id = get_session_id();
+        $projects = query_user_tasks($user_id);
+        $user_list = query_known_users($user_id);
     }
-
-    if (! $user_id) {
-        $user_id = get_session_user_id();
-    }
-    $user = query_user_vitals($user_id);
-    $session_id = get_session_id();
-    $projects = query_user_tasks($user_id);
-    $user_list = query_known_users($user_id);
-
-    return $projects;
 }
 
 function show_sidebar() {

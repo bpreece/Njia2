@@ -1,6 +1,6 @@
 <?php
 
-function query_user_log($connection, $user_id, $start_date, $end_date, &$total_work_hours)
+function query_user_log($user_id, $start_date, $end_date, &$total_work_hours)
 {
     $log_query = "SELECT L.`log_id` , L.`description` , L.`work_hours` , 
         DATE( L.`log_time` ) AS `log_date` , 

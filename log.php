@@ -45,31 +45,28 @@ function process_form_data() {
 function prepare_page_data() {
     global $user_id, $user_list, $log_date_list, $start_date, $end_date, $total_work_hours;
     
-    $connection = connect_to_database_session();
-    if (! $connection) {
-        return;
-    }
+    if (connect_to_database_session()) {
+        // default to the session user
+        $session_user_id = get_session_user_id();
+        if (! $user_id) {
+            $user_id = $session_user_id;
+        }
 
-    // default to the session user
-    $session_user_id = get_session_user_id();
-    if (! $user_id) {
-        $user_id = $session_user_id;
-    }
-    
-    db_calculate_range_dates($start_date, $end_date, $connection);
+        db_calculate_range_dates($start_date, $end_date);
 
-    /*
-     * Fetch list of users with common projects and verify that this user is
-     * one of them
-     */
+        /*
+         * Fetch list of users with common projects and verify that this user is
+         * one of them
+         */
 
-    $user_list = fetch_user_list($connection);
-    if ($user_id != $session_user_id && !array_key_exists($user_id, $user_list)) {
-        set_user_message("User $user_id was not found; displaying your information instead.", 'warning');
-        $user_id = $session_user_id;
+        $user_list = fetch_user_list();
+        if ($user_id != $session_user_id && !array_key_exists($user_id, $user_list)) {
+            set_user_message("User $user_id was not found; displaying your information instead.", 'warning');
+            $user_id = $session_user_id;
+        }
+
+        $log_date_list = query_user_log($user_id, $start_date, $end_date, $total_work_hours);
     }
-    
-    $log_date_list = query_user_log($connection, $user_id, $start_date, $end_date, $total_work_hours);
 }
 
 function get_stylesheets() {

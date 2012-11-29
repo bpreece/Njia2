@@ -39,15 +39,12 @@ function process_form_data() {
 }
 
 function prepare_page_data() {
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return null;
+    if (connect_to_database_session()) {
+        global $projects;
+        global $show_closed_tasks;
+        global $show_closed_projects;
+        $projects = query_projects($show_closed_projects, $show_closed_tasks);
     }
-
-    global $projects;
-    global $show_closed_tasks;
-    global $show_closed_projects;
-    $projects = query_projects($show_closed_projects, $show_closed_tasks);
 }
     
 function show_sidebar() {

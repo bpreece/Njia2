@@ -8,7 +8,7 @@ include_once 'common.inc';
  * @param type $connection
  * @return type array()
  */
-function fetch_user_list($connection) {
+function fetch_user_list() {
     $session_user_id = get_session_user_id();
 
     $user_query = "SELECT DISTINCT U.`user_id` , U.`login_name` 

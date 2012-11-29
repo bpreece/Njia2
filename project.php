@@ -59,13 +59,10 @@ function prepare_page_data() {
     global $project_id, $project;
     global $show_closed_tasks, $show_subtasks, $timebox_end_date;
     
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return null;
+    if (connect_to_database_session()) {
+        $user_id = get_session_user_id();
+        $project = query_project($project_id, $user_id, $show_closed_tasks, $show_subtasks);
     }
-
-    $user_id = get_session_user_id();
-    $project = query_project($project_id, $user_id, $show_closed_tasks, $show_subtasks);
 }
 
 function get_stylesheets() {

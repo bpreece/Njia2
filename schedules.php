@@ -43,13 +43,10 @@ function prepare_page_data() {
     global $show_closed_tasks;
     global $timebox_end_date;
 
-    $connection = connect_to_database_session();
-    if (!$connection) {
-        return null;
-    }
-    
-    global $timeboxes;
-    $timeboxes = query_timeboxes($show_closed_tasks, $timebox_end_date);
+    if (connect_to_database_session()) {
+        global $timeboxes;
+        $timeboxes = query_timeboxes($show_closed_tasks, $timebox_end_date);
+    }    
 }
 
 function show_sidebar() {

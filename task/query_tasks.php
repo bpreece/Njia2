@@ -50,9 +50,8 @@ function query_subtasks($task_id, &$show_closed_tasks)
     return db_fetch_list('task_id', $subtask_query);
 }
 
-function query_task_log($connection, $task_id, &$total_hours)
+function query_task_log($task_id, &$total_hours)
 {
-    $log_list = array();
     $log_query = "SELECT L.`log_id` , L.`work_hours` , L.`description` , 
             L.`user_id` , L.`log_time` , 
             U.`login_name` AS `user_name`
