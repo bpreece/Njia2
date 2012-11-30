@@ -100,7 +100,13 @@ function query_project_users($project_id)
     return db_fetch_list('user_id', $user_query);
 }
 
-function query_project_timeboxes( $project_id, $timebox_end_date = NULL)
+/**
+ * Returns an array of timeboxes for the given project
+ * @param type $project_id
+ * @param type $timebox_end_date
+ * @return type
+ */
+function query_project_timeboxes($project_id, $timebox_end_date = NULL)
 {
     $timebox_query = "SELECT X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` 
                  FROM `timebox_table` AS  X
@@ -110,10 +116,11 @@ function query_project_timeboxes( $project_id, $timebox_end_date = NULL)
             AND X.`timebox_end_date` >= DATE( '$timebox_end_date' )";
     } else {
         $timebox_query .= "
-            AND X.`timebox_end_date` >= NOW()";
+            AND X.`timebox_end_date` >= CURRENT_DATE()";
     }
     $timebox_query .= "
                  ORDER BY X.`timebox_end_date`, X.`timebox_id`";
+    
     return db_fetch_list('timebox_id', $timebox_query);
 }
 

@@ -2,7 +2,7 @@
 <?php 
 
 global $mysqli;
-$mysqli = FALSE;
+$mysqli = TRUE;
 
 global $db_host, $db_name, $db_user, $db_password;
 $db_host = 'localhost';
@@ -73,7 +73,7 @@ function db_connect()
         $_connection = mysql_connect($db_host, $db_user, $db_password);
     }
     if (! $_connection) {
-        set_user_message("Failed connecting to database", 'failure');
+        set_user_message("The Njia database is not accessible.", 'failure');
         return FALSE;
     }
     
@@ -90,7 +90,7 @@ function db_connect()
     return $_connection;
 }
 
-function show_db_error()
+function show_db_error($connection = NULL)
 {
     global $_connection;
     if ($connection == NULL) {
@@ -302,6 +302,11 @@ function get_session_id_cookie()
     }
 }
 
+function create_session($user_id, $cookie)
+{
+    
+}
+
 /**
  * 
  * @global type $session_id
@@ -380,12 +385,12 @@ function connect_to_database_session()
     if (! db_connect()) {
         return FALSE;
     }
-    
+
     if (! validate_user()) {
         header('Location: login.php?x');
         return FALSE;
     }
-    
+
     global $_connection;
     return $_connection;
 }

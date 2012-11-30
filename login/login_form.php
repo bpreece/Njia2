@@ -47,11 +47,11 @@ function process_login_form()
     if (! isset($_POST['login-button'])) {
         return FALSE;  // we did not handle a login form
     }
-
+    
     if (!$_POST['name_field'] || !$_POST['password-field']) {
         return TRUE;  // we did handle a login form
     }
-
+    
     if (db_connect()) {
         $login_form_name_field = db_escape($_POST['name_field']);
         $password = db_escape($_POST['password-field']);
@@ -61,11 +61,13 @@ function process_login_form()
             WHERE `login_name` = '$login_form_name_field' AND 
                 `password` = MD5( CONCAT( `password_salt`, '$password' ) ) AND 
                 `account_closed_date` IS NULL";
-
+    
         $user = db_fetch($query);
         if ($user) {
             $cookie = set_session_id($user['user_id']);
             header("Location: todo.php");
+        } else {
+            set_user_message("Login failed.  Either this user account does not exist, or the password was incorrect.", 'warning'); 
         }
     }
     
@@ -100,7 +102,7 @@ function process_new_login_form()
         $login_form_name_field = db_escape($_POST['name_field']);
         $password = db_escape($_POST['password-field']);
 
-        $user_query = "INSERT INTO `user_table` (
+        $query = "INSERT INTO `user_table` (
                 `login_name` , `password_salt` 
             ) VALUES (
                 '$login_form_name_field' , MD5( CONCAT( '$login_form_name_field' , NOW() ) )
@@ -115,7 +117,7 @@ function process_new_login_form()
             
             if (db_execute($password_query)) {
                 $cookie = set_session_id($user_id);
-                header("Location: user.php?id=$user_id");
+                header("Location: todo.php");
             }
         }
     }

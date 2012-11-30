@@ -1,11 +1,48 @@
 
-* Login page
+A.  Login page
+
+    1.  Switch between login and new account forms.
+    2.  From the new account form, enter an existing name; verify that it 
+        fails.
+    3.  From the new account form, enter a new name, but mismatched passwords;
+        verify that it fails.
+    4.  From the new account form, enter a new name and matching password; 
+        verify that the account is created and the user logged in.
+    5.  Log out of the account.
+    6.  Log in to the account which was just created.
+    7.  Log out of the account, then log back in again.
+
+B.  Empty pages
+
+    1.  Verify that the user list in the show todo list form contains the user.
+    2.  Click 'show todo list'; verify that the URL now contains '?id=...'.
+    3.  Click the Log page; verify that the "show log for" field contains the
+        user name, the from field is 13 days ago, and the to field is today.
+    4.  Click the Projects page.
+    5.  Click the Schedules page.
+
+C.  Basic work flow.
+
+    1.  Click the todo page.
+    2.  Enter a name for a new project; click Create a new project; verify you
+        are in the project form, and the user list includes the temp user.
+    3.  Enter lorem ipsum in the discussion field and click update.
+    4.  Create a new timebox from the project page; verify you're in the 
+        timebox form.
+    5.  In the timebox page, enter Lorem ipsum in the discussion field and
+        click Update.
+    6.  Click the project name to return to the project.
+    7.  Enter a new task in the add task form;  verify that you're in the task
+        form.
+    8.  Enter Lorem ipsum in the discussion field and select the timebox in the
+        timebox drop-down box; click update.
+    9.  Enter Lorem ipsum in the log entry form, and enter a work hours (e.g.
+        1.5.); click Add log entry.
+    10. Click the Todo, Log, Project, and Schedule pages.
 
 * To-do page
 
 * Work log page
-
-* Projects page
 
 * Schedules page
 

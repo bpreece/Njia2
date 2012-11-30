@@ -38,7 +38,6 @@ function prepare_page_data() {
             $user_id = get_session_user_id();
         }
         $user = query_user_vitals($user_id);
-        $session_id = get_session_id();
         $projects = query_user_tasks($user_id);
         $user_list = query_known_users($user_id);
     }

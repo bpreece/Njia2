@@ -14,13 +14,13 @@ function query_user($user_id)
     $session_user_id = get_session_user_id();
     $user_id = db_escape($user_id);
     
-    if (is_admin_session()) {
-        $user_query = "SELECT U.`user_id` , U.`login_name` AS  `user_name` , 
+    if (is_admin_session() || $user_id == $session_user_id) {
+        $query = "SELECT U.`user_id` , U.`login_name` AS  `user_name` , 
                 U.`account_closed_date` 
             FROM `user_table` AS U
             WHERE `user_id` = '$user_id'";
     } else {
-        $user_query = "SELECT U.`user_id` , U.`login_name` AS  `user_name` , 
+        $query = "SELECT U.`user_id` , U.`login_name` AS  `user_name` , 
                 U.`account_closed_date` 
             FROM  `project_table` AS P
             INNER JOIN  `access_table` AS A1 ON P.`project_id` = A1.`project_id` 
@@ -30,7 +30,7 @@ function query_user($user_id)
                 AND A2.`user_id` =  '$session_user_id'";
     }
     
-    return db_fetch($user_query);
+    return db_fetch($query);
 }
 
 function query_user_owned_projects($user_id, $show_closed_projects)
@@ -118,7 +118,7 @@ function query_users($show_closed_accounts, $starting_index, $max_row_count)
 function query_user_tasks($user_id)
 {
     $task_query = "SELECT P.`project_id` , P.`project_name` , 
-                T.`task_id` , T.`task_summary` , T.`parent_task_id` , 
+                T.`task_id` , T.`task_summary` , T.`parent_task_id` , T.`task_status` , 
                 X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` 
                 FROM  `access_table` AS A 
                 INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
@@ -167,9 +167,8 @@ function query_user_tasks($user_id)
 function query_known_users($user_id)
 {
     $users_query = "SELECT DISTINCT U.`user_id` , U.`login_name` 
-                FROM  `access_table` AS A1 
-                INNER JOIN `project_table` AS P ON A1.`project_id` = P.`project_id` 
-                INNER JOIN `access_table` AS A2 ON P.`project_id` = A2.`project_id`
+                FROM  `access_table` AS A1  
+                INNER JOIN `access_table` AS A2 ON A1.`project_id` = A2.`project_id`
                 INNER JOIN `user_table` as U ON A2.`user_id` = U.`user_id` 
                 WHERE A1.`user_id` = '$user_id'
                 ORDER BY U.`login_name`";
@@ -181,6 +180,10 @@ function query_known_users($user_id)
             $user_list[$project_user['user_id']] = $project_user['login_name'];
         }
     }
+    
+    // make sure we include the session user
+    $session_user = get_session_user();
+    $user_list[$session_user['user_id']] = $session_user['login_name'];
     return $user_list;
 }
 

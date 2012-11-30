@@ -27,7 +27,7 @@ function show_user_form($user_id, $user_name)
             </div>
                 
             <div id='form-controls'>
-                <input type='submit' name='user_form-button' value='Update'></input>
+                <input type='submit' name='user-form-button' value='Update'></input>
             </div> <!-- /form-controls -->
 
         </form>";
@@ -36,14 +36,8 @@ function show_user_form($user_id, $user_name)
 
 function process_user_form() 
 {
-    if (! isset($POST['user_form_button'])) {
+    if (! isset($_POST['user-form-button'])) {
         return FALSE;
-    }
-    
-    $user_id = get_session_user_id();
-    if ($user_id != $_POST['user-id']) {
-        header ("Location: user.php?id=$user_id");
-        return TRUE;
     }
     
     if (isset($_POST['new-password']) && $_POST['new-password'] != $_POST['repeat-password']) {
@@ -52,10 +46,16 @@ function process_user_form()
     }
     
     if (connect_to_database_session()) {
+        $user_id = get_session_user_id();    
+        if ($user_id != $_POST['user-id'] && ! is_admin_session()) {
+            header ("Location: user.php?id=$user_id");
+            return TRUE;
+        }
+        
         $login_name = db_escape($_POST['login-name']);
         $old_password = db_escape($_POST['old-password']);
 
-        if (isset($_POST['new-password'])) {
+        if ($_POST['new-password']) {
             $new_password = db_escape($_POST['new-password']);
             $query = "UPDATE `user_table` SET 
                 `login_name` = '$login_name' , 

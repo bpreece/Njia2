@@ -35,17 +35,19 @@ function show_timebox_form($timebox_id, $timebox)
 
 function process_timebox_form()
 {
-    if (! isset($POST['timebox_form_button'])) {
+    if (! isset($_POST['update-button'])) {
         return FALSE;
     }
 
     if (connect_to_database_session()) {
         $timebox_id = db_escape($_POST['timebox-id']);
         $timebox_name = db_escape($_POST['timebox-name']);
+        $timebox_discussion = db_escape($_POST['timebox-discussion']);
         $timebox_end_date= db_escape($_POST['timebox-end-date']);
 
         $query = "UPDATE `timebox_table` SET
             `timebox_name` = '$timebox_name' , 
+            `timebox_discussion` = '$timebox_discussion' , 
             `timebox_end_date` = '$timebox_end_date' 
             WHERE `timebox_id` = '$timebox_id'";
 

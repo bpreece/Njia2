@@ -1,37 +1,36 @@
 <?php
 
-function query_timeboxes($show_closed_tasks, $timebox_end_date)
+/**
+ * Queries the database for all timeboxes for all projects to which the
+ * session user has access.
+ * @param type $show_closed_tasks
+ * @param type $timebox_end_date
+ * @return array
+ */
+function query_timeboxes($show_closed_tasks = FALSE, $timebox_end_date = NULL)
 {
     $user_id = get_session_user_id();
     $timebox_query = "SELECT X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` , 
-        ( X.`timebox_end_date` < DATE( NOW() ) ) AS `timebox_expired` , 
-        P.`project_id` , P.`project_name` , P.`project_status` , 
-        T.`task_id` , T.`task_summary` , T.`task_status` , 
-        U.`user_id` , U.`login_name` 
+        ( X.`timebox_end_date` < CURRENT_DATE() ) AS `timebox_expired` , 
+        P.`project_id` , P.`project_name` , P.`project_status` 
         FROM `access_table` AS A 
         INNER JOIN `timebox_table` AS X ON A.`project_id` = X.`project_id` 
         INNER JOIN `project_table` AS P ON X.`project_id` = P.`project_id` 
-        INNER JOIN `task_table` AS T ON T.`timebox_id` = X.`timebox_id` 
-        LEFT OUTER JOIN `user_table` AS U ON U.`user_id` = T.`user_id`
         WHERE A.`user_id` = '$user_id' 
             AND P.`project_status` <> 'closed'";
-    if (! $show_closed_tasks) {
-        $timebox_query .= "
-            AND T.`task_status` <> 'closed'";
-    }
     if ($timebox_end_date) {
         $timebox_query .= "
             AND X.`timebox_end_date` >= '$timebox_end_date'";
     } else {
         $timebox_query .= "
-            AND X.`timebox_end_date` >= NOW()";
+            AND X.`timebox_end_date` >= CURRENT_DATE()";
     }
     $timebox_query .= "
-        ORDER BY X.`timebox_end_date` , P.`project_id` , T.`task_id`";
-
+        ORDER BY X.`timebox_end_date` , P.`project_id` ";
+ 
     $timeboxes = db_fetch_list('timebox_id', $timebox_query);
     foreach ($timeboxes as $timebox_id => $timebox) {
-        $timeboxes[$timebox_id]['task-list'] = query_timebox_tasks($timebox_id, $show_closed_tasks, FALSE);
+        $timeboxes[$timebox_id]['task-list'] = query_timebox_tasks($timebox_id, $show_closed_tasks);
     }
     
     return $timeboxes;
@@ -51,6 +50,15 @@ function query_user_timeboxes($timebox_id)
     return db_fetch($timebox_query);
 }
 
+/**
+ * Queries the database for all tasks included in this timebox.  This function
+ * presumes the session user has already been authenticated and has authority
+ * to view this timebox.
+ * @param type $timebox_id
+ * @param type $show_closed_tasks
+ * @param type $show_subtasks
+ * @return array
+ */
 function query_timebox_tasks($timebox_id, $show_closed_tasks, $show_subtasks = TRUE)
 {
     $tasks_query = "SELECT T.`task_id` , T.`task_summary` , T.`task_status` , T.`parent_task_id` , 
@@ -71,7 +79,8 @@ function query_timebox_tasks($timebox_id, $show_closed_tasks, $show_subtasks = T
     $tasks_query .= "
         ORDER BY T.`task_id` ";
     
-    return db_fetch_list('task_id', $tasks_query);
+    $results = db_fetch_list('task_id', $tasks_query);
+    return $results;
 }
 
 ?>

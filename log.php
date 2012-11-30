@@ -95,14 +95,17 @@ function show_sidebar() {
 
 function show_content() {
     global $user_id, $user_list, $log_date_list, $start_date, $end_date, $total_work_hours;
-    
-    if (! $log_date_list) {
-        return;
-    }
 
     $user_name = $user_list[$user_id]['login_name'];
     echo "
-        <h3><a class='object-ref' href='user.php?id=$user_id'>$user_name</a></h3>
+        <h3><a class='object-ref' href='user.php?id=$user_id'>$user_name</a></h3>";
+    if (! $log_date_list) {
+        echo "
+            <div>There are no entries in the current work log for $user_name.</div>";
+        return;
+    }
+
+    echo "
         <div class='work-log-details'>Total hours: $total_work_hours</div>
         <div class='work-log-dates'>$start_date &mdash; $end_date</div>
         <div class='work-log-list'>";

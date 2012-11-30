@@ -46,7 +46,7 @@ function prepare_page_data() {
     if (connect_to_database_session()) {
         global $timeboxes;
         $timeboxes = query_timeboxes($show_closed_tasks, $timebox_end_date);
-    }    
+    }
 }
 
 function show_sidebar() {
