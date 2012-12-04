@@ -105,6 +105,19 @@ function show_db_error($connection = NULL)
     }
 }
 
+/**
+ * Escape the SQL characters in the string so that the result is safe to store
+ * in the database
+ * NOTE that db_escape requires a connection;  if one is not provided, then
+ * the call to db_escape must come AFTER a previous call to db_connect() or 
+ * connect_to_database_session() so that the default connection is available.
+ * 
+ * @global type $_connection
+ * @global boolean $mysqli
+ * @param type $string
+ * @param type $connection
+ * @return type
+ */
 function db_escape($string, $connection = NULL)
 {
     global $_connection;
@@ -288,7 +301,8 @@ function get_session_user_id() {
 
 function is_admin_session() {
     global $session_user;
-    return $session_user['user_permissions'] == 'admin';
+    $permissions = explode(',', $session_user['user_permissions']);
+    return in_array('admin', $permissions);
 }
 
 function get_session_id_cookie() 
@@ -300,11 +314,6 @@ function get_session_id_cookie()
     } else {
         return FALSE;
     }
-}
-
-function create_session($user_id, $cookie)
-{
-    
 }
 
 /**
@@ -339,6 +348,104 @@ function validate_user($connection = NULL)
     // ignore the results
 
     return TRUE;
+}
+
+/**
+ * Check the access table to determine whether the session user has access to
+ * the given project.
+ * @global type $_connection
+ * @param type $project_id
+ * @param type $connection
+ * @return boolean 
+ */
+function authorize_project($project_id, $connection = NULL) 
+{
+    if (is_admin_session()) {
+        return TRUE;
+    }
+    
+    global $_connection;
+    if ($connection == NULL) {
+        $connection = $_connection;
+    }
+    
+    $session_user_id = get_session_user_id();
+    $query = "SELECT * 
+        FROM `access_table` AS A 
+        WHERE A.`user_id` = '$session_user_id' 
+            AND A.`project_id` = '$project_id' ";
+    $access = db_fetch($query, $connection);
+    if (! $access) {
+        return FALSE;
+    } else {
+        return TRUE;
+    }
+}
+
+/**
+ * Check the access table to determine whether the session user has access to
+ * the given task.
+ * @global type $_connection
+ * @param type $project_id
+ * @param type $connection
+ * @return boolean 
+ */
+function authorize_task($task_id, $connection = NULL) 
+{
+    if (is_admin_session()) {
+        return TRUE;
+    }
+    
+    global $_connection;
+    if ($connection == NULL) {
+        $connection = $_connection;
+    }
+    
+    $session_user_id = get_session_user_id();
+    $query = "SELECT A.*  
+        FROM `access_table` AS A 
+        INNER JOIN `task_table` AS T ON A.`project_id` = T.`project_id` 
+        WHERE A.`user_id` = '$session_user_id' 
+            AND T.`task_id` = '$task_id' ";
+    $access = db_fetch($query, $connection);
+    if (! $access) {
+        return FALSE;
+    } else {
+        return TRUE;
+    }
+}
+
+/**
+ * Check the access table to determine whether the session user has access to
+ * the given task.
+ * @global type $_connection
+ * @param type $project_id
+ * @param type $connection
+ * @return boolean 
+ */
+function authorize_timebox($timebox_id, $connection = NULL) 
+{
+    if (is_admin_session()) {
+        return TRUE;
+    }
+    
+    global $_connection;
+    if ($connection == NULL) {
+        $connection = $_connection;
+    }
+    
+    $session_user_id = get_session_user_id();
+    $query = "SELECT * 
+        FROM `access_table` AS A 
+        INNER JOIN `timebox_table` AS X ON A.`project_id` = X.`project_id` 
+        WHERE A.`user_id` = '$session_user_id' 
+            AND X.`timebox_id` = '$timebox_id' ";
+    $access = db_fetch($query, $connection);
+    if (! $access) {
+        return FALSE;
+    } else {
+        return TRUE;
+    }
 }
 
 /**

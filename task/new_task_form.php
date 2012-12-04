@@ -34,17 +34,22 @@ function process_new_task_form()
         $project_id = db_escape($_POST['project-id']);
         $task_summary = db_escape($_POST['task-summary']);
         
-        $task_query = "INSERT INTO `task_table` (
-                `task_summary` , `project_id` , `task_created_date` , `user_id` 
-            ) VALUES ( 
-                '$task_summary' , '$project_id' , CURRENT_TIMESTAMP() , 
-                ( SELECT `project_owner` FROM `project_table` WHERE `project_id` = '$project_id' )
-            )";
+        if (authorize_project($project_id)) {
+            $task_query = "INSERT INTO `task_table` (
+                    `task_summary` , `project_id` , `task_created_date` , `user_id` 
+                ) VALUES ( 
+                    '$task_summary' , '$project_id' , CURRENT_TIMESTAMP() , 
+                    ( SELECT `project_owner` FROM `project_table` WHERE `project_id` = '$project_id' )
+                )";
 
-        if (db_execute($task_query)) {
-            $new_task_id = db_last_index();    
-            header("Location:task.php?id=$new_task_id");
-        }    
+            if (db_execute($task_query)) {
+                $new_task_id = db_last_index();    
+                header("Location:task.php?id=$new_task_id");
+            }    
+        } else {
+            set_user_message("Project $project_id was not found.", 'warning');
+            return FALSE;
+        }
     }
     
     return TRUE;
@@ -65,24 +70,29 @@ function process_add_subtask_form()
         $project_id = db_escape($_POST['project-id']);
         $task_summary = db_escape($_POST['task-summary']);
 
-        $user_id = get_session_user_id();
-        $task_query = "INSERT INTO `task_table` 
-            ( `task_summary` , `project_id` , `parent_task_id` , `user_id` , 
-                `timebox_id` , `task_created_date` )
-            ( SELECT '$task_summary' , '$project_id' , '$parent_task_id' , 
-                '$user_id' , `timebox_id` , CURRENT_TIMESTAMP()
-              FROM `task_table` WHERE `task_id` = '$parent_task_id' )";
+        if (authorize_task($parent_task_id)) {
+            $user_id = get_session_user_id();
+            $task_query = "INSERT INTO `task_table` 
+                ( `task_summary` , `project_id` , `parent_task_id` , `user_id` , 
+                    `timebox_id` , `task_created_date` )
+                ( SELECT '$task_summary' , '$project_id' , '$parent_task_id' , 
+                    '$user_id' , `timebox_id` , CURRENT_TIMESTAMP()
+                  FROM `task_table` WHERE `task_id` = '$parent_task_id' )";
 
-        if (db_execute($task_query)) {
-            $new_task_id = db_last_index();
+            if (db_execute($task_query)) {
+                $new_task_id = db_last_index();
 
-            $parent_task_query = "UPDATE `task_table` SET 
-                `user_id` = '0' , `timebox_id` = NULL
-                WHERE `task_id` = '$parent_task_id'";
-            
-            if (db_execute($parent_task_query)) {
-                header("Location:task.php?id=$new_task_id");
+                $parent_task_query = "UPDATE `task_table` SET 
+                    `user_id` = '0' , `timebox_id` = NULL
+                    WHERE `task_id` = '$parent_task_id'";
+
+                if (db_execute($parent_task_query)) {
+                    header("Location:task.php?id=$new_task_id");
+                }
             }
+        } else {
+            set_user_message("Task $parent_task_id was not found.", 'warning');
+            return FALSE;
         }    
     }
 

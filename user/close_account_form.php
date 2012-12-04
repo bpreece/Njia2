@@ -34,19 +34,19 @@ function process_close_account_form()
             return TRUE;
         }
 
-        if (! is_admin_session() && $user_id != get_session_user_id()) {
-            header('Location: user.php');
-            return TRUE;
-        }
+        if ($user_id == get_session_user_id() || is_admin_session()) {
+            $query = "UPDATE `user_table`
+                SET `account_closed_date` = NOW()
+                WHERE `user_id` = '$user_id'";
 
-        $query = "UPDATE `user_table`
-            SET `account_closed_date` = NOW()
-            WHERE `user_id` = '$user_id'";
-        
-        if (db_execute($query)) {
-            if ($user_id == get_session_user_id()) {
-                header("Location: login.php");
+            if (db_execute($query)) {
+                if ($user_id == get_session_user_id()) {
+                    header("Location: login.php");
+                }
             }
+        } else {
+            header("Location:user.php?id=$user_id");
+            return FALSE;
         }
     }
     

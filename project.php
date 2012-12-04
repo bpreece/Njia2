@@ -196,10 +196,11 @@ function show_content()
                 <div class='user-header object-header'>
                     <div class='user-id'>$user_id</div>";
         $project_owner = $project['project_owner'];
-        if ($project_owner == get_session_user_id() && $project_owner != $user_id) {
+        if (($project_owner == get_session_user_id() || is_admin_session())
+                && $project_owner != $user_id) {
             echo "
                     <div style='float:right'>";
-            show_remove_user_from_project_form($project_id, $user_id, $user_name);
+            show_remove_user_from_project_form($project_id, $user_id, $user['user_name']);
             echo "
                     </div> <!-- /remove-user-$user_id-form -->";
         }

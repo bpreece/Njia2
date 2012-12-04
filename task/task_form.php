@@ -93,22 +93,27 @@ function process_task_form()
         $task_summary = db_escape($_POST['task-summary']);
         $task_discussion = db_escape($_POST['task-discussion']);
 
-        $query = "UPDATE `task_table` SET ";
-        if (isset($_POST['task-user'])) {
-            $user_id = db_escape($_POST['task-user']);
-            $query .= "`user_id`='$user_id', ";
-        }
-        if (isset($_POST['task-timebox'])) {
-            $timebox_id = db_escape($_POST['task-timebox']);
-            $query .= "`timebox_id`='$timebox_id', ";
-        }
-        $query .= "`task_discussion`='$task_discussion', 
-            `task_summary`='$task_summary' ,
-            `task_modified_date` = CURRENT_TIMESTAMP() 
-            WHERE `task_id` = '$task_id'";
+        if (authorize_task($task_id)) {
+            $query = "UPDATE `task_table` SET ";
+            if (isset($_POST['task-user'])) {
+                $user_id = db_escape($_POST['task-user']);
+                $query .= "`user_id`='$user_id', ";
+            }
+            if (isset($_POST['task-timebox'])) {
+                $timebox_id = db_escape($_POST['task-timebox']);
+                $query .= "`timebox_id`='$timebox_id', ";
+            }
+            $query .= "`task_discussion`='$task_discussion', 
+                `task_summary`='$task_summary' ,
+                `task_modified_date` = CURRENT_TIMESTAMP() 
+                WHERE `task_id` = '$task_id'";
 
-        if (db_execute($query)) {
-            set_user_message("The changes have been applied", 'success');
+            if (db_execute($query)) {
+                set_user_message("The changes have been applied", 'success');
+            }
+        } else {
+            set_user_message("Task $task_id was not found.", 'warning');
+            return FALSE;
         }
     }
     

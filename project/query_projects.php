@@ -1,5 +1,20 @@
 <?php
 
+function validate_project_owner($project_id)
+{
+    $owner_id = get_session_user_id();
+    $query = "SELECT P.`project_owner` 
+        FROM `project_table` AS P 
+        WHERE P.`project_id` = '$project_id' 
+            AND P.`project_owner` = '$owner_id' ";
+    $owner = db_fetch($query);
+    if (! $owner) {
+        return FALSE;
+    } else {
+        return TRUE;
+    }
+}
+
 function query_projects($show_closed_projects, $show_closed_tasks)
 {
     $user_id = get_session_user_id();

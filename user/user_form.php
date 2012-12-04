@@ -46,31 +46,31 @@ function process_user_form()
     }
     
     if (connect_to_database_session()) {
-        $user_id = get_session_user_id();    
-        if ($user_id != $_POST['user-id'] && ! is_admin_session()) {
-            header ("Location: user.php?id=$user_id");
-            return TRUE;
-        }
-        
+        $user_id = db_escape($_POST['user-id']);
         $login_name = db_escape($_POST['login-name']);
         $old_password = db_escape($_POST['old-password']);
 
-        if ($_POST['new-password']) {
-            $new_password = db_escape($_POST['new-password']);
-            $query = "UPDATE `user_table` SET 
-                `login_name` = '$login_name' , 
-                `password` =  MD5(CONCAT(`password_salt`,'$new_password'))
-                WHERE `user_id` = '$user_id' AND 
-                    `password` = MD5(CONCAT(`password_salt`,'$old_password')) ";
+        if ($user_id == get_session_user_id() || is_admin_session()) {
+            if ($_POST['new-password']) {
+                $new_password = db_escape($_POST['new-password']);
+                $query = "UPDATE `user_table` SET 
+                    `login_name` = '$login_name' , 
+                    `password` =  MD5(CONCAT(`password_salt`,'$new_password'))
+                    WHERE `user_id` = '$user_id' AND 
+                        `password` = MD5(CONCAT(`password_salt`,'$old_password')) ";
+            } else {
+                $query = "UPDATE `user_table` SET 
+                    `login_name` = '$login_name' 
+                    WHERE `user_id` = '$user_id' AND 
+                        `password` = MD5(CONCAT(`password_salt`,'$old_password')) ";
+            }
+
+            if (db_execute($query)) {
+                set_user_message("The changes have been applied", 'success');
+            }
         } else {
-            $query = "UPDATE `user_table` SET 
-                `login_name` = '$login_name' 
-                WHERE `user_id` = '$user_id' AND 
-                    `password` = MD5(CONCAT(`password_salt`,'$old_password')) ";
-        }
-        
-        if (db_execute($query)) {
-            set_user_message("The changes have been applied", 'success');
+            header("Location:todo.php?id=$user_id");
+            return FALSE;
         }
     }
     

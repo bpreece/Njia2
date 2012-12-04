@@ -28,15 +28,20 @@ function process_add_user_to_project_form()
         $project_id = db_escape($_POST['project-id']);
         $user_name = db_escape($_POST['user-name']);
         
-        $access_query = "INSERT INTO `access_table` ( 
-                `project_id` , `user_id` 
-            ) VALUES ( 
-                '$project_id' , (SELECT `user_id` FROM `user_table` WHERE `login_name` = '$user_name' )
-            )";
+        if (validate_project_owner($project_id) || is_admin_session()) {
+            $access_query = "INSERT INTO `access_table` ( 
+                    `project_id` , `user_id` 
+                ) VALUES ( 
+                    '$project_id' , (SELECT `user_id` FROM `user_table` WHERE `login_name` = '$user_name' )
+                )";
 
-        if (db_execute($access_query)) {
-            set_user_message("User $user_name has been added to project $project_id", 'success');
-        }    
+            if (db_execute($access_query)) {
+                set_user_message("User $user_name has been added to project $project_id", 'success');
+            }    
+        } else {
+            set_user_message("Project $project_id was not found.", 'warning');
+            return FALSE;
+        }
     }
 
     return TRUE;

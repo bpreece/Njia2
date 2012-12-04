@@ -28,15 +28,20 @@ function process_new_timebox_form()
         $timebox_name = db_escape($_POST['timebox-name']);
         $timebox_end_date = db_escape($_POST['timebox-end-date']);
 
-        $query = "INSERT INTO `timebox_table` (
-                `timebox_name` , `project_id` , `timebox_end_date` 
-            ) VALUES ( 
-                '$timebox_name' , '$project_id' , '$timebox_end_date')";
+        if (! authorize_project($project_id)) {
+            $query = "INSERT INTO `timebox_table` (
+                    `timebox_name` , `project_id` , `timebox_end_date` 
+                ) VALUES ( 
+                    '$timebox_name' , '$project_id' , '$timebox_end_date')";
 
-        if (db_execute($query)) {
-            $new_timebox_id = db_last_index();
-            header("Location:timebox.php?id=$new_timebox_id");
-        }    
+            if (db_execute($query)) {
+                $new_timebox_id = db_last_index();
+                header("Location:timebox.php?id=$new_timebox_id");
+            }    
+        } else {
+            set_user_message("Project $project_id was not found.", 'warning');
+            return FALSE;
+        }
     }
     
     return TRUE;

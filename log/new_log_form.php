@@ -29,22 +29,27 @@ function process_new_log_form()
         $description = db_escape($_POST['description']);
         $work_hours = db_escape($_POST['work-hours']);
 
-        $query = "INSERT INTO `log_table` (
-                `user_id` , `task_id` , `description` ";
-        if ($_POST['work-hours']) {
-            $query .=  ", `work_hours` ";
-        }
-        $query .= "
-            ) VALUES (
-                '$user_id' , '$task_id' , '$description' ";
-        if ($_POST['work-hours']) {
-            $query .=  ", '$work_hours' ";
-        }
-        $query .= "
-            )";
-        
-        if (db_execute($query)) {
-            set_user_message("The log entry has been created.", 'success');
+        if (authorize_task($task_id)) {
+            $query = "INSERT INTO `log_table` (
+                    `user_id` , `task_id` , `description` ";
+            if ($_POST['work-hours']) {
+                $query .=  ", `work_hours` ";
+            }
+            $query .= "
+                ) VALUES (
+                    '$user_id' , '$task_id' , '$description' ";
+            if ($_POST['work-hours']) {
+                $query .=  ", '$work_hours' ";
+            }
+            $query .= "
+                )";
+
+            if (db_execute($query)) {
+                set_user_message("The log entry has been created.", 'success');
+            }
+        } else {
+            set_user_message("Task $task_id was not found.", 'warning');
+            return FALSE;
         }
     }
     return TRUE;

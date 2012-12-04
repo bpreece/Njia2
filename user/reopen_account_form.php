@@ -16,18 +16,18 @@ function process_reopen_account_form()
     
     if (connect_to_database_session()) {
         $user_id = db_escape($_POST['user-id']);
-        
-        if (!is_admin_session()) {
-            header('Location: user.php');
-            return TRUE;
-        }
 
-        $query = "UPDATE `user_table` 
-            SET `account_closed_date` = NULL
-            WHERE `user_id` = '$user_id'";
-        
-        if (db_execute($query)) {
-            set_user_message("This account has been re-opened.", 'success');
+        if (is_admin_session()) {
+            $query = "UPDATE `user_table` 
+                SET `account_closed_date` = NULL
+                WHERE `user_id` = '$user_id'";
+
+            if (db_execute($query)) {
+                set_user_message("This account has been re-opened.", 'success');
+            }
+        } else {
+            header("Location: user.php?id=$user_id");
+            return FALSE;
         }
     }
     

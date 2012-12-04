@@ -44,16 +44,20 @@ function process_project_form()
         $project_name = db_escape($_POST['project-name']);
         $project_discussion = db_escape($_POST['project-discussion']);
 
-        $query = "UPDATE `project_table` SET
-                `project_name` = '$project_name' , 
-                `project_discussion` = '$project_discussion' 
-            WHERE `project_id` = '$project_id'";
+        if (authorize_project($project_id)) {
+            $query = "UPDATE `project_table` SET
+                    `project_name` = '$project_name' , 
+                    `project_discussion` = '$project_discussion' 
+                WHERE `project_id` = '$project_id'";
 
-        if (db_execute($query)) {
-            set_user_message("The changes have been applied", 'success');
+            if (db_execute($query)) {
+                set_user_message("The changes have been applied", 'success');
+            }
+        } else {
+            set_user_message("Project $project_id was not found.", 'warning');
+            return FALSE;
         }
     }
-
 
     return TRUE;
 }
