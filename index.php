@@ -33,7 +33,7 @@ function show_sidebar() {
         </div>";
     echo "<div class='sidebar-block'>
             <ul class='menu'>
-                <li>NJIA 2</li>
+                <li>NJIA &beta;</li>
                 <li><a href='site-design.php'>SITE DESIGN</a></li>
                 <li><a href='test-cases.php'>TEST CASES</a></li>
             </ul>
@@ -41,7 +41,7 @@ function show_sidebar() {
 }
 
 function show_content() {
-    echo "<h1>Njia 2</h1>
+    echo "<h1>Njia &beta;</h1>
                 <h2>Section title</h2>
                 <p>
                     Quam ob rem sive hoc statueritis, dederitis mihi comitem ad 

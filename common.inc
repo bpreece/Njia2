@@ -38,8 +38,8 @@ function show_user_message($message, $message_type)  {
 }
 
 global $global_title, $logo_image;
-$global_title = "";
-$logo_image = "image/NJIA-v.png";
+$global_title = "Njia-&beta;";
+$logo_image = "image/NJIA-B.png";
 
 function get_global_title() {
     global $global_title;
@@ -57,7 +57,7 @@ function show_main_menu() {
 }
 
 function show_footer() {
-    echo "<div id='copyright'>Njia &copy; Copyright 2012, Ben Preece</div>";
+    echo "<div id='copyright'>Njia Beta version 0.01-&beta; &copy; Copyright 2012, Ben Preece</div>";
 }
 
 global $_connection;

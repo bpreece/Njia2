@@ -28,7 +28,7 @@ function process_new_timebox_form()
         $timebox_name = db_escape($_POST['timebox-name']);
         $timebox_end_date = db_escape($_POST['timebox-end-date']);
 
-        if (! authorize_project($project_id)) {
+        if (authorize_project($project_id)) {
             $query = "INSERT INTO `timebox_table` (
                     `timebox_name` , `project_id` , `timebox_end_date` 
                 ) VALUES ( 

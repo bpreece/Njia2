@@ -1,6 +1,7 @@
 <?php
 
 include_once 'common.inc';
+include_once 'login_user.php';
 
 global $login_form_name_field;
 
@@ -54,21 +55,8 @@ function process_login_form()
     
     if (db_connect()) {
         $login_form_name_field = db_escape($_POST['name_field']);
-        $password = db_escape($_POST['password-field']);
-
-        $query = "SELECT `user_id`, `login_name` 
-            FROM `user_table` 
-            WHERE `login_name` = '$login_form_name_field' AND 
-                `password` = MD5( CONCAT( `password_salt`, '$password' ) ) AND 
-                `account_closed_date` IS NULL";
-    
-        $user = db_fetch($query);
-        if ($user) {
-            $cookie = set_session_id($user['user_id']);
-            header("Location: todo.php");
-        } else {
-            set_user_message("Login failed.  Either this user account does not exist, or the password was incorrect.", 'warning'); 
-        }
+        $password_field = db_escape($_POST['password-field']);
+        login_user($login_form_name_field, $password_field);
     }
     
     return TRUE;
@@ -100,7 +88,7 @@ function process_new_login_form()
     
     if (db_connect()) {
         $login_form_name_field = db_escape($_POST['name_field']);
-        $password = db_escape($_POST['password-field']);
+        $password_field = db_escape($_POST['password-field']);
 
         $query = "INSERT INTO `user_table` (
                 `login_name` , `password_salt` 
@@ -112,12 +100,11 @@ function process_new_login_form()
             $user_id = db_last_index();
 
             $password_query = "UPDATE `user_table`
-                SET `password` = MD5( CONCAT( `password_salt`, '$password' ) )
+                SET `password` = MD5( CONCAT( `password_salt`, '$password_field' ) )
                 WHERE `user_id` = '$user_id'";
             
             if (db_execute($password_query)) {
-                $cookie = set_session_id($user_id);
-                header("Location: todo.php");
+                login_user($login_form_name_field, $password_field);
             }
         }
     }
