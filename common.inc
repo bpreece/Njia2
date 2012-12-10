@@ -57,7 +57,7 @@ function show_main_menu() {
 }
 
 function show_footer() {
-    echo "<div id='copyright'>Njia Beta version 0.01-&beta; &copy; Copyright 2012, Ben Preece</div>";
+    echo "<div id='copyright'>Njia Beta version 0.01-&beta; &copy; Copyright 2012-2013, Ben Preece</div>";
 }
 
 global $_connection;
