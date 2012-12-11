@@ -19,13 +19,11 @@ function show_log_list_form($user_list, $user, $start_date = '', $end_date = '',
     } else {
         echo "
                 <select name='id' style='width:100%'>";
-    
-        foreach ($user_list as $user_id => $user) {
-            $selected = ($user_id == $selected_user_id) ? 'selected' : '';
+        foreach ($user_list as $user_id => $user_name) {
+            $selected = ($user_id == $user['user_id']) ? "selected" : "";
             echo "
-                    <option value='$user_id' $selected>${user['login_name']}</option>";
-        }
-    
+                <option value='$user_id' $selected>$user_name</option>";
+        }    
         echo "
                 </select>";
     }
