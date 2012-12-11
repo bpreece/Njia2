@@ -15,13 +15,15 @@ function get_page_class() {
     return 'todo-page';
 }
 
-global $projects, $user, $user_id, $user_list;
+global $projects, $user, $user_id, $user_name, $user_list;
 
 function process_query_string() {
-    global $user_id;
+    global $user_id, $user_name;
 
     if (isset($_GET['id'])) {
         $user_id = $_GET['id'];
+    } else if (isset($_GET['n'])) {
+        $user_name = $_GET['n'];
     }
 }
 
@@ -31,15 +33,51 @@ function process_form_data() {
 }
 
 function prepare_page_data() {
-    global $projects, $user_id, $user, $user_list;
+    global $projects, $user_id, $user_name, $user, $user_list;
 
     if (connect_to_database_session()) {
-        if (! $user_id) {
-            $user_id = get_session_user_id();
+        $user_list = query_known_users(get_session_user_id());
+        
+        if ($user_name) {
+            $user_id = array_search($user_name, $user_list);
+            if ($user_id) {
+                $user = array(
+                    'user_id' => $user_id,
+                    'login_name' => $user_name,
+                );
+                $session_user_id = get_session_user_id();
+            } else if (is_admin_session()) {
+                $user = query_user_by_name($user_name);
+                $user_id = $user['user_id'];
+                $session_user_id = $user['user_id'];
+            }
+
+            if (! $user) {
+                set_user_message("User $user_name was not found.", 'warning');
+                return;
+            }
+        } else {
+            if (! $user_id) {
+                $user_id = get_session_user_id();
+            }
+            if (array_key_exists($user_id, $user_list)) {
+                $user = array(
+                    'user_id' => $user_id,
+                    'login_name' => $user_list[$user_id],
+                );
+                $session_user_id = get_session_user_id();
+            } else if (is_admin_session()) {
+                $session_user_id = $user_id;
+                $user = query_user_by_id($user_id);
+            }
+
+            if (! $user) {
+                set_user_message("User $user_id was not found.", 'warning');
+                return;
+            }
         }
-        $user = query_user_vitals($user_id);
-        $projects = query_user_tasks($user_id);
-        $user_list = query_known_users($user_id);
+        
+        $projects = query_user_tasks($user_id, $session_user_id);
     }
 }
 
@@ -48,7 +86,11 @@ function show_sidebar() {
     
     echo "
         <div class='sidebar-block'>";
-    show_todo_list_form($user_list, $user_id);
+    if (is_admin_session()) {
+        show_admin_todo_list_form();
+    } else {
+        show_todo_list_form($user_list, $user_id);
+    }
     echo "
         </div>";
     

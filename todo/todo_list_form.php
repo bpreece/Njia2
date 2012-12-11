@@ -12,7 +12,7 @@ function show_todo_list_form($user_list, $selected_user_id = '')
     echo "
         <form id='show-todo-form' method='GET' action='todo.php'>
             <div id='user-id-field' class='group'>
-                <label for='user-id'>Show to-do list for:</label>
+                <label for='id'>Show to-do list for:</label>
                 <select name='id' style='width:100%'>";
     
     foreach ($user_list as $user_id => $user_name) {
@@ -23,6 +23,21 @@ function show_todo_list_form($user_list, $selected_user_id = '')
     
     echo "
                 </select>
+            </div>
+            <input type='submit' value='Show to-do list'></input>
+        </form>";
+}
+
+/**
+ * 
+ */
+function show_admin_todo_list_form()
+{
+    echo "
+        <form id='show-todo-form' method='GET' action='todo.php'>
+            <div id='user-id-field' class='group'>
+                <label for='user-id'>Show to-do list for:</label>
+                <input type='text' style='width:100%' name='n'/>
             </div>
             <input type='submit' value='Show to-do list'></input>
         </form>";
