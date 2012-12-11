@@ -42,7 +42,7 @@ function show_sidebar() {
 
 function show_content() {
     echo "<h1>Njia &beta;</h1>
-                <h2>Section title</h2>
+                <h2>Project Tracking for the Ultra-Agile</h2>
                 <p>
                     Quam ob rem sive hoc statueritis, dederitis mihi comitem ad 
                     contionem populo carum atque iucundum, sive Silani sententiam 

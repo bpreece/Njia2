@@ -4,21 +4,24 @@ include_once 'common.inc';
 include_once 'data.inc';
 include_once 'log/log_list_form.php';
 include_once 'log/query_log.php';
+include_once 'user/query_users.php';
 
-global $user_id, $user_list, $log_date_list, $start_date, $end_date, $total_work_hours;
+global $user, $user_id, $user_list, $log_date_list;
+global $start_date, $end_date, $total_work_hours;
 $start_date = '';
 $end_date = '';
+$total_work_hours = 0;
 
 /*
  * Process query string from the URL
  */
 function process_query_string() {
-    global $user_id, $start_date, $end_date;
+    global $user_id, $user_name, $start_date, $end_date;
 
-    if (isset($_GET['u'])) {
-        $user_id = $_GET['u'];
-    } else {
-        $user_id = get_session_user_id();
+    if (isset($_GET['id'])) {
+        $user_id = $_GET['id'];
+    } else if (isset($_GET['n'])) {
+        $user_name = $_GET['n'];
     }
     
     if (isset($_GET['e'])) {
@@ -43,29 +46,16 @@ function process_form_data() {
  * Fetch page contents from the database
  */
 function prepare_page_data() {
-    global $user_id, $user_list, $log_date_list, $start_date, $end_date, $total_work_hours;
+    global $user, $user_id, $user_name, $user_list, $log_date_list, $start_date, $end_date, $total_work_hours;
     
     if (connect_to_database_session()) {
-        // default to the session user
-        $session_user_id = get_session_user_id();
-        if (! $user_id) {
-            $user_id = $session_user_id;
-        }
-
         db_calculate_range_dates($start_date, $end_date);
-
-        /*
-         * Fetch list of users with common projects and verify that this user is
-         * one of them
-         */
-
         $user_list = fetch_user_list();
-        if ($user_id != $session_user_id && !array_key_exists($user_id, $user_list)) {
-            set_user_message("User $user_id was not found; displaying your information instead.", 'warning');
-            $user_id = $session_user_id;
+        $user = find_user($user_list, $user_id, $user_name);
+        if ($user) {
+            $session_user_id = is_admin_session() ? $user['user_id'] : get_session_user_id();
+            $log_date_list = query_user_log($user['user_id'], $start_date, $end_date, $total_work_hours, $session_user_id);
         }
-
-        $log_date_list = query_user_log($user_id, $start_date, $end_date, $total_work_hours);
     }
 }
 
@@ -84,24 +74,27 @@ function get_page_class() {
 }
 
 function show_sidebar() {
-    global $user_id, $user_list, $start_date, $end_date;
+    global $user, $user_list, $start_date, $end_date;
 
     echo "
         <div class='sidebar-block'>";
-    show_log_list_form($user_list, $user_id, $start_date, $end_date);
+    show_log_list_form($user_list, $user, $start_date, $end_date, is_admin_session());
     echo "
         </div>";
 }
 
 function show_content() {
-    global $user_id, $user_list, $log_date_list, $start_date, $end_date, $total_work_hours;
+    global $user, $log_date_list, $start_date, $end_date, $total_work_hours;
+    
+    if (! $user) {
+        return;
+    }
 
-    $user_name = $user_list[$user_id]['login_name'];
     echo "
-        <h3><a class='object-ref' href='user.php?id=$user_id'>$user_name</a></h3>";
+        <h3><a class='object-ref' href='user.php?id=${user['user_id']}'>${user['login_name']}</a></h3>";
     if (! $log_date_list) {
         echo "
-            <div>There are no entries in the current work log for $user_name.</div>";
+            <div>There are no entries in the current work log for ${user['login_name']}.</div>";
         return;
     }
 

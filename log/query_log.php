@@ -1,13 +1,15 @@
 <?php
 
-function query_user_log($user_id, $start_date, $end_date, &$total_work_hours)
+function query_user_log($user_id, $start_date, $end_date, &$total_work_hours, $session_user_id)
 {
     $log_query = "SELECT L.`log_id` , L.`description` , L.`work_hours` , 
-        DATE( L.`log_time` ) AS `log_date` , 
-        T.`task_id` , T.`task_summary` 
+            DATE( L.`log_time` ) AS `log_date` , 
+            T.`task_id` , T.`task_summary` 
         FROM `log_table` AS L
         INNER JOIN `task_table` AS T ON L.`task_id` = T.`task_id` 
-        INNER JOIN  `user_table` AS U ON L.`user_id` = U.`user_id` 
+        INNER JOIN `access_table` AS A1 ON A1.`project_id` = T.`project_id` 
+        INNER JOIN `access_table` AS A2 ON A2.`project_id` = A1.`project_id` 
+            AND A2.`user_id` = '$session_user_id'
         WHERE L.`user_id` = '$user_id' ";
     if ($end_date) {
         $log_query .= "
