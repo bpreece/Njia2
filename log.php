@@ -50,7 +50,6 @@ function prepare_page_data() {
     
     if (connect_to_database_session()) {
         db_calculate_range_dates($start_date, $end_date);
-        $user_list = fetch_user_list();
         $user = find_user($user_list, $user_id, $user_name);
         if ($user) {
             $session_user_id = is_admin_session() ? $user['user_id'] : get_session_user_id();
