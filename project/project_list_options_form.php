@@ -34,7 +34,7 @@ function show_project_list_options_form($user_list, $user, $show_closed_tasks, $
                 <input type='checkbox' name='tx' $tx_checked> Show closed tasks</br>
                 <input type='checkbox' name='px' $px_checked> Show closed projects</br>
             </div>
-            <input type='submit' value='Apply these options'></input>
+            <input type='submit' value='Show projects'></input>
         </form>";
 }
 

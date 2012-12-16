@@ -28,14 +28,12 @@ function get_page_class() {
     return 'user-page';
 }
 
-global $query_user, $user_id;
+global $user, $user_id, $user_name;
 
 function process_query_string() {
-    global $show_closed_member_projects;
-    global $show_closed_owned_projects;
-    global $work_log_start_date;
-    global $work_log_end_date;
-    global $query_user, $user_id;
+    global $user, $user_id, $user_name;
+    global $show_closed_member_projects, $show_closed_owned_projects;
+    global $work_log_start_date, $work_log_end_date;
 
     if (isset($_GET['po'])) {
         $show_closed_owned_projects = 'checked';
@@ -49,11 +47,11 @@ function process_query_string() {
     if (isset($_GET['le'])) {
         $work_log_end_date = $_GET['le'];
     }
-    
+
     if (isset($_GET['id'])) {
         $user_id = $_GET['id'];
-    } else {
-        $user_id = get_session_user_id();
+    } else if (isset($_GET['n'])) {
+        $user_name = $_GET['n'];
     }
 }
 
@@ -64,32 +62,23 @@ function process_form_data() {
 }
 
 function prepare_page_data() {
-    global $query_user, $user_id, $account_closed;
-    
+    global $user, $user_list, $user_id, $user_name;
+    global $account_closed;
+    global $show_closed_member_projects, $show_closed_owned_projects;
+    global $work_log_start_date, $work_log_end_date;
+
     if (connect_to_database_session()) {
-        if ( ($query_user = query_user($user_id)) == NULL) {
-            set_user_message("User $user_id was not found", 'warning');
-            return;
+        $user = find_user($user_list, $user_id, $user_name);
+        if ($user) {
+            $session_user_id = is_admin_session() ? $user['user_id'] : get_session_user_id();
+            $user['log-list'] = query_user_work_log($user_id, $work_log_start_date, $work_log_end_date, $session_user_id);
+            if (isset($query_user['account_closed_date'])) {
+                $account_closed = TRUE;
+                set_user_message('This account has been closed', 'warning');
+            }
+            $user['owned-project-list'] = query_user_owned_projects($user_id, $show_closed_owned_projects, $session_user_id);
+            $user['project-member-list'] = query_user_member_functions($user_id, $show_closed_member_projects, $session_user_id);
         }
-        if (isset($query_user['account_closed_date'])) {
-            $account_closed = TRUE;
-            set_user_message('This account has been closed', 'warning');
-        }
-
-        global $show_closed_member_projects;
-        global $show_closed_owned_projects;
-
-        // projects which are owned by $user_id, and which are accessible to
-        // get_session_user_id();
-        $query_user['owned-project-list'] = query_user_owned_projects($user_id, $show_closed_owned_projects);
-
-        // projects which are accessible to both $user_id and get_session_user_id();
-        $query_user['project-member-list'] = query_user_member_functions($user_id, $show_closed_member_projects);
-
-        global $work_log_start_date;
-        global $work_log_end_date;
-
-        $query_user['log-list'] = query_user_work_log($user_id, $work_log_start_date, $work_log_end_date);
     }
 }
 
@@ -115,26 +104,24 @@ function show_sidebar() {
 
 function show_content() 
 {    
-    global $show_closed_member_projects;
-    global $show_closed_owned_projects;
-    global $work_log_start_date;
-    global $work_log_end_date;
-    global $query_user;
-    if (!$query_user) {
+    global $show_closed_member_projects, $show_closed_owned_projects;
+    global $work_log_start_date, $work_log_end_date;
+    global $user;
+    
+    if (!$user) {
         return;
     }
-    
-    $query_id = $query_user['user_id'];
-    echo "
-        <h3>User $query_id</h3>";
 
-    show_user_form($query_id, $query_user['user_name']);
+    echo "
+        <h3>User ${user['user_id']}</h3>";
+
+    show_user_form($user['user_id'], $user['login_name']);
     
     echo "
         <div id='owned-projects-header'>
             <div class='header-controls' style='float:right'>
                 <form method='GET'>
-                    <input type='hidden' name='id' value='$query_id' />";
+                    <input type='hidden' name='id' value='${user['user_id']}' />";
     if ($show_closed_member_projects) {
         echo "
                     <input type='hidden' name='pm' value='$show_closed_member_projects' />";
@@ -149,7 +136,7 @@ function show_content()
             <h4>Project owner</h4>
         </div>
         <div class='project-list'>";
-    foreach ($query_user['owned-project-list'] as $project_id => $project) {
+    foreach ($user['owned-project-list'] as $project_id => $project) {
         echo "
                 <div id='project-$project_id' class='project object-element'>";
         if ($project['project_status'] != 'open') {
@@ -173,7 +160,7 @@ function show_content()
         <div id='project-member-header'>
             <div class='header-controls' style='float:right'>
                 <form method='GET'>
-                    <input type='hidden' name='id' value='$query_id' />";
+                    <input type='hidden' name='id' value='${user['user_id']}' />";
     if ($show_closed_owned_projects) {
         echo"
                     <input type='hidden' name='po' value='$show_closed_owned_projects' />";
@@ -188,7 +175,7 @@ function show_content()
             <h4>Project member</h4>
         </div>
         <div class='project-list'>";
-    foreach ($query_user['project-member-list'] as $project_id => $project) {
+    foreach ($user['project-member-list'] as $project_id => $project) {
         echo "
                 <div id='project-$project_id' class='project object-element'>";
         if ($project['project_status'] != 'open') {
@@ -212,7 +199,7 @@ function show_content()
         <div id='work-log-header'>
             <div class='header-controls' style='float:right'>
                 <form method='GET'>
-                    <input type='hidden' name='id' value='$query_id' />";
+                    <input type='hidden' name='id' value='${user['user_id']}' />";
     if ($show_closed_member_projects) {
         echo"
                     <input type='hidden' name='pm' value='$show_closed_member_projects' />";
@@ -232,7 +219,7 @@ function show_content()
             <h4>Work log</h4>
         </div>
         <div class='work-log-list'>";
-    foreach($query_user['log-list'] as $log_id => $log) {
+    foreach($user['log-list'] as $log_id => $log) {
         echo "
             <div id='log-$log_id' class='log-entry'>
                 <div class='log-time'>${log['log_time']}</div>

@@ -7,17 +7,18 @@
  * @param type $timebox_end_date
  * @return array
  */
-function query_timeboxes($show_closed_tasks = FALSE, $timebox_end_date = NULL)
+function query_timeboxes($user_id, $show_closed_tasks, $timebox_end_date, $session_user_id)
 {
-    $user_id = get_session_user_id();
     $timebox_query = "SELECT X.`timebox_id` , X.`timebox_name` , X.`timebox_end_date` , 
-        ( X.`timebox_end_date` < CURRENT_DATE() ) AS `timebox_expired` , 
-        P.`project_id` , P.`project_name` , P.`project_status` 
-        FROM `access_table` AS A 
-        INNER JOIN `timebox_table` AS X ON A.`project_id` = X.`project_id` 
+            ( X.`timebox_end_date` < CURRENT_DATE() ) AS `timebox_expired` , 
+            P.`project_id` , P.`project_name` , P.`project_status` 
+        FROM `timebox_table` AS X 
         INNER JOIN `project_table` AS P ON X.`project_id` = P.`project_id` 
-        WHERE A.`user_id` = '$user_id' 
-            AND P.`project_status` <> 'closed'";
+        INNER JOIN `access_table` AS A1 ON A1.`project_id` = P.`project_id` 
+        INNER JOIN `access_table` AS A2 ON A2.`project_id` = A1.`project_id` 
+            AND A2.`user_id` = '$session_user_id' 
+        WHERE A1.`user_id` = '$user_id' 
+            AND P.`project_status` <> 'closed' ";
     if ($timebox_end_date) {
         $timebox_query .= "
             AND X.`timebox_end_date` >= '$timebox_end_date'";

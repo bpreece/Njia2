@@ -20,7 +20,7 @@ function show_schedule_list_options_form($show_closed_tasks, $past_timeboxes_dat
                     <input style='width:100%' type='text' name='xx' value='$past_timeboxes_date' />
                 </div> <!-- /group -->
             </div>
-            <input type='submit' value='Apply these options'></input>
+            <input type='submit' value='Show timeboxes'></input>
         </form>";
 }
 

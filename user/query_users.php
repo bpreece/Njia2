@@ -76,37 +76,26 @@ function query_user_by_name($user_name)
     return db_fetch($user_query);
 }
 
-function query_user($user_id) 
+function query_user($user_id, $session_user_id) 
 {
-    $session_user_id = get_session_user_id();
-    $user_id = db_escape($user_id);
-    
-    if (is_admin_session() || $user_id == $session_user_id) {
-        $query = "SELECT U.`user_id` , U.`login_name` AS  `user_name` , 
-                U.`account_closed_date` 
-            FROM `user_table` AS U
-            WHERE `user_id` = '$user_id'";
-    } else {
-        $query = "SELECT U.`user_id` , U.`login_name` AS  `user_name` , 
-                U.`account_closed_date` 
-            FROM  `project_table` AS P
-            INNER JOIN  `access_table` AS A1 ON P.`project_id` = A1.`project_id` 
-            INNER JOIN  `access_table` AS A2 ON P.`project_id` = A2.`project_id` 
-            INNER JOIN  `user_table` AS U ON A1.`user_id` = U.`user_id` 
-            WHERE A1.`user_id` =  '$user_id'
-                AND A2.`user_id` =  '$session_user_id'";
-    }
+    $query = "SELECT U.`user_id` , U.`login_name` AS  `user_name` , 
+            U.`account_closed_date` 
+        FROM  `user_table` AS U
+        INNER JOIN  `access_table` AS A1 ON A1.`user_id` = U.`user_id` 
+        INNER JOIN  `access_table` AS A2 ON A2.`project_id` = A1.`project_id` 
+        WHERE U.`user_id` =  '$user_id'
+            AND A2.`user_id` =  '$session_user_id'";
     
     return db_fetch($query);
 }
 
-function query_user_owned_projects($user_id, $show_closed_projects)
+function query_user_owned_projects($user_id, $show_closed_projects, $session_user_id)
 {
-    $session_user_id = get_session_user_id();
     $owner_query = "SELECT P.`project_id` , P.`project_name` , P.`project_status` 
-        FROM `access_table` AS A 
-        INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
-        WHERE P.`project_owner` = '$user_id' AND A.`user_id` = '$session_user_id' ";
+        FROM `project_table` AS P 
+        INNER JOIN `access_table` AS A ON A.`project_id` = P.`project_id` 
+        WHERE P.`project_owner` = '$user_id' 
+            AND A.`user_id` = '$session_user_id' ";
     if (! $show_closed_projects) {
         $owner_query .= "
             AND P.`project_status` <> 'closed'";
@@ -117,12 +106,15 @@ function query_user_owned_projects($user_id, $show_closed_projects)
     return db_fetch_list('project_id', $owner_query);
 }
 
-function query_user_member_functions($user_id, $show_closed_projects)
+function query_user_member_functions($user_id, $show_closed_projects, $session_user_id)
 {
     $member_query = "SELECT P.`project_id` , P.`project_name` , P.`project_status` 
-        FROM `access_table` AS A 
-        INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
-        WHERE P.`project_owner` <> '$user_id' AND A.`user_id` = '$user_id' ";
+        FROM `project_table` AS P
+        INNER JOIN `access_table` AS A1 ON A1.`project_id` = P.`project_id` 
+        INNER JOIN `access_table` AS A2 ON A2.`project_id` = A1.`project_id` 
+        WHERE P.`project_owner` <> '$user_id' 
+            AND A1.`user_id` = '$user_id' 
+            AND A2.`user_id` = '$session_user_id' ";
     if (! $show_closed_projects) {
         $member_query .= "
             AND P.`project_status` <> 'closed'";
@@ -133,18 +125,17 @@ function query_user_member_functions($user_id, $show_closed_projects)
     return db_fetch_list('project_id', $member_query);
 }
 
-function query_user_work_log($user_id, $work_log_start_date, $work_log_end_date)
+function query_user_work_log($user_id, $work_log_start_date, $work_log_end_date, $session_user_id)
 {
-    $session_user_id = get_session_user_id();
     $log_query = "SELECT P.`project_id` , P.`project_name` , 
             T.`task_id` , T.`task_summary` , 
             L.`log_id` , L.`description` , L.`work_hours` , L.`log_time` 
-        FROM `access_table` AS A 
-        INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
-        INNER JOIN `task_table` AS T ON P.`project_id` = T.`project_id` 
-        INNER JOIN `log_table` AS L ON L.`task_id` = T.`task_id` 
-        WHERE A.`user_id`= '$session_user_id' 
-            AND L.`user_id` = $user_id ";
+        FROM `log_table` AS L 
+        INNER JOIN `task_table` AS T ON L.`task_id` = T.`task_id` 
+        INNER JOIN `project_table` AS P ON P.`project_id` = T.`project_id` 
+        INNER JOIN `access_table` AS A ON A.`project_id` = P.`project_id` 
+        WHERE L.`user_id` = '$user_id'  
+            AND A.`user_id`= '$session_user_id' ";
     if ($work_log_end_date) {
         $log_query .= "
             AND DATE( L.`log_time` ) <= '$work_log_end_date' ";
@@ -234,7 +225,8 @@ function query_user_tasks($user_id, $session_user_id)
 
 function query_known_users($user_id)
 {
-    $users_query = "SELECT DISTINCT U.`user_id` , U.`login_name` 
+    $users_query = "SELECT DISTINCT U.`user_id` , U.`login_name` , 
+            U.`account_closed_date` , U.`user_creation_date` 
         FROM `user_table` AS U
         INNER JOIN `access_table` AS A1 ON A1.`user_id` = U.`user_id` 
         INNER JOIN `access_table` AS A2 ON A2.`project_id` = A1.`project_id` 

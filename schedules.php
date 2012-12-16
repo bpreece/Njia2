@@ -4,9 +4,10 @@ include_once 'common.inc';
 include_once 'timebox/schedule_list_options_form.php';
 include_once 'timebox/query_timeboxes.php';
 include_once 'task/tasks_list.php';
+include_once 'user/query_users.php';
 
-global $show_closed_tasks;
-global $timebox_end_date;
+global $user_id, $user_name;
+global $show_closed_tasks, $timebox_end_date;
 $show_closed_tasks = '';
 $timebox_end_date = '';
 
@@ -22,9 +23,15 @@ function get_page_class() {
 global $timeboxes, $tasks;
 
 function process_query_string() {
-    global $show_closed_tasks;
-    global $timebox_end_date;
+    global $user_id, $user_name;
+    global $show_closed_tasks, $timebox_end_date;
     
+    if (isset($_GET['id'])) {
+        $user_id = $_GET['id'];
+    } else if (isset($_GET['n'])) {
+        $user_name = $_GET['n'];
+    }
+
     if (isset($_GET['tx'])) {
         $show_closed_tasks = TRUE;
     }
@@ -40,12 +47,15 @@ function process_form_data() {
 */
 
 function prepare_page_data() {
-    global $show_closed_tasks;
-    global $timebox_end_date;
+    global $timeboxes, $user_id, $user_name, $user, $user_list;
+    global $show_closed_tasks, $timebox_end_date;
 
     if (connect_to_database_session()) {
-        global $timeboxes;
-        $timeboxes = query_timeboxes($show_closed_tasks, $timebox_end_date);
+        $user = find_user($user_list, $user_id, $user_name);
+        if ($user) {
+            $session_user_id = is_admin_session() ? $user['user_id'] : get_session_user_id();
+            $timeboxes = query_timeboxes($user['user_id'], $show_closed_tasks, $timebox_end_date, $session_user_id);
+        }
     }
 }
 
@@ -63,11 +73,15 @@ function show_sidebar() {
 function show_content() {
     global $timeboxes, $user;
     
+    if (! $user) {
+        return;
+    }
+
     echo "
-        <h3>Schedules</h3>";
+        <h3><a class='object-ref' href='user.php?id=${user['user_id']}'>${user['login_name']}</a></h3>";
     if (! $timeboxes) {
         echo "
-            <div>You currently have no scheduled tasks.</div>";
+            <div>There are no timeboxes to show for ${user['login_name']}.</div>";
         return;
     }
     

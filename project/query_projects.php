@@ -17,7 +17,6 @@ function validate_project_owner($project_id)
 
 function query_projects($user_id, $show_closed_projects, $show_closed_tasks, $session_user_id)
 {
-    $user_id = get_session_user_id();
     $projects_query = "SELECT P.`project_id` , P.`project_name` , P.`project_status` 
         FROM `project_table` AS P
         INNER JOIN `access_table` AS A1 ON A1.`project_id` = P.`project_id` 
