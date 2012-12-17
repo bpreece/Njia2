@@ -72,7 +72,7 @@ function prepare_page_data() {
         if ($user) {
             $session_user_id = is_admin_session() ? $user['user_id'] : get_session_user_id();
             $user['log-list'] = query_user_work_log($user_id, $work_log_start_date, $work_log_end_date, $session_user_id);
-            if (isset($query_user['account_closed_date'])) {
+            if (isset($user['account_closed_date'])) {
                 $account_closed = TRUE;
                 set_user_message('This account has been closed', 'warning');
             }
@@ -115,7 +115,17 @@ function show_content()
     echo "
         <h3>User ${user['user_id']}</h3>";
 
-    show_user_form($user['user_id'], $user['login_name']);
+    if ($user['user_id'] == get_session_user_id() || is_admin_session()) {
+        show_user_form($user['user_id'], $user['login_name']);
+    } else {
+        echo "
+        <form class='main-form'>
+            <div id='login-name'>
+                <label for='login-name'>Login name:</label>
+                ${user['login_name']}
+            </div>
+        </form>";
+    }
     
     echo "
         <div id='owned-projects-header'>
