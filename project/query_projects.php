@@ -38,30 +38,17 @@ function query_projects($user_id, $show_closed_projects, $show_closed_tasks, $se
     return $projects;
 }
 
-function query_project($project_id, $user_id, $show_closed_tasks, $show_subtasks, $timebox_end_date = NULL)
+function query_project($project_id)
 {
     $project_id = db_escape($project_id);
-    $show_closed_tasks = db_escape($show_closed_tasks);
-    $timebox_end_date = db_escape($timebox_end_date);
 
     $project_query = "SELECT P.* , 
-            O.`user_id` AS `owner_id` , O.`login_name` AS `owner_name` 
-        FROM `access_table` AS A 
-        INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
-        INNER JOIN `user_table` AS O ON P.`project_owner` = O.`user_id`
-        WHERE P.`project_id` = '$project_id' AND A.`user_id` = $user_id";
-    $project = db_fetch($project_query);
-    if (! $project) {
-        return NULL;
-    }
+            U.`user_id` AS `owner_id` , U.`login_name` AS `owner_name` 
+        FROM `project_table` AS P 
+        INNER JOIN `user_table` AS U ON P.`project_owner` = U.`user_id`
+        WHERE P.`project_id` = '$project_id' ";
 
-    $project['can-close'] = ($project['project_status'] != 'closed');
-    
-    $project['task-list'] = query_project_tasks($project_id, $show_closed_tasks, $show_subtasks);
-    $project['timebox-list'] = query_project_timeboxes($project_id, $timebox_end_date);    
-    $project['user-list'] = query_project_users($project_id);
-
-    return $project;
+    return db_fetch($project_query);
 }
 
 function query_project_tasks($project_id, $show_closed_tasks, $show_subtasks = TRUE)

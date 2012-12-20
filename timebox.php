@@ -45,12 +45,17 @@ function process_form_data() {
 
 function prepare_page_data() {
     global $timebox_id, $timebox;
+    global $show_closed_tasks;
 
     if (connect_to_database_session()) {
-        $timebox = query_user_timeboxes($timebox_id);
+        $users = query_timebox_users($timebox_id);
+        if (array_key_exists(get_session_user_id(), $users) || is_admin_session()) {
+            $timebox = query_user_timeboxes($timebox_id);
 
-        global $show_closed_tasks;
-        $timebox['task-list'] = query_timebox_tasks($timebox_id, $show_closed_tasks);
+            $timebox['task-list'] = query_timebox_tasks($timebox_id, $show_closed_tasks);
+        } else {
+            set_user_message("Timebox $timebox_id was not found.", 'warning');
+        }
     }
 }
 

@@ -42,11 +42,9 @@ function query_user_timeboxes($timebox_id)
     $session_id = get_session_id();
     
     $timebox_query = "SELECT X.* , P.`project_name` 
-        FROM `session_table` AS S
-        INNER JOIN `access_table` AS A ON S.`user_id` = A.`user_id` 
-        INNER JOIN `timebox_table` AS X ON A.`project_id` = X.`project_id` 
+        FROM `timebox_table` AS X 
         INNER JOIN `project_table` AS P ON X.`project_id` = P.`project_id`
-        WHERE S.`session_id` = '$session_id' and X.`timebox_id` = '$timebox_id'";
+        WHERE X.`timebox_id` = '$timebox_id'";
     
     return db_fetch($timebox_query);
 }
@@ -82,6 +80,17 @@ function query_timebox_tasks($timebox_id, $show_closed_tasks, $show_subtasks = T
     
     $results = db_fetch_list('task_id', $tasks_query);
     return $results;
+}
+
+function query_timebox_users($timebox_id)
+{
+    $user_query = "SELECT U.`user_id` , U.`login_name` AS `user_name` 
+                 FROM `access_table` AS A 
+                 INNER JOIN `user_table` AS U ON U.`user_id` = A.`user_id`
+                 INNER JOIN `timebox_table` AS X ON X.`project_id` = A.`project_id`
+                 WHERE X.`timebox_id` = '$timebox_id'
+                 ORDER BY U.`login_name`";
+    return db_fetch_list('user_id', $user_query);
 }
 
 ?>

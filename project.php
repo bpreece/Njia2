@@ -60,8 +60,18 @@ function prepare_page_data() {
     global $show_closed_tasks, $show_subtasks, $timebox_end_date;
     
     if (connect_to_database_session()) {
-        $user_id = get_session_user_id();
-        $project = query_project($project_id, $user_id, $show_closed_tasks, $show_subtasks);
+        $users = query_project_users($project_id);
+        if (array_key_exists(get_session_user_id(), $users) || is_admin_session()) {
+            $project = query_project($project_id);
+
+            $project['can-close'] = ($project['project_status'] != 'closed');
+
+            $project['task-list'] = query_project_tasks($project_id, $show_closed_tasks, $show_subtasks);
+            $project['timebox-list'] = query_project_timeboxes($project_id, $timebox_end_date);    
+            $project['user-list'] = query_project_users($project_id);
+        } else {
+            set_user_message("Project $project_id was not found.", 'warning');
+        }
     }
 }
 
@@ -136,12 +146,12 @@ function show_content()
     global $timebox_end_date, $end_date;
     global $project_id, $project;
     
-    echo "
-        <h3>Project $project_id</h3>";
-    
     if (! $project) {
         return;
     }
+    
+    echo "
+        <h3>Project $project_id</h3>";
     
     show_project_form($project_id, $project);
 

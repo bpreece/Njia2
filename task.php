@@ -58,28 +58,37 @@ function process_form_data() {
 
 function prepare_page_data() {
     global $task_id, $task, $show_closed_subtasks;
+    global $total_hours;
 
     if (connect_to_database_session()) {
-        $task = query_task($task_id);
-        $project_id = $task['project_id'];
+        $users = query_task_users($task_id);
+        if (array_key_exists(get_session_user_id(), $users) || is_admin_session()) {
+            $task = query_task($task_id);
+            $project_id = $task['project_id'];
 
-        // if the task has subtasks, then we'll list them;  otherwise, this task
-        // can be assigned, so we'll need a list of users and a list of timeboxes.
+            // if the task has subtasks, then we'll list them;  otherwise, this task
+            // can be assigned, so we'll need a list of users and a list of timeboxes.
 
-        $task['subtask-list'] = query_subtasks($task_id, $show_closed_subtasks);
-        if (count($task['subtask-list']) == 0) {
-            $task['users-list'] = query_project_users($project_id);
-            $task['timebox-list'] = query_project_timeboxes($project_id);
+            $task['subtask-list'] = query_subtasks($task_id, $show_closed_subtasks);
+            if (count($task['subtask-list']) == 0) {
+                $task['users-list'] = query_project_users($project_id);
+                $task['timebox-list'] = query_project_timeboxes($project_id);
+            }
+
+            $total_hours = 0;
+            $task['log-list'] = query_task_log($task_id, $total_hours);
+        } else {
+            set_user_message("Task $task_id was not found.", 'warning');
         }
-
-        global $total_hours;
-        $total_hours = 0;
-        $task['log-list'] = query_task_log($task_id, $total_hours);
     }
 }
 
 function show_sidebar() {
     global $task_id, $task;
+    
+    if (! $task) {
+        return;
+    }
 
     if ($task['task_status'] == 'closed') {
         if ($task['parent_task_status'] != 'closed') {

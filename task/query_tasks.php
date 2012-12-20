@@ -5,17 +5,16 @@ function query_task($task_id)
     $task_id = db_escape($task_id);
 
     $task_query = "SELECT T . * , P.`project_name` , 
-                X.`timebox_name` , X.`timebox_end_date` , 
-                PT.`task_summary` AS `parent_task_summary` , 
-                PT.`task_status` AS `parent_task_status` ,
-                U.`login_name`
-                FROM `access_table` AS A
-                INNER JOIN `project_table` AS P ON A.`project_id` = P.`project_id` 
-                INNER JOIN `task_table` AS T ON P.`project_id` = T.`project_id` 
-                LEFT JOIN `timebox_table` AS X ON T.`timebox_id` = X.`timebox_id` 
-                LEFT JOIN `task_table` AS PT ON T.`parent_task_id` = PT.`task_id`
-                LEFT JOIN `user_table` AS U ON T.`user_id` = U.`user_id`
-                WHERE T.`task_id` = '$task_id'";
+            X.`timebox_name` , X.`timebox_end_date` , 
+            PT.`task_summary` AS `parent_task_summary` , 
+            PT.`task_status` AS `parent_task_status` ,
+            U.`login_name`
+        FROM `task_table` AS T 
+        INNER JOIN `project_table` AS P ON P.`project_id` = T.`project_id` 
+        LEFT JOIN `timebox_table` AS X ON X.`timebox_id` = T.`timebox_id` 
+        LEFT JOIN `task_table` AS PT ON T.`parent_task_id` = PT.`task_id`
+        LEFT JOIN `user_table` AS U ON T.`user_id` = U.`user_id`
+        WHERE T.`task_id` = '$task_id'";
 
     
     $task = db_fetch($task_query);
@@ -69,6 +68,17 @@ function query_task_log($task_id, &$total_hours)
     }
     
     return $log_list;
+}
+
+function query_task_users($task_id)
+{
+    $user_query = "SELECT U.`user_id` , U.`login_name` AS `user_name` 
+                 FROM `access_table` AS A 
+                 INNER JOIN `user_table` AS U ON U.`user_id` = A.`user_id`
+                 INNER JOIN `task_table` AS T ON T.`project_id` = A.`project_id`
+                 WHERE T.`task_id` = '$task_id'
+                 ORDER BY U.`login_name`";
+    return db_fetch_list('user_id', $user_query);
 }
 
 ?>
