@@ -6,8 +6,9 @@ function login_user($user_name, $user_password)
             FROM `user_table` 
             WHERE `login_name` = '$user_name' AND 
                 `password` = MD5( CONCAT( `password_salt`, '$user_password' ) ) AND 
-                `account_closed_date` IS NULL";
-
+                `account_closed_date` IS NULL AND
+                ( `expiration_date` IS NULL OR `expiration_date` >= DATE(NOW()) )";
+    
     $user = db_fetch($user_query);
     if ($user) {
         $login_query = "UPDATE  `user_table` 
@@ -18,7 +19,7 @@ function login_user($user_name, $user_password)
         $cookie = set_session_id($user['user_id']);
         header("Location: todo.php");
     } else {
-        set_user_message("Login failed.  Either this user account does not exist, or the password was incorrect.", 'warning');
+        set_user_message("Login failed.  Either the user name or the password was incorrect, or else this user account does not exist or has expired.", 'warning');
     }
 }
 

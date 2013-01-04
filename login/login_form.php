@@ -25,6 +25,8 @@ function show_login_form($new_login)
         echo "
             <label for='repeat-password_field'>Repeat password:</label>
             <input type='password' name='repeat-password-field'></input>
+            <label for='email-field'>E-mail:</label>
+            <input type='text' name='email-field' value=''></input>
             <br/>
             <input type='submit' name='new-login-button' value='Create login'></input>";
     } else {
@@ -76,8 +78,8 @@ function process_new_login_form()
         return FALSE;
     }
 
-    if (!$_POST['name_field'] || !$_POST['password-field']) {
-        set_user_message("You must provide a login name and password", "warning");
+    if (!$_POST['name_field'] || !$_POST['password-field'] || !$_POST['email-field']) {
+        set_user_message("You must provide a login name, password, and e-mail address", "warning");
         return TRUE;
     }
 
@@ -89,11 +91,15 @@ function process_new_login_form()
     if (db_connect()) {
         $login_form_name_field = db_escape($_POST['name_field']);
         $password_field = db_escape($_POST['password-field']);
+        $email_field = db_escape($_POST['email-field']);
 
         $query = "INSERT INTO `user_table` (
-                `login_name` , `password_salt` 
+                `login_name` , `password_salt` , `email` , `expiration_date` 
             ) VALUES (
-                '$login_form_name_field' , MD5( CONCAT( '$login_form_name_field' , NOW() ) )
+                '$login_form_name_field' , 
+                MD5( CONCAT( '$login_form_name_field' , NOW() ) ) , 
+                '$email_field' , 
+                DATE_ADD( NOW(), INTERVAL 2 DAY)
             )";
         
         if (db_execute($query)) {

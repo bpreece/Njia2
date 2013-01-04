@@ -36,6 +36,10 @@ function prepare_page_data() {
     global $projects, $user_id, $user_name, $user, $user_list;
 
     if (connect_to_database_session()) {
+        $session_user = get_session_user();
+        if ($session_user['expiration_date']) {
+            set_user_message("This account expires on ${session_user['expiration_date']}", 'warning');
+        }
         $user = find_user($user_list, $user_id, $user_name);
         if ($user) {
             $session_user_id = is_admin_session() ? $user['user_id'] : get_session_user_id();
