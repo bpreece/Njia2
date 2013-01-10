@@ -72,6 +72,7 @@ function process_login_form()
  */
 function process_new_login_form() 
 {
+    global $njia_url, $admin_email;
     global $login_form_name_field;
 
     if (! isset($_POST['new-login-button'])) {
@@ -109,9 +110,33 @@ function process_new_login_form()
                 SET `password` = MD5( CONCAT( `password_salt`, '$password_field' ) )
                 WHERE `user_id` = '$user_id'";
             
-            if (db_execute($password_query)) {
-                login_user($login_form_name_field, $password_field);
+            if (! db_execute($password_query)) {
+                return;
             }
+            
+            $user_query = "SELECT `password_salt` , `expiration_date` , 
+                MD5( CONCAT( `password_salt`, `expiration_date` ) ) AS `key` 
+                FROM `user_table` WHERE `user_id` = '$user_id'";
+            $user = db_fetch($user_query);
+            if (! $user) {
+                return;
+            }
+            
+            $subject = 'Your new Njia account';
+            $message = <<<EOM
+An account has been created for you at Njia with the login name ${_POST['name_field']}.  
+This is a temporary account which will expire in two days.  To remove the 
+expiration from this account, please follow this link:
+
+    http://$njia_url/verify.php?id=$user_id&key=${user['key']}
+
+If you did not create this account, please notify the administrator at Njia
+by replying to this email.
+EOM;
+            $headers = "From: $admin_email";
+            mail($email_field, $subject, $message, $headers);
+            
+            login_user($login_form_name_field, $password_field);
         }
     }
     

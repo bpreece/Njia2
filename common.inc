@@ -1,6 +1,10 @@
 
 <?php 
 
+global $admin_email, $njia_url;
+$admin_email = 'admin@bpreece.com';
+$njia_url = 'localhost/Njia2';
+
 global $mysqli;
 $mysqli = TRUE;
 
@@ -57,7 +61,7 @@ function show_main_menu() {
 }
 
 function show_footer() {
-    echo "<div id='copyright'>Njia Beta version 0.01-&beta; &copy; Copyright 2012-2013, Ben Preece</div>";
+    echo "<div id='copyright'>Njia Beta version 0.01-&beta;-1 &copy; Copyright 2012-2013, Ben Preece</div>";
 }
 
 global $_connection;
