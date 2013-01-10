@@ -112,11 +112,6 @@ $session_user = get_session_user();
                     <?php else: ?>
                         <li><a href='todo.php'>TO-DO</a></li>
                     <?php endif; ?>
-                    <?php if ($page_class == 'log-page') : ?>
-                        <li class='selected'>LOG</li>
-                    <?php else: ?>
-                        <li><a href='log.php'>LOG</a></li>
-                    <?php endif; ?>
                     <?php if ($page_class == 'projects-page') : ?>
                         <li class='selected'>PROJECTS</li>
                     <?php else: ?>
@@ -133,6 +128,11 @@ $session_user = get_session_user();
                         <?php else: ?>
                             <li><a href='users.php'>USERS</a></li>
                         <?php endif; ?>
+                    <?php endif; ?>
+                    <?php if ($page_class == 'log-page') : ?>
+                        <li class='selected'>LOG</li>
+                    <?php else: ?>
+                        <li><a href='log.php'>LOG</a></li>
                     <?php endif; ?>
                         <li><a style='font-variant: small-caps; font-size: 85%' href='logout.php'>Log out</a></li>
                 </ul> <!-- /menu -->

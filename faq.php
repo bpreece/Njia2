@@ -33,40 +33,37 @@ function show_sidebar() {
         </div>";
     echo "<div class='sidebar-block'>
             <ul class='menu'>
-                <li>NJIA &beta;</li>
-                <li><a href='overview.php'>READ ME</a></li>
+                <li><a href='index.php'>NJIA &beta;</a></li>
                 <li><a href='quickstart.php'>QUICK START</a></li>
-                <li><a href='faq.php'>FAQ</a></li>
+                <li>FAQ</li>
             </ul>
         </div>";
 }
 
 function show_content() {
     echo "<h1>Njia &beta;</h1>
+                <h2>Project Tracking for the Ultra-Agile</h2>
                 <p class='dictionary-definition'>
                     <strong>Njia</strong> /n&#805;.&#712;&#676;&#618;.&#601;/ 
                     Noun. The absolute best online project task-tracking 
                     application ever created&mdash;designed especially for 
-                    small, agile development teams like yours&mdash;your 
-                    guarantee of success. Because, you know, <em>hyperbole</em>!
-                    <br>
-                    [from Swahili <cite>njia</cite> way, path]
+                    small, agile development teams like yours&mdash;you're 
+                    guarantee of success. Because, you know, hyperbole!
+                    (from Swahili <cite>njia</cite> way, path)
                 </p>
-                <h2>Project Tracking for the Ultra-Agile</h2>
                 <p>
                     You and us, we're the same. We're small. We're agile. We 
                     get things done.  
                 </p>
                 <p>
-                    We follow process mindfully, not slavishly. We know that 
-                    process keeps us on track, keeps us honest, but we see
-                    process as a tool, not a goal, and we don't let process get 
-                    in our way. We use just as much as we need and no more. We 
-                    always remember that people and results are more important 
-                    than process.
+                    We know that process is important, but we refuse to let 
+                    process get in our way. We use just as much process as we 
+                    need, and no more. We follow process responsibly, not 
+                    mindlessly. We know that people and results are more 
+                    important than process.
                 </p>
                 <p>
-                    That's why <strong>Njia!</strong>
+                    That's why we use  Njia!
                 </p>
                 <h2>Section title</h2>
                 <p>
@@ -116,8 +113,8 @@ function show_content() {
                 <h3>Disclaimer</h3>
                 <p>
                     This site is currently in first beta stage.  You're welcome
-                    to use it, and comments and feedback will be duly drooled over, 
-                    but consider yourself warned.
+                    to use it, and feedback will be welcome, but consider
+                    yourself warned.
                 </p>";
 }
 

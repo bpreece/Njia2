@@ -6,6 +6,10 @@
         Purpose of the stylesheet follows.
 */
 
+h2 {
+    color: #B66A18;
+}
+
 #table-of-contents {
     margin: 0;
     padding: 0;
@@ -20,9 +24,19 @@
 
 #table-of-contents li a {
     text-decoration: none;
-    color: #BA8200;
+    color: #B66A18;
 }
 
 #table-of-contents li a:hover {
     text-decoration: underline;
+}
+
+.dictionary-definition {
+    background-color: #fffef8;
+    padding: 1.25em;
+    border: #B66A18 solid 1px;
+    border-radius: 0.75em;
+    font-family: serif;
+    font-size: 115%;
+    line-height: 1.5em;
 }
