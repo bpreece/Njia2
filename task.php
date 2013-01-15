@@ -100,8 +100,13 @@ function show_sidebar() {
         }
     } else {
         echo "
+            <div class='sidebar-block'>";
+        show_new_task_form('Add another task', $task['project_id'], $task['parent_task_id']);
+        echo "
+            </div>";
+        echo "
         <div class='sidebar-block'>";
-        show_new_task_form($task['project_id'], $task_id);
+        show_new_task_form('Create a subtask', $task['project_id'], $task_id);
         echo "
         </div>";
         echo "

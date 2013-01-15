@@ -1,9 +1,7 @@
 <?php
 
-function show_new_task_form($project_id, $parent_task_id = NULL) 
+function show_new_task_form($submit_title, $project_id, $parent_task_id = NULL) 
 {
-    $label_title = $parent_task_id ? 'Subtask Summary' : 'Task Summary';
-    $submit_title = $parent_task_id ? 'Add subtask' : 'Add task';
     echo "
         <form id='add-task-form' method='POST'>
             <input type='hidden' name='project-id' value='$project_id'>";
@@ -13,7 +11,7 @@ function show_new_task_form($project_id, $parent_task_id = NULL)
     }
     echo "
             <div id='task-summary'>
-                <label for='task-summary'>$label_title:</label>
+                <label for='task-summary'>Task Summary:</label>
                 <input style='width:100%' type='text' name='task-summary'></input>
             </div>
             <input type='submit' name='new-task-button' value='$submit_title'></input>

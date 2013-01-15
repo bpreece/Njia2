@@ -112,7 +112,7 @@ function show_sidebar() {
     } else {
         echo "
             <div class='sidebar-block'>";
-        show_new_task_form($project_id);
+        show_new_task_form('Create a task', $project_id);
         echo "
             </div>";
         

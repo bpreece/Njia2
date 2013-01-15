@@ -36,35 +36,34 @@ function show_sidebar() {
                 <li><a href='index.php'>NJIA &beta;</a></li>
                 <li>READ ME</li>
                 <li><a href='quickstart.php'>QUICK START</a></li>
-                <li><a href='faq.php'>FAQ</a></li>
             </ul>
         </div>";
 }
 
 function show_content() {
     echo "
-        <h1>Overview</h1>
+        <h1>How does this work?</h1>
         <h2>Timeboxes</h2>
         <p>
             Njia is based on the concept of a <em>timebox</em>.
         </p>
         <p>
-            A timebox <em>is not</em> a deliverable, although it might be.  A 
-            timebox <em>is not</em> a milestone, although it might be.  A 
-            timebox is a <em>project review cycle</em>. 
+            A timebox is not a deliverable, although it might be.  A 
+            timebox is not a milestone, although it might be.  What is a
+            timebox? It's is a <em>project review cycle</em>. 
         </p>
         <p>
-            Central to agile development is the need for a regular project 
-            review.  Has the team made progress? Is the work actualy addressing 
-            the customer's needs? Have any obstacles come up which need to be 
+            Central to agile development is the periodic project review.  
+            Has the team made progress? Is the work actualy addressing 
+            the customer's needs? Have customer expectations changed?  Have 
+            priorities changed? Have any obstacles come up which need to be 
             handled?  Is the team on target for completing the project on time? 
-            Have customer expectations changed?  Have priorities changed?
             The timebox is the development cycle between successive project 
             reviews.
         </p>
         <p>
             Part of the project review is judging whether the team has made 
-            acceptable progress, but there is no way to judge progress unless 
+            acceptable progress. But there is no way to judge progress unless 
             the team knows what progress was expected. This means that every 
             timebox requires a clear list of tasks which are to be completed 
             by the project review.  And of course, incomplete tasks need to be 
@@ -75,7 +74,7 @@ function show_content() {
             There is no hard rule for how long a timebox should last. Different 
             projects may have different requirements.  If your team is pursuing  
             an aggressive schedule, or if your team is very inexperienced, you  
-            may choose to make them one or two weeks long. More typical projects 
+            may choose to have reviews every week or two. More typical projects 
             will probably schedule one timebox per month, more or less.  As 
             with everything else agile, timeboxes are adaptable: they can and 
             should be reworked as necessary to meet the needs of the project.
@@ -91,11 +90,12 @@ function show_content() {
             Njia allows tasks to be divided into subtasks. 
             For example, you might have a top-level task called <em>User 
             Interface</em>.  This might have subtasks called <em>First 
-            Wireframe</em>, <em>Committed Wireframe</em>, <em>Design Graphics</em>, 
-            <em>Page Template</em>, <em>Welcome Page</em>, and so on.  And
-            maybe <em>Design Graphics</em> has further subtasks called 
-            <em>Color Palette</em>, <em>Main Logo</em>, and so forth.  Use this 
-            scheme to organize your tasks however best suits your project.
+            Wireframe</em>, <em>Committed Wireframe</em>, <em>Design 
+            Graphics</em>, <em>Page Template</em>, <em>Welcome Page</em>, and 
+            so on.  And maybe <em>Design Graphics</em> has further subtasks 
+            called <em>Color Palette</em>, <em>Main Logo</em>, and so forth.  
+            Use this scheme to organize your tasks however best suits your 
+            project.
         </p>
         <p>
             Only leaf tasks can be scheduled or assigned to team members.
@@ -104,22 +104,22 @@ function show_content() {
         </p>
         <p>
             It true agile fashion, it should be assumed that tasks and 
-            schedules will evolve as the project evolves, user expectations 
-            become clearer, priorities are re-adjusted.  New tasks will be 
-            created, some tasks will be closed without work, other tasks will 
-            be moved between timeboxes.  The main goal is always simply to be 
-            responsive to the customer's needs.
+            schedules will evolve as the project evolves, as user expectations 
+            become clearer, and as priorities are re-adjusted.  New tasks will 
+            be created, some tasks will be closed without work, other tasks 
+            will be moved between timeboxes.  The main goal is always simply to 
+            be responsive to the customer's needs.
             
         </p>
         <h2>Task Lifecycle</h2>
         <p>
-            Njia does not use the typical concept of task lifecycles that other 
-            project tracking system use. There is no concept of  <em>new</em>, 
-            <em>in progress</em>, <em>blocked</em>, <em>completed</em>, 
-            <em>canceled</em> or any other typical status.  Either a 
-            task is closed, or it is not.  Either it is scheduled in a timebox, 
-            or it is not.  Either it is assigned to a team member, or it is 
-            not.  That's as complicate as it gets.
+            Njia does not use the typical concepts of task lifecycles that 
+            other project tracking system use. There is no concept of 
+            <em>new</em>, \<em>in progress</em>, <em>blocked</em>, 
+            <em>completed</em>, <em>canceled</em> or any other typical status.  
+            Either a task is closed, or it's not.  Either it's timeboxed, or 
+            it's not.  Either it's assigned to a team member, or it's not.  
+            That's as complicated as it gets.
         </p>
             Njia does provide a free-form, unlimited size <em>discussion</em> 
             field for providing information about a task. Typically, this 
@@ -127,8 +127,9 @@ function show_content() {
             so on.  However, if you need to record that a task is blocked, or 
             depends on another task, or if you need to explain why a task was 
             suspended, or canceled, or rescheduled, or if the task has been 
-            reassigned and you need to explain why, then this is a good place 
-            to capture that information.
+            reassigned and you need to explain why, and shouting over the cube 
+            wall isn't sufficient, then this may be a good place to capture 
+            that information.
         <p>
         </p>
         <h2>Project Permissions</h2>
@@ -143,8 +144,7 @@ function show_content() {
             change a timebox's end date.
         </p>
         <p>
-            If you don't trust your team members, you might want to consider 
-            joining a different team.
+            Trust your team members.
         </p>
         ";
 }
