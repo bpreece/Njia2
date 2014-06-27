@@ -8,11 +8,12 @@ global $default_stylesheets;
 $default_stylesheets = array('layout.css', 'style.css');
 if (! function_exists('get_all_stylesheets')) {
     function get_all_stylesheets() {
-        global $default_stylesheets;
+        global $page, $default_stylesheets;
         $stylesheets = $default_stylesheets;
         if (function_exists('get_stylesheets')) {
-            $page_stylesheets = get_stylesheets();
-            $stylesheets = array_merge($stylesheets, $page_stylesheets);
+            $stylesheets = array_merge($stylesheets, get_stylesheets());
+        } else if (is_array($page) && isset($page['styles'])) {
+            $stylesheets = array_merge($stylesheets, $page['styles']);
         }
         return $stylesheets;
     }
@@ -26,13 +27,46 @@ global $default_scripts;
 $default_scripts = array();
 if (! function_exists('get_all_scripts')) {
     function get_all_scripts() {
-        global $default_scripts;
+        global $page, $default_scripts;
         $scripts = $default_scripts;
         if (function_exists('get_scripts')) {
-            $page_scripts = get_scripts();
-            $scripts = array_merge($scripts, $page_scripts);
+            $scripts = array_merge($scripts, get_scripts());
+        } else if (is_array($page) && isset($page['scripts'])) {
+            $scripts = array_merge($scripts, $page['scripts']);
         }
         return $scripts;
+    }
+}
+
+if (! function_exists('show_sidebar')) {
+    function show_sidebar() {
+        global $page;
+        echo "<div id='sidebar'>";
+        if (is_array($page) && isset($page['sidebar-views'])) {
+            foreach ($page['sidebar-views'] as $sidebar) {
+                echo "<div class='sidebar-block'>";
+                include $sidebar;
+                echo "</div>";
+            }
+        } else if (is_array($page) && isset($page['sidebar-blocks'])) {
+            foreach ($page['sidebar-blocks'] as $sidebar) {
+                echo "<div class='sidebar-block'>$sidebar</div>";
+            }
+        }
+        echo "</div><!-- sidebar -->";
+    }
+}
+
+if (! function_exists('show_content')) {
+    function show_content() {
+        global $page;
+        if (is_array($page) && isset($page['view'])) {
+            include $page['view'];
+        } else if (is_array($page) && isset($page['content'])) {
+            echo $page['content'];
+        } else {
+            echo "<div style='color:red;font-weight:bold'>TODO: Define the content for this page.</div>";
+        }
     }
 }
 
@@ -68,11 +102,15 @@ if (function_exists('prepare_page_data')) {
 $page_id = '';
 if (function_exists('get_page_id')) {
     $page_id = get_page_id();
+} else if (is_array($page) && isset($page['page-id'])) {
+    $page_id = $page['page-id'];
 }
 
 $page_class = '';
 if (function_exists('get_page_class')) {
     $page_class = get_page_class();
+} else if (is_array($page) && isset($page['page-class'])) {
+    $page_class = $page['page-class'];
 }
 
 $session_user = get_session_user();
@@ -95,7 +133,7 @@ $session_user = get_session_user();
         <title><?php echo get_global_title(); ?></title>
     </head>
     
-    <body <?php if (isset($page_id)) echo "id='$page_id'"; ?> <?php echo "class='$page_class'"; ?> >
+    <body <?php echo "id='$page_id'"; ?> <?php echo "class='$page_class'"; ?> >
         <div id="logo-and-title">
             <div id="logo">
                 <a href='index.php'><img src="<?php echo get_logo_image(); ?>" /></a>
@@ -139,12 +177,7 @@ $session_user = get_session_user();
             </div> <!-- /header -->
             
             <div id="content">
-                <?php if (function_exists('show_sidebar')): ?>
-                <div id="sidebar">
-                    <?php show_sidebar(); ?>
-                </div> <!-- /sidebar -->
-                <?php endif; ?>
-            
+                <?php show_sidebar(); ?>            
                 <div id="main">
                     <?php show_user_messages(); ?>
                     <?php show_content(); ?>

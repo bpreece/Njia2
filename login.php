@@ -5,31 +5,115 @@
  */
 
 include_once 'common.inc';
-include_once 'login/login_form.php';
+include_once 'data/login.php';
+
+/**
+ * Handle input from a login form
+ * @return boolean TRUE if we handled a login form, even if there were errors;
+ *                 FALSE if there was no login form data to handle
+ */
+function process_login_form() 
+{
+    global $login_form_name_field;
+
+    if (! isset($_POST['login-button'])) {
+        return FALSE;  // we did not handle a login form
+    }
+    
+    if (!$_POST['name_field'] || !$_POST['password-field']) {
+        return TRUE;  // we did handle a login form
+    }
+    
+    if (db_connect()) {
+        $login_form_name_field = db_escape($_POST['name_field']);
+        $password_field = db_escape($_POST['password-field']);
+        login_user($login_form_name_field, $password_field);
+    }
+    
+    return TRUE;
+}
+
+/**
+ * Handle input from a new login account form
+ * @return boolean TRUE if we handled a new login account form, even if there 
+ *                 were errors; FALSE if there was no new login account form 
+ *                 data to handle
+ */
+function process_new_login_form() 
+{
+    global $njia_url, $admin_email;
+    global $login_form_name_field;
+
+    if (! isset($_POST['new-login-button'])) {
+        return FALSE;
+    }
+
+    if (!$_POST['name_field'] || !$_POST['password-field'] || !$_POST['email-field']) {
+        set_user_message("You must provide a login name, password, and e-mail address", "warning");
+        return TRUE;
+    }
+
+    if (!$_POST['repeat-password-field'] || $_POST['repeat-password-field'] != $_POST['password-field']) {
+        set_user_message("The passwords do not match.", "warning");
+        return TRUE;
+    }
+    
+    if (db_connect()) {
+        $login_form_name_field = db_escape($_POST['name_field']);
+        $password_field = db_escape($_POST['password-field']);
+        $email_field = db_escape($_POST['email-field']);
+
+        $query = "INSERT INTO `user_table` (
+                `login_name` , `password_salt` , `password`, `email` , `expiration_date` 
+            ) VALUES (
+                '$login_form_name_field' , 
+                MD5( CONCAT( '$login_form_name_field' , NOW() ) ) , 
+                MD5( CONCAT( `password_salt`, '$password_field' ) ), 
+                '$email_field' , 
+                DATE_ADD( NOW(), INTERVAL 2 DAY)
+            )";
+        
+        if (db_execute($query)) {
+            $user_id = db_last_index();
+
+            $user_query = "SELECT `password_salt` , `expiration_date` , 
+                MD5( CONCAT( `password_salt`, `expiration_date` ) ) AS `key` 
+                FROM `user_table` WHERE `user_id` = '$user_id'";
+            $user = db_fetch($user_query);
+            if (! $user) {
+                return;
+            }
+            
+            $subject = 'Your new Njia account';
+            $message = <<<EOM
+An account has been created for you at Njia with the login name ${_POST['name_field']}.  
+This is a temporary account which will expire in two days.  To remove the 
+expiration from this account, please follow this link:
+
+    http://$njia_url/verify.php?id=$user_id&key=${user['key']}
+
+If you did not create this account, please notify the administrator at Njia
+by replying to this email.
+EOM;
+            $headers = "From: $admin_email";
+            mail($email_field, $subject, $message, $headers);
+            
+            login_user($login_form_name_field, $password_field);
+        }
+    }
+    
+    return TRUE;
+}
 
 global $new_login;
 $new_login = FALSE;
 
-function get_stylesheets() {
-    $stylesheets = array('login.css');
-    return $stylesheets;
-}
-
-function get_page_id() {
-    return 'login-page';
-}
-
-function get_page_class() {
-    return 'no-header';
-}
-
-function process_query_string() {
-    global $new_login;
+if (isset($_POST)) {
     
+} else if (isset($_GET)) {    
     if (isset($_GET['new'])) {
         $new_login = TRUE;
     }
-    
     if (isset($_GET['x'])) {
         set_user_message('You must log in to view these pages.', 'warning');
     }
@@ -60,16 +144,11 @@ function show_sidebar() {
     }
 }
 
-function show_content() {
-    global $new_login;
-    echo "
-        <h3>Sign on</h3>
-        <div id='login-main'>";
-    show_login_form($new_login); 
-    echo "
-        </div>";
-}
+$page = array(
+    'view' => 'view/login.php',
+    'styles' => array( 'css/login.css', ),
+    'page-id' => 'login-page',
+    'page-class' => 'no-header',
+);
 
 include_once 'template.inc';
-
-?>
